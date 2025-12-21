@@ -19,8 +19,8 @@ class CreateLogScreen extends StatefulWidget {
 }
 
 class _CreateLogScreenState extends State<CreateLogScreen> {
-  double rating = 3;
-  String logType = 'retro';
+  double rating = 0;
+  String logType = 'memory';
   final TextEditingController reviewController = TextEditingController();
 
   Future<void> saveLog() async {
@@ -79,18 +79,18 @@ class _CreateLogScreenState extends State<CreateLogScreen> {
 
             ToggleButtons(
               isSelected: [
-                logType == 'retro',
+                logType == 'memory',
                 logType == 'diary',
               ],
               onPressed: (index) {
                 setState(() {
-                  logType = index == 0 ? 'retro' : 'diary';
+                  logType = index == 0 ? 'memory' : 'diary';
                 });
               },
               children: const [
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text("Retro"),
+                  child: Text("Memory"),
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
@@ -113,7 +113,7 @@ class _CreateLogScreenState extends State<CreateLogScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: saveLog,
+                onPressed: rating > 0 ? saveLog : null,
                 child: const Text("Save Log"),
               ),
             ),
