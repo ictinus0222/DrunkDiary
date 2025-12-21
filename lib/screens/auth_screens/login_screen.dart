@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../services/google_auth_service.dart'; // adjust path
+import '../../services/google_auth_service.dart'; // adjust path
 
 class LoginScreen extends StatefulWidget {  // StatefulWidget to manage _isLoading and _error state
   static const routeName = '/login';

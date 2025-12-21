@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/alcohol_model.dart';
-import '../logs/create_log_screen.dart';
+import '../drink_logs/create_log_screen.dart';
 
 class AlcoholDetailScreen extends StatelessWidget {
   static const routeName = '/alcoholDetail';
