@@ -80,3 +80,6 @@ coverage/
 # Generated files (if using codegen later)
 # =================
 
+# FVM Version Cache
+.fvm/
+.fvm/flutter_sdk
