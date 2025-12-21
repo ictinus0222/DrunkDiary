@@ -20,6 +20,7 @@ class CreateLogScreen extends StatefulWidget {
 
 class _CreateLogScreenState extends State<CreateLogScreen> {
   double rating = 0;
+  bool hasRated = false; // Edge case handling
   String logType = 'memory';
   final TextEditingController reviewController = TextEditingController();
 
@@ -71,7 +72,10 @@ class _CreateLogScreenState extends State<CreateLogScreen> {
               max: 5,
               divisions: 10,
               onChanged: (value) {
-                setState(() => rating = value);
+                setState(() {
+                  rating = value;
+                  hasRated = true; // if user interacts with slider
+                });
               },
             ),
 
@@ -113,8 +117,8 @@ class _CreateLogScreenState extends State<CreateLogScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: rating > 0 ? saveLog : null,
-                child: const Text("Save Log"),
+                onPressed: hasRated? saveLog : null,
+                child: hasRated ? const Text('Save Log') : const Text('Move the slider to rate'),
               ),
             ),
           ],
