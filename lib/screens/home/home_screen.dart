@@ -56,12 +56,14 @@ class HomeScreen extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () async {
-                final alcohol = await getOneAlcohol();
+                final alcohol = await _fetchOneAlcohol();
 
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => AlcoholDetailScreen(alcohol: alcohol),
+                    builder: (_) => AlcoholDetailScreen(
+                        alcoholId: alcohol.id,
+                        initialAlcohol: alcohol),
                   ),
                 );
               },
@@ -75,11 +77,15 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Future<AlcoholModel> getOneAlcohol() async {
+  Future<AlcoholModel> _fetchOneAlcohol() async {
     final snapshot = await FirebaseFirestore.instance
         .collection('alcohols')
         .limit(1)
         .get();
+
+    if (snapshot.docs.isEmpty) {
+      throw Exception('No alcohols found');
+    }
 
     return AlcoholModel.fromFirestore(snapshot.docs.first);
   }
