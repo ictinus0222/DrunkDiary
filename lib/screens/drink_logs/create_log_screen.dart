@@ -33,13 +33,13 @@ class _CreateLogScreenState extends State<CreateLogScreen> {
       alcoholName: widget.alcohol.name,
       alcoholType: widget.alcohol.type,
       rating: rating,
-      review: reviewController.text.isNotEmpty
+      note: reviewController.text.isNotEmpty
           ? reviewController.text
           : null,
       logType: logType,
-      visibility: 'private',
-      loggedAt: DateTime.now(),
-      drankAt: logType == 'diary' ? DateTime.now() : null,
+      isPublic: false,
+      createdAt: DateTime.now(),
+      consumedAt: logType == 'diary' ? DateTime.now() : null,
     );
 
     await FirebaseFirestore.instance

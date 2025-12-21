@@ -9,13 +9,13 @@ class DrinkLogModel {
   final String alcoholType;
 
   final double rating;
-  final String? review;
+  final String? note;
 
   final String logType;        // diary | retro
-  final String visibility;     // private | public
+  final bool isPublic;     // private | public
 
-  final DateTime loggedAt;
-  final DateTime? drankAt;
+  final DateTime createdAt;
+  final DateTime? consumedAt;
 
   DrinkLogModel({
     required this.id,
@@ -24,11 +24,11 @@ class DrinkLogModel {
     required this.alcoholName,
     required this.alcoholType,
     required this.rating,
-    this.review,
+    this.note,
     required this.logType,
-    required this.visibility,
-    required this.loggedAt,
-    this.drankAt,
+    required this.isPublic,
+    required this.createdAt,
+    this.consumedAt,
   });
 
   factory DrinkLogModel.fromFirestore(DocumentSnapshot doc) {
@@ -41,11 +41,11 @@ class DrinkLogModel {
       alcoholName: data['alcoholName'],
       alcoholType: data['alcoholType'],
       rating: (data['rating'] as num).toDouble(),
-      review: data['review'],
+      note: data['review'],
       logType: data['logType'],
-      visibility: data['visibility'],
-      loggedAt: (data['loggedAt'] as Timestamp).toDate(),
-      drankAt: data['drankAt'] != null
+      isPublic: data['visibility'],
+      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      consumedAt: data['consumedAt'] != null
           ? (data['drankAt'] as Timestamp).toDate()
           : null,
     );
@@ -58,12 +58,12 @@ class DrinkLogModel {
       'alcoholName': alcoholName,
       'alcoholType': alcoholType,
       'rating': rating,
-      'review': review,
+      'note': note,
       'logType': logType,
-      'visibility': visibility,
-      'loggedAt': Timestamp.fromDate(loggedAt),
-      'drankAt':
-      drankAt != null ? Timestamp.fromDate(drankAt!) : null,
+      'isPublic': isPublic,
+      'createdAt': Timestamp.fromDate(createdAt),
+      'consumedAt':
+      consumedAt != null ? Timestamp.fromDate(consumedAt!) : null,
     };
   }
 }
