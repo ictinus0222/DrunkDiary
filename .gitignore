@@ -50,6 +50,7 @@ GoogleService-Info.plist
 .firebase/
 .firebaserc
 firebase.json
+lib/firebase_options.dart
 
 # =========================
 # Secrets / Env
