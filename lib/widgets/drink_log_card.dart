@@ -2,6 +2,8 @@ import 'package:drunk_diary/models/drink_log_model.dart';
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
+import '../screens/activity/activity_detail_screen.dart';
+
 class DrinkLogCard extends StatelessWidget {
   final DrinkLogModel log;
 
@@ -13,14 +15,25 @@ class DrinkLogCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: _buildContentByLogType(),
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ActivityDetailScreen(log: log),
+          ),
+        );
+      },
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: _buildContentByLogType(),
+        ),
       ),
     );
   }
+
   Widget _buildContentByLogType() {
     switch (log.logType) {
       case 'memory':
