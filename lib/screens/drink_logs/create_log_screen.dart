@@ -43,16 +43,27 @@ class _CreateLogScreenState extends State<CreateLogScreen> {
       consumedAt: logType == 'diary' ? DateTime.now() : null,
     );
 
-    await FirebaseFirestore.instance
-        .collection('drink_logs')
-        .add(log.toMap());
+    try {
+      await FirebaseFirestore.instance
+          .collection('drink_logs')
+          .add(log.toMap());
 
-    if (mounted) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Added to your Shelf 🍻")),
-      );
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Added to your Diary 🍻")),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Could not save log. Please try again."),
+          ),
+        );
+      }
     }
+
   }
 
   @override
