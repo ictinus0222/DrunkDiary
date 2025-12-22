@@ -6,6 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../../models/alcohol_model.dart';
 import '../alcohol/alcohol_detail_screen.dart';
 import '../drink_logs/diary_timeline_screen.dart';
+import '../activity/user_activity_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   static const routeName = '/home';
@@ -80,6 +81,17 @@ class HomeScreen extends StatelessWidget {
                 );
               },
               child: const Text("Go to Diary 📖"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ActivityScreen(),
+                  ),
+                );
+              },
+              child: const Text("Go to Activity ⏳"),
             ),
 
           ],
