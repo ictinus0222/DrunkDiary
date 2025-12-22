@@ -34,21 +34,26 @@ class DrinkLogModel {
   factory DrinkLogModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
+    final Timestamp? createdAtTs = data['createdAt'] as Timestamp?;
+
     return DrinkLogModel(
       id: doc.id,
-      userId: data['userId'],
-      alcoholId: data['alcoholId'],
-      alcoholName: data['alcoholName'],
-      alcoholType: data['alcoholType'],
+      userId: data['userId'] as String,
+      alcoholId: data['alcoholId'] as String,
+      alcoholName: data['alcoholName'] as String,
+      alcoholType: data['alcoholType'] as String,
       rating: (data['rating'] as num).toDouble(),
-      note: data['review'],
-      logType: data['logType'],
-      isPublic: data['visibility'],
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      note: data['note'] as String?,
+      logType: data['logType'] as String,
+      isPublic: data['isPublic'] ?? false,
+      createdAt: createdAtTs != null
+          ? createdAtTs.toDate()
+          : DateTime.fromMillisecondsSinceEpoch(0),
       consumedAt: data['consumedAt'] != null
-          ? (data['drankAt'] as Timestamp).toDate()
+          ? (data['consumedAt'] as Timestamp).toDate()
           : null,
     );
+
   }
 
   Map<String, dynamic> toMap() {
