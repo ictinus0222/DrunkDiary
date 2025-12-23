@@ -5,6 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../models/alcohol_model.dart';
 import '../alcohol/alcohol_detail_screen.dart';
+import '../alcohol/alcohol_search_screen.dart';
 import '../drink_logs/diary_timeline_screen.dart';
 import '../activity/user_activity_screen.dart';
 
@@ -58,18 +59,16 @@ class HomeScreen extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () async {
-                final alcohol = await _fetchOneAlcohol();
+                // final alcohol = await _fetchOneAlcohol();
 
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => AlcoholDetailScreen(
-                        alcoholId: alcohol.id,
-                        initialAlcohol: alcohol),
+                    builder: (_) => AlcoholSearchScreen(),
                   ),
                 );
               },
-              child: const Text("Go to Alcohol Detail"),
+              child: const Text("Search Alcohols"),
             ),
             ElevatedButton(
               onPressed: () {
@@ -102,17 +101,17 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Future<AlcoholModel> _fetchOneAlcohol() async {
-    final snapshot = await FirebaseFirestore.instance
-        .collection('alcohols')
-        .limit(1)
-        .get();
-
-    if (snapshot.docs.isEmpty) {
-      throw Exception('No alcohols found');
-    }
-
-    return AlcoholModel.fromFirestore(snapshot.docs.first);
-  }
+  // Future<AlcoholModel> _fetchOneAlcohol() async {
+  //   final snapshot = await FirebaseFirestore.instance
+  //       .collection('alcohols')
+  //       .limit(1)
+  //       .get();
+  //
+  //   if (snapshot.docs.isEmpty) {
+  //     throw Exception('No alcohols found');
+  //   }
+  //
+  //   return AlcoholModel.fromFirestore(snapshot.docs.first);
+  // }
 
 }
