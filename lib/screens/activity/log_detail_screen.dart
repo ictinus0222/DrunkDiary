@@ -3,12 +3,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class ActivityDetailScreen extends StatelessWidget {
-  static const routeName = '/activityDetail';
+class LogDetailScreen extends StatelessWidget {
+  static const routeName = '/logDetail';
 
   final DrinkLogModel log;
 
-  const ActivityDetailScreen({super.key, required this.log});
+  const LogDetailScreen({super.key, required this.log});
 
   @override
   Widget build(BuildContext context) {

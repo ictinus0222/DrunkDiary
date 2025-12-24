@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../models/alcohol_model.dart';
+import '../../widgets/alcohol_activity_widget.dart';
 import '../drink_logs/create_log_screen.dart';
 
 class AlcoholDetailScreen extends StatelessWidget {
@@ -48,37 +49,107 @@ class AlcoholDetailScreen extends StatelessWidget {
           appBar: AppBar(
             title: Text(alcohol.name),
           ),
-          body: Padding(
-            padding: const EdgeInsets.all(16.0),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // 🍾 Alcohol Image
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: AspectRatio(
+                    aspectRatio: 3 / 4,
+                    child: Image.network(
+                      alcohol.imageUrl,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: Colors.grey.shade200,
+                        child: const Icon(Icons.local_bar, size: 64),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // 🏷️ Alcohol Identity
                 Text(
-                  alcohol.brand,
-                  style: Theme.of(context).textTheme.titleMedium,
+                  alcohol.name,
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                const SizedBox(height: 4),
+
+                Text(
+                  "${alcohol.brand} • ${alcohol.origin}",
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(color: Colors.grey.shade700),
+                ),
+
+                const SizedBox(height: 8),
+
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _InfoChip(label: alcohol.type),
+                    _InfoChip(label: "${alcohol.abv}% ABV"),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+
+                Text(
+                  "About this drink",
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 8),
-                Text("${alcohol.type} • ${alcohol.abv}% ABV"),
-                const SizedBox(height: 16),
-                Text(alcohol.description),
-                const Spacer(),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              CreateLogScreen(alcohol: alcohol),
-                        ),
-                      );
-                    },
-                    child: const Text("Log this drink"),
+
+                if (alcohol.description.isNotEmpty)
+                  Text(
+                    alcohol.description,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
 
+
+                // 🧠 Activity
+                const SizedBox(height: 32),
+
+                Text(
+                  "Your activity",
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
+                const SizedBox(height: 8),
+
+                AlcoholActivityWidget(
+                  alcoholId: alcohol.id,
+                ),
+
               ],
+            ),
+          ),
+
+          bottomNavigationBar: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.add),
+                  label: const Text("Log this drink"),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CreateLogScreen(alcohol: alcohol),
+                      ),
+                    );
+                  },
+                ),
+              ),
             ),
           ),
         );
@@ -86,3 +157,25 @@ class AlcoholDetailScreen extends StatelessWidget {
     );
   }
 }
+
+class _InfoChip extends StatelessWidget {
+  final String label;
+
+  const _InfoChip({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(fontSize: 12, color: Colors.black),
+      ),
+    );
+  }
+}
+

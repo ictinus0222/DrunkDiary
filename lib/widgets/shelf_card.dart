@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/alcohol_model.dart';
+import '../screens/activity/alcohol_activity_screen.dart';
 
 class ShelfCard extends StatelessWidget {
   final AlcoholModel alcohol;
@@ -17,8 +18,18 @@ class ShelfCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // TODO: Navigate to alcohol detail page (Week 4)
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AlcoholActivityScreen(
+              alcoholId: alcohol.id,
+              alcoholName: alcohol.name,
+            ),
+          ),
+        );
       },
+
+
       child: Card(
         elevation: 2,
         shape: RoundedRectangleBorder(

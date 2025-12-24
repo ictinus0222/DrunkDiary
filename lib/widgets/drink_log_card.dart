@@ -2,7 +2,7 @@ import 'package:drunk_diary/models/drink_log_model.dart';
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-import '../screens/activity/activity_detail_screen.dart';
+import '../screens/activity/log_detail_screen.dart';
 
 class DrinkLogCard extends StatelessWidget {
   final DrinkLogModel log;
@@ -20,7 +20,7 @@ class DrinkLogCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => ActivityDetailScreen(log: log),
+            builder: (_) => LogDetailScreen(log: log),
           ),
         );
       },
