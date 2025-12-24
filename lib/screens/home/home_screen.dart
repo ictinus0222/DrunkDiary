@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:drunk_diary/screens/shelf/shelf_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -91,6 +92,17 @@ class HomeScreen extends StatelessWidget {
                 );
               },
               child: const Text("Go to Activity ⏳"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ShelfScreen(),
+                  ),
+                );
+              },
+              child: const Text("Go to Shelf 🍻"),
             ),
 
           ],
