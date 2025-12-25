@@ -65,14 +65,13 @@ class DrinkLogCard extends StatelessWidget {
 
               const SizedBox(height: 4),
 
-              if (log.rating != null)
-                Row(
-                  children: [
-                    Text(log.rating!.toStringAsFixed(1)),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.star, size: 14),
-                  ],
-                ),
+              Row(
+                children: [
+                  Text(log.rating.toStringAsFixed(1)),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.star, size: 14),
+                ],
+              ),
 
               if (log.note != null && log.note!.isNotEmpty) ...[
                 const SizedBox(height: 6),
@@ -90,13 +89,7 @@ class DrinkLogCard extends StatelessWidget {
 
         Column(
           children: [
-            Text(
-              timeago.format(log.createdAt),
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
-              ),
-            ),
+            _timeText(),
             ],
         ),
       ],
@@ -123,20 +116,19 @@ class DrinkLogCard extends StatelessWidget {
 
                 const SizedBox(width: 6),
 
-                if (log.rating != null)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        log.rating!.toStringAsFixed(1),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.star, size: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      log.rating.toStringAsFixed(1),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.star, size: 16),
 
 
-                    ],
-                  ),
+                  ],
+                ),
 
 
               ],
@@ -161,17 +153,19 @@ class DrinkLogCard extends StatelessWidget {
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              timeago.format(log.createdAt),
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
-              ),
-            ),
+            _timeText(),
           ],
         ),
       ],
     );
   }
+
+  Widget _timeText() {
+    return Text(
+      timeago.format(log.createdAt),
+      style: const TextStyle(fontSize: 12, color: Colors.grey),
+    );
+  }
+
 
 }

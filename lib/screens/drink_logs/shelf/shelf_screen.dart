@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../../models/alcohol_model.dart';
-import '../../widgets/shelf_card.dart';
+import '../../../models/alcohol_model.dart';
+import '../../../widgets/shelf_card.dart';
 
 class ShelfScreen extends StatefulWidget {
   static const routeName = '/shelf';
@@ -32,7 +32,7 @@ Future<void> fetchShelfData() async {
 
   final currentUserId = user.uid;
 
-
+  // Fetch all logs from the current user (memory + diary)
   final logsSnapshot = await FirebaseFirestore.instance
   .collection('drink_logs')
   .where('userId', isEqualTo: currentUserId)
@@ -67,7 +67,7 @@ Future<void> fetchShelfData() async {
     counts[alcoholId] = logs.length;
 
     final ratingsList = logs
-        .map((l) => (l['rating'] ?? 0).toDouble())
+        .map((l) => (l['rating'] ?? 0).toDouble() ?? 0)
         .toList();
 
     final totalRating = ratingsList.isEmpty

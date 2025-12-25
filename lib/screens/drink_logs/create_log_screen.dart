@@ -5,9 +5,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../models/alcohol_model.dart';
 import '../../models/drink_log_model.dart';
 
+// NOTES:
+// This Screen takes an AlcoholModel => Collects a user input => creates a DrinkLogModel => Saves to Firebase
+
 class CreateLogScreen extends StatefulWidget {
   static const String routeName = '/createLog';
-  final AlcoholModel alcohol;
+  final AlcoholModel alcohol; // Screen is contextual => cannot access without choosing an alcohol.
 
   const CreateLogScreen({
     super.key,
@@ -20,13 +23,14 @@ class CreateLogScreen extends StatefulWidget {
 
 class _CreateLogScreenState extends State<CreateLogScreen> {
   double rating = 0;
-  bool hasRated = false; // Edge case handling
+  bool hasRated = false; // Edge case handling => prevents accidental zero-star-logs
   String logType = 'memory';
   final TextEditingController reviewController = TextEditingController();
 
   Future<void> saveLog() async {
     final user = FirebaseAuth.instance.currentUser!;
 
+    // Model Creation:
     final log = DrinkLogModel(
       id: '',
       userId: user.uid,
@@ -48,12 +52,21 @@ class _CreateLogScreenState extends State<CreateLogScreen> {
           .collection('drink_logs')
           .add(log.toMap());
 
-      if (mounted) {
+      // Context based SnackBar:
+      if (mounted && logType == 'memory') {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Added to your Diary 🍻")),
+          const SnackBar(content: Text("Logged!")),
         );
+      } else if (mounted && logType == 'diary') {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Added to diary!")),
+        );
+      } else {
+        throw Exception('Invalid log type');
       }
+
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -137,4 +150,11 @@ class _CreateLogScreenState extends State<CreateLogScreen> {
       ),
     );
   }
+
+  @override
+  void dispose() {
+    reviewController.dispose();
+    super.dispose();
+  }
+
 }

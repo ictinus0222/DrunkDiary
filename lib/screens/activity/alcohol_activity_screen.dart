@@ -53,12 +53,10 @@ class AlcoholActivityScreen extends StatelessWidget {
           final logCount = logs.length;
           final ratedLogs =
           logs.where((l) => l.rating != null).toList();
-          final avgRating = ratedLogs.isEmpty
+          final avgRating = logs.isEmpty
               ? 0
-              : ratedLogs
-              .map((l) => l.rating!)
-              .reduce((a, b) => a + b) /
-              ratedLogs.length;
+              : logs.map((l) => l.rating).reduce((a, b) => a + b) / logs.length;
+
 
           return Column(
             children: [
@@ -97,11 +95,7 @@ class AlcoholActivityScreen extends StatelessWidget {
                     final log = logs[index];
 
                     return ListTile(
-                      title: Text(
-                        log.rating != null
-                            ? "Rated ${log.rating!.toStringAsFixed(1)} ★"
-                            : "Logged a drink",
-                      ),
+                      title: Text("Rated ${log.rating.toStringAsFixed(1)} ★"),
                       subtitle: log.note != null &&
                           log.note!.isNotEmpty
                           ? Text(

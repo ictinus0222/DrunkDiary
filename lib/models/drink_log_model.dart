@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+// DrinkLogModel is one user interaction with one drink, not a static entity
+// TODO: fix for when document is deleted, malformed or empty.
 class DrinkLogModel {
   final String id;
   final String userId;
@@ -11,7 +13,7 @@ class DrinkLogModel {
   final double rating;
   final String? note;
 
-  final String logType;        // diary | retro
+  final String logType;        // diary | memory // TODO: Convert to enum
   final bool isPublic;     // private | public
 
   final DateTime createdAt;

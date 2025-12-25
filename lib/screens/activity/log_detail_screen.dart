@@ -1,5 +1,4 @@
 import 'package:drunk_diary/models/drink_log_model.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -53,20 +52,19 @@ class LogDetailScreen extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          if (log.rating != null)
-            Row(
-              children: [
-                const Icon(Icons.star, size: 22),
-                const SizedBox(width: 6),
-                Text(
-                  log.rating!.toStringAsFixed(1),
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                ),
-                ),
-              ],
-            ),
+          Row(
+            children: [
+              const Icon(Icons.star, size: 22),
+              const SizedBox(width: 6),
+              Text(
+                log.rating.toStringAsFixed(1),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+              ),
+              ),
+            ],
+          ),
 
           const SizedBox(height: 16),
 
@@ -99,36 +97,28 @@ class LogDetailScreen extends StatelessWidget {
 
         const SizedBox(height: 12),
 
-        if (log.rating != null)
-          Row(
-            children: [
-              const Icon(Icons.star, size: 24),
-              const SizedBox(width: 6),
-              Text(
-                log.rating!.toStringAsFixed(1),
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
+        Row(
+          children: [
+            const Icon(Icons.star, size: 24),
+            const SizedBox(width: 6),
+            Text(
+              log.rating.toStringAsFixed(1),
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
 
         const SizedBox(height: 20),
 
-        if (log.note != null && log.note!.isNotEmpty)
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              log.note!,
-              style: const TextStyle(
-                fontSize: 16,
-                fontStyle: FontStyle.italic,
-              ),
+        if (log.note !=null && log.note!.isNotEmpty)
+          Text(
+            log.note!,
+            style: const TextStyle(
+              fontSize: 16,
+              fontStyle: FontStyle.italic,
             ),
           ),
 

@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:drunk_diary/screens/shelf/shelf_screen.dart';
+import 'package:drunk_diary/screens/drink_logs/shelf/shelf_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
