@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/alcohol_model.dart';
-import '../screens/activity/alcohol_activity_screen.dart';
+import '../screens/alcohol/alcohol_detail_screen.dart';
 
 class ShelfCard extends StatelessWidget {
   final AlcoholModel alcohol;
@@ -21,12 +21,10 @@ class ShelfCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => AlcoholActivityScreen(
-              alcoholId: alcohol.id,
-              alcoholName: alcohol.name,
-            ),
+            builder: (_) => AlcoholDetailScreen(alcohol: alcohol),
           ),
         );
+
       },
 
 

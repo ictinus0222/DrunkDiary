@@ -112,12 +112,10 @@ class _AlcoholSearchScreenState extends State<AlcoholSearchScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => AlcoholDetailScreen(
-                        alcoholId: alcohol.id,
-                        initialAlcohol: alcohol,
-                      ),
+                      builder: (_) => AlcoholDetailScreen(alcohol: alcohol),
                     ),
                   );
+
                 },
               );
             },

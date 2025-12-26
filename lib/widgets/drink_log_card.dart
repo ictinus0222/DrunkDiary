@@ -2,7 +2,7 @@ import 'package:drunk_diary/models/drink_log_model.dart';
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-import '../screens/activity/log_detail_screen.dart';
+import 'log_detail_bottom_sheet.dart';
 
 class DrinkLogCard extends StatelessWidget {
   final DrinkLogModel log;
@@ -17,12 +17,15 @@ class DrinkLogCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => LogDetailScreen(log: log),
+        showModalBottomSheet(
+          context: context,
+          useSafeArea: true,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
           ),
+          builder: (_) => LogDetailBottomSheet(log: log),
         );
+
       },
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

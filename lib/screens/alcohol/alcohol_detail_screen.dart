@@ -1,181 +1,283 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
 import '../../models/alcohol_model.dart';
-import '../../widgets/alcohol_activity_widget.dart';
-import '../drink_logs/create_log_screen.dart';
+import '../../models/drink_log_model.dart';
+import '../../widgets/create_log_bottom_sheet.dart';
+import '../../widgets/drink_log_card.dart';
 
 class AlcoholDetailScreen extends StatelessWidget {
-  static const routeName = '/alcoholDetail';
-
-  final String alcoholId;
-  final AlcoholModel? initialAlcohol;
+  final AlcoholModel alcohol;
 
   const AlcoholDetailScreen({
     super.key,
-    required this.alcoholId,
-    this.initialAlcohol,
+    required this.alcohol,
   });
-  Future<AlcoholModel> _fetchAlcohol() async {
-    final doc = await FirebaseFirestore.instance
-        .collection('alcohols')
-        .doc(alcoholId)
-        .get();
 
-    return AlcoholModel.fromFirestore(doc);
+  Stream<List<DrinkLogModel>> _logsStream() {
+    final user = FirebaseAuth.instance.currentUser!;
+
+    // Gets all logs by THIS user for THIS alcohol, newest first.
+    return FirebaseFirestore.instance
+        .collection('drink_logs')
+        .where('userId', isEqualTo: user.uid)
+        .where('alcoholId', isEqualTo: alcohol.id)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        // Firestore docs -> DrinkLogModel
+        // UI only gets clean Dart objects
+        .map(
+          (snapshot) =>
+          snapshot.docs.map(DrinkLogModel.fromFirestore).toList(),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<AlcoholModel>(
-      future: initialAlcohol != null
-        ? Future.value(initialAlcohol)
-        : _fetchAlcohol(),
-      builder: (context, snapshot) {
-        // Loading state
-        if (snapshot.connectionState ==ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-        // Alcohol not found / error state
-        if (!snapshot.hasData || snapshot.data == null) {
-          return const Scaffold(
-            body: Center(child: Text('Alcohol not found')),
-          );
-        }
-        final alcohol = snapshot.data!;
+    return Scaffold(
+      appBar: AppBar(title: Text(alcohol.name)),
+      body: StreamBuilder<List<DrinkLogModel>>( // Handles live refresh after logging
+        stream: _logsStream(),
+        builder: (context, snapshot) {
+          final logs = snapshot.data ?? []; // if data hasn't arrived yet, empty list
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(alcohol.name),
-          ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 🍾 Alcohol Image
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: AspectRatio(
-                    aspectRatio: 3 / 4,
-                    child: Image.network(
-                      alcohol.imageUrl,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      errorBuilder: (_, __, ___) => Container(
-                        color: Colors.grey.shade200,
-                        child: const Icon(Icons.local_bar, size: 64),
-                      ),
+          final logCount = logs.length; // number of times a drink is logged
+
+          final double avgRating = logs.isEmpty
+              ? 0
+              : logs
+              .map((l) => l.rating)
+              .reduce((a, b) => a + b) /
+              logs.length.toDouble();
+
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              _AlcoholHeader(alcohol: alcohol),
+
+              const SizedBox(height: 16),
+
+              _AlcoholStats(
+                logCount: logCount,
+                avgRating: avgRating,
+              ),
+
+              const SizedBox(height: 16),
+
+              const Text(
+                'Your logs',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+
+              const SizedBox(height: 8),
+
+              ...logs.map((log) => DrinkLogCard(log: log)),
+            ],
+          );
+        },
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  useSafeArea: true,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(16),
                     ),
                   ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // 🏷️ Alcohol Identity
-                Text(
-                  alcohol.name,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 4),
-
-                Text(
-                  "${alcohol.brand} • ${alcohol.origin}",
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(color: Colors.grey.shade700),
-                ),
-
-                const SizedBox(height: 8),
-
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    _InfoChip(label: alcohol.type),
-                    _InfoChip(label: "${alcohol.abv}% ABV"),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-
-                Text(
-                  "About this drink",
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 8),
-
-                if (alcohol.description.isNotEmpty)
-                  Text(
-                    alcohol.description,
-                    style: Theme.of(context).textTheme.bodyMedium,
+                  builder: (_) => CreateLogBottomSheet(
+                    alcohol: alcohol,
                   ),
-
-
-                // 🧠 Activity
-                const SizedBox(height: 32),
-
-                Text(
-                  "Your activity",
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 8),
-
-                AlcoholActivityWidget(
-                  alcoholId: alcohol.id,
-                ),
-
-              ],
+                );
+              },
+              child: const Text('Log this drink'),
             ),
           ),
-
-          bottomNavigationBar: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton.icon(
-                  icon: const Icon(Icons.add),
-                  label: const Text("Log this drink"),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => CreateLogScreen(alcohol: alcohol),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ),
-        );
-      }
+        ),
+      ),
     );
   }
 }
 
-class _InfoChip extends StatelessWidget {
-  final String label;
+class _AlcoholHeader extends StatelessWidget {
+  final AlcoholModel alcohol;
 
-  const _InfoChip({required this.label});
+  const _AlcoholHeader({
+    required this.alcohol,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 🖼 Alcohol Image
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: AspectRatio(
+            aspectRatio: 1 / 1,
+            child: alcohol.imageUrl.isNotEmpty
+                ? Image.network(
+              alcohol.imageUrl,
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, progress) {
+                if (progress == null) return child;
+                return Container(
+                  color: Colors.grey.shade200,
+                  child: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return _imagePlaceholder();
+              },
+            )
+                : _imagePlaceholder(),
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        // 🍾 Alcohol Name
+        Text(
+          alcohol.name,
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+
+        const SizedBox(height: 4),
+
+        // 🏷 Brand
+        Text(
+          'By ${alcohol.brand}',
+          style: Theme.of(context)
+              .textTheme
+              .titleMedium
+              ?.copyWith(color: Colors.grey.shade700),
+        ),
+
+        const SizedBox(height: 6),
+
+        // 🧪 Type + ABV
+        Text(
+          '${alcohol.type} • ${alcohol.abv}% ABV',
+          style: TextStyle(color: Colors.grey.shade600),
+        ),
+
+        if (alcohol.description.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Text(
+            alcohol.description,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
+      ],
+    );
+
+  }
+}
+class _AlcoholStats extends StatelessWidget {
+  final int logCount;
+  final double avgRating;
+
+  const _AlcoholStats({
+    required this.logCount,
+    required this.avgRating,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(fontSize: 12, color: Colors.black),
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _StatItem(
+            label: 'Logs',
+            value: logCount.toString(),
+          ),
+          _StatItem(
+            label: 'Avg rating',
+            value: avgRating.toStringAsFixed(1),
+            icon: Icons.star,
+          ),
+        ],
       ),
     );
   }
 }
+
+class _StatItem extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData? icon;
+
+  const _StatItem({
+    required this.label,
+    required this.value,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        if (icon != null) ...[
+          Row(
+            children: [
+              Icon(icon, size: 16),
+              const SizedBox(width: 4),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ] else
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+        const SizedBox(height: 4),
+
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.grey,
+          ),
+        ),
+      ],
+    );
+  }
+}
+Widget _imagePlaceholder() {
+  return Container(
+    color: Colors.grey.shade200,
+    child: const Center(
+      child: Icon(
+        Icons.local_bar,
+        size: 48,
+        color: Colors.grey,
+      ),
+    ),
+  );
+}
+
 

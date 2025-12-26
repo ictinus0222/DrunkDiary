@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:drunk_diary/widgets/log_detail_bottom_sheet.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../models/drink_log_model.dart';
-import '../screens/activity/log_detail_screen.dart';
 
 class AlcoholActivityWidget extends StatelessWidget {
   final String alcoholId;
@@ -115,7 +115,7 @@ class AlcoholActivityWidget extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => LogDetailScreen(log: log),
+                        builder: (_) => LogDetailBottomSheet(log: log),
                       ),
                     );
                   },
