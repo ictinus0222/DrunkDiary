@@ -102,7 +102,7 @@ Future<void> fetchShelfData() async {
           : GridView.builder(
         padding: const EdgeInsets.all(12),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+          crossAxisCount: 3,
           childAspectRatio: 0.7,
         ),
         itemCount: shelfAlcohols.length,

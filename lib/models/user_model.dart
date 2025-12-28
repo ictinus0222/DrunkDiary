@@ -6,6 +6,10 @@ class UserModel {
   final String? photoUrl;
   final bool ageVerified;
   final DateTime createdAt;
+  // Profile
+  final String? bio;
+  final bool isProfilePublic;
+  final String username;
 
   UserModel({
     required this.id,
@@ -13,6 +17,10 @@ class UserModel {
     this.photoUrl,
     required this.ageVerified,
     required this.createdAt,
+    // Profile
+    this.bio,
+    required this.isProfilePublic,
+    required this.username,
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
@@ -23,7 +31,11 @@ class UserModel {
       displayName: data['displayName'] ?? '',
       photoUrl: data['photoUrl'],
       ageVerified: data['ageVerified'] ?? false,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      // Profile
+      bio: data['bio'],
+      isProfilePublic: data['isProfilePublic'] ?? false,
+      username: data['username'] ?? '',
     );
   }
 
@@ -33,6 +45,10 @@ class UserModel {
       'photoUrl': photoUrl,
       'ageVerified': ageVerified,
       'createdAt': Timestamp.fromDate(createdAt),
+      // Profile
+      'bio': bio,
+      'isPublic': isProfilePublic,
+      'username': username,
     };
   }
 }

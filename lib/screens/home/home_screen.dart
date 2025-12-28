@@ -1,14 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drunk_diary/screens/drink_logs/shelf/shelf_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import '../../models/alcohol_model.dart';
-import '../alcohol/alcohol_detail_screen.dart';
 import '../alcohol/alcohol_search_screen.dart';
 import '../drink_logs/diary_timeline_screen.dart';
 import '../activity/user_activity_screen.dart';
+import '../profile/profile_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   static const routeName = '/home';
@@ -104,6 +102,17 @@ class HomeScreen extends StatelessWidget {
               },
               child: const Text("Go to Shelf 🍻"),
             ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ProfileScreen(),
+                  ),
+                );
+              },
+              child: const Text("Go to Profile 👤"),
+            ),
 
           ],
 
@@ -112,18 +121,5 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
-
-  // Future<AlcoholModel> _fetchOneAlcohol() async {
-  //   final snapshot = await FirebaseFirestore.instance
-  //       .collection('alcohols')
-  //       .limit(1)
-  //       .get();
-  //
-  //   if (snapshot.docs.isEmpty) {
-  //     throw Exception('No alcohols found');
-  //   }
-  //
-  //   return AlcoholModel.fromFirestore(snapshot.docs.first);
-  // }
 
 }
