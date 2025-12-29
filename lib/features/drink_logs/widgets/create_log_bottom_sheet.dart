@@ -26,6 +26,13 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
   Future<void> saveLog() async {
     if (isSaving) return;
 
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .get();
+    final username = userDoc['username'];
+    final photoUrl = userDoc['photoUrl'];
+
     final user = FirebaseAuth.instance.currentUser!;
     setState(() => isSaving = true);
 
@@ -33,6 +40,8 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
       id: '',
       userId: user.uid,
       alcoholId: widget.alcohol.id,
+      username: username ?? 'Unknown',
+      userPhotoUrl: photoUrl,
       alcoholName: widget.alcohol.name,
       alcoholType: widget.alcohol.type,
       rating: rating,

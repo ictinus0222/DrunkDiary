@@ -6,6 +6,8 @@ class DrinkLogModel {
   final String id;
   final String userId;
   final String alcoholId;
+  final String username;
+  final String? userPhotoUrl;
 
   final String alcoholName;
   final String alcoholType;
@@ -23,6 +25,8 @@ class DrinkLogModel {
     required this.id,
     required this.userId,
     required this.alcoholId,
+    required this.username,
+    this.userPhotoUrl,
     required this.alcoholName,
     required this.alcoholType,
     required this.rating,
@@ -42,6 +46,8 @@ class DrinkLogModel {
       id: doc.id,
       userId: data['userId'] as String,
       alcoholId: data['alcoholId'] as String,
+      username: data['username'] ?? 'Unknown',
+      userPhotoUrl: data['userPhotoUrl'],
       alcoholName: data['alcoholName'] as String,
       alcoholType: data['alcoholType'] as String,
       rating: (data['rating'] as num).toDouble(),
@@ -65,6 +71,8 @@ class DrinkLogModel {
     return {
       'userId': userId,
       'alcoholId': alcoholId,
+      'username': username,
+      'userPhotoUrl': userPhotoUrl,
       'alcoholName': alcoholName,
       'alcoholType': alcoholType,
       'rating': rating,
