@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/stats_model.dart';
 import '../models/user_model.dart';
-import '../repositories/profile_repository.dart';
+import '../repositories/user_repository.dart';
 
 class ProfileContent extends StatefulWidget {
   final UserModel user;

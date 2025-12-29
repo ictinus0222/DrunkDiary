@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import '../../alcohol/screens/alcohol_search_screen.dart';
 import '../../drink_logs/screens/diary_timeline_screen.dart';
 import '../../activity/screens/user_activity_screen.dart';
 import '../../profile/screens/profile_screen.dart';
+import '../../search/screens/search_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   static const routeName = '/home';
@@ -63,11 +63,11 @@ class HomeScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => AlcoholSearchScreen(),
+                    builder: (_) => SearchScreen(),
                   ),
                 );
               },
-              child: const Text("Search Alcohols"),
+              child: const Text("Search"),
             ),
             ElevatedButton(
               onPressed: () {

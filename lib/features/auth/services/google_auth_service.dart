@@ -51,7 +51,7 @@ Future<void> signInWithGoogle() async {
   if (!docSnapshot.exists) {
     await userDoc.set({
       'email': user.email,
-      'name': user.displayName,
+      'displayName': user.displayName,
       'photoUrl': user.photoURL,
       'createdAt': FieldValue.serverTimestamp(),
       'onboardingCompleted': false,

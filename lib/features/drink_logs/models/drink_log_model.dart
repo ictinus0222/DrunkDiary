@@ -47,7 +47,10 @@ class DrinkLogModel {
       rating: (data['rating'] as num).toDouble(),
       note: data['note'] as String?,
       logType: data['logType'] as String,
-      visibility: data['isPublic'] ?? 'private',
+      visibility: data['visibility'] is String
+          ? data['visibility']
+          : (data['isPublic'] == true ? 'public' : 'private'),
+
       createdAt: createdAtTs != null
           ? createdAtTs.toDate()
           : DateTime.fromMillisecondsSinceEpoch(0),
