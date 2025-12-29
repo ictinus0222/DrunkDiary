@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../models/stats_model.dart';
-import '../models/user_model.dart';
-import '../services/profile_service_stats.dart';
+import '../repositories/profile_repository.dart';
+import '../models/profile_data.dart';
 import '../widgets/profile_content.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -13,45 +11,28 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userId = FirebaseAuth.instance.currentUser!.uid;
+    final repository = ProfileRepository();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
       ),
-      body: FutureBuilder<DocumentSnapshot>(
-        future: FirebaseFirestore.instance
-            .collection('users')
-            .doc(userId)
-            .get(),
-        builder: (context, userSnapshot) {
-          if (userSnapshot.connectionState == ConnectionState.waiting) {
+      body: FutureBuilder<ProfileData>(
+        future: repository.fetchMyProfile(userId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
-            return const Center(child: Text('User not found'));
+          if (!snapshot.hasData) {
+            return const Center(child: Text('Failed to load profile'));
           }
 
-          final user = UserModel.fromFirestore(userSnapshot.data!);
+          final profile = snapshot.data!;
 
-          return FutureBuilder<ProfileStats>(
-            future: ProfileStatsService.fetchStats(userId),
-            builder: (context, statsSnapshot) {
-              if (statsSnapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              if (!statsSnapshot.hasData) {
-                return const Center(child: Text('Failed to load stats'));
-              }
-
-              final stats = statsSnapshot.data!;
-
-              return ProfileContent(
-                user: user,
-                stats: stats,
-              );
-            },
+          return ProfileContent(
+            user: profile.user,
+            stats: profile.stats,
           );
         },
       ),

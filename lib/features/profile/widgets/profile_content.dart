@@ -2,15 +2,56 @@ import 'package:flutter/material.dart';
 
 import '../models/stats_model.dart';
 import '../models/user_model.dart';
+import '../repositories/profile_repository.dart';
 
-class ProfileContent extends StatelessWidget {
+class ProfileContent extends StatefulWidget {
   final UserModel user;
   final ProfileStats stats;
 
   const ProfileContent({
+    super.key,
     required this.user,
     required this.stats,
   });
+
+  @override
+  State<ProfileContent> createState() => _ProfileContentState();
+}
+
+class _ProfileContentState extends State<ProfileContent> {
+  final UserRepository _userRepository = UserRepository();
+
+  late bool isProfilePublic;
+  bool isUpdating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    isProfilePublic = widget.user.isProfilePublic;
+  }
+
+  Future<void> _toggleProfileVisibility(bool value) async {
+    setState(() {
+      isProfilePublic = value;
+      isUpdating = true;
+    });
+
+    try {
+      await _userRepository.updateProfileVisibility(
+        userId: widget.user.id,
+        isProfilePublic: value,
+      );
+    } catch (e) {
+      // Rollback on failure (safe fallback)
+      setState(() {
+        isProfilePublic = !value;
+      });
+    } finally {
+      setState(() {
+        isUpdating = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,8 +66,10 @@ class ProfileContent extends StatelessWidget {
               CircleAvatar(
                 radius: 32,
                 backgroundImage:
-                user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
-                child: user.photoUrl == null
+                widget.user.photoUrl != null
+                    ? NetworkImage(widget.user.photoUrl!)
+                    : null,
+                child: widget.user.photoUrl == null
                     ? const Icon(Icons.person, size: 32)
                     : null,
               ),
@@ -35,7 +78,7 @@ class ProfileContent extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    user.displayName,
+                    widget.user.displayName,
                     style: Theme.of(context)
                         .textTheme
                         .titleLarge
@@ -43,13 +86,12 @@ class ProfileContent extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '@${user.username}',
+                    '@${widget.user.username}',
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.grey.shade600,
                     ),
                   ),
-
                 ],
               ),
             ],
@@ -57,20 +99,19 @@ class ProfileContent extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          if (user.bio == null || user.bio!.isEmpty)
+          if (widget.user.bio == null || widget.user.bio!.isEmpty)
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Text(
                 'No bio yet',
                 style: TextStyle(
-                    color: Colors.grey.shade700,
-                    fontSize: 14,
-                    height: 1.4,
+                  color: Colors.grey.shade700,
+                  fontSize: 14,
+                  height: 1.4,
                 ),
               ),
             ),
-
 
           const SizedBox(height: 24),
 
@@ -86,14 +127,19 @@ class ProfileContent extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _StatItem(label: 'Drinks', value: stats.totalLogs.toString()),
-                _StatItem(label: 'Bottles', value: stats.uniqueBottles.toString()),
+                _StatItem(
+                  label: 'Drinks',
+                  value: widget.stats.totalLogs.toString(),
+                ),
+                _StatItem(
+                  label: 'Bottles',
+                  value: widget.stats.uniqueBottles.toString(),
+                ),
                 _StatItem(
                   label: 'Avg',
-                  value: stats.averageRating == 0
+                  value: widget.stats.averageRating == 0
                       ? '–'
-                      : stats.averageRating.toStringAsFixed(1),
-
+                      : widget.stats.averageRating.toStringAsFixed(1),
                 ),
               ],
             ),
@@ -101,15 +147,38 @@ class ProfileContent extends StatelessWidget {
 
           const SizedBox(height: 16),
 
+          // 🔐 Public / Private Toggle
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Public Profile'),
+            subtitle: const Text(
+              'Allow others to view your profile',
+            ),
+            value: isProfilePublic,
+            onChanged: isUpdating ? null : _toggleProfileVisibility,
+          ),
+
+          const SizedBox(height: 8),
+
           Text(
-            'On DrunkDiary since ${user.createdAt.month}/${user.createdAt.year}',
+            isProfilePublic
+                ? 'Your profile is visible via a shareable link.'
+                : 'Your profile is private. Only you can view it.',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade600,
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          Text(
+            'On DrunkDiary since ${widget.user.createdAt.month}/${widget.user.createdAt.year}',
             style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
           ),
         ],
       ),
     );
-
-
   }
 }
 
@@ -141,7 +210,6 @@ class _StatItem extends StatelessWidget {
             color: Colors.grey.shade600,
           ),
         ),
-
       ],
     );
   }

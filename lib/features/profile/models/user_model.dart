@@ -47,7 +47,7 @@ class UserModel {
       'createdAt': Timestamp.fromDate(createdAt),
       // Profile
       'bio': bio,
-      'isPublic': isProfilePublic,
+      'isProfilePublic': isProfilePublic,
       'username': username,
     };
   }
