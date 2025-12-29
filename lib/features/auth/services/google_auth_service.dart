@@ -55,7 +55,6 @@ Future<void> signInWithGoogle() async {
       'photoUrl': user.photoURL,
       'createdAt': FieldValue.serverTimestamp(),
       'onboardingCompleted': false,
-      'dateOfBirth': null,
       'authProvider': 'google',
     });
   }
