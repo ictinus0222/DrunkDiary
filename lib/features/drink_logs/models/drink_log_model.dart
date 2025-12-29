@@ -13,8 +13,8 @@ class DrinkLogModel {
   final double rating;
   final String? note;
 
-  final String logType;        // diary | memory // TODO: Convert to enum
-  final bool isPublic;     // private | public
+  final String logType;        // diary | memory
+  final String visibility;     // private | public
 
   final DateTime createdAt;
   final DateTime? consumedAt;
@@ -28,7 +28,7 @@ class DrinkLogModel {
     required this.rating,
     this.note,
     required this.logType,
-    required this.isPublic,
+    required this.visibility,
     required this.createdAt,
     this.consumedAt,
   });
@@ -47,7 +47,7 @@ class DrinkLogModel {
       rating: (data['rating'] as num).toDouble(),
       note: data['note'] as String?,
       logType: data['logType'] as String,
-      isPublic: data['isPublic'] ?? false,
+      visibility: data['isPublic'] ?? 'private',
       createdAt: createdAtTs != null
           ? createdAtTs.toDate()
           : DateTime.fromMillisecondsSinceEpoch(0),
@@ -67,7 +67,7 @@ class DrinkLogModel {
       'rating': rating,
       'note': note,
       'logType': logType,
-      'isPublic': isPublic,
+      'visibility': visibility,
       'createdAt': Timestamp.fromDate(createdAt),
       'consumedAt':
       consumedAt != null ? Timestamp.fromDate(consumedAt!) : null,

@@ -38,7 +38,7 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
           ? reviewController.text
           : null,
       logType: logType,
-      isPublic: false,
+      visibility: logType == 'memory' ? 'private' : 'public',
       createdAt: DateTime.now(),
       consumedAt: logType == 'diary' ? DateTime.now() : null,
     );
