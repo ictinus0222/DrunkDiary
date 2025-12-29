@@ -13,7 +13,7 @@ class DrinkLogModel {
   final double rating;
   final String? note;
 
-  final String logType;        // diary | memory
+  final String logType;        // diary | log
   final String visibility;     // private | public
 
   final DateTime createdAt;

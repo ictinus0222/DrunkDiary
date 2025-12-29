@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../alcohol/models/alcohol_model.dart';
@@ -17,7 +16,10 @@ class CreateLogBottomSheet extends StatefulWidget {
 class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
   double rating = 0;
   bool hasRated = false;
+
   String logType = 'memory';
+  String visibility = 'private';
+
   final TextEditingController reviewController = TextEditingController();
   bool isSaving = false;
 
@@ -38,7 +40,7 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
           ? reviewController.text
           : null,
       logType: logType,
-      visibility: logType == 'memory' ? 'private' : 'public',
+      visibility: visibility,
       createdAt: DateTime.now(),
       consumedAt: logType == 'diary' ? DateTime.now() : null,
     );
@@ -52,7 +54,9 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Could not save log. Please try again.")),
+          const SnackBar(
+            content: Text('Could not save log. Please try again.'),
+          ),
         );
       }
     } finally {
@@ -69,7 +73,12 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, 16, 16, MediaQuery.of(context).viewInsets.bottom + 16,),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        16,
+        16,
+        MediaQuery.of(context).viewInsets.bottom + 16,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,31 +104,96 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
             },
           ),
 
+          const SizedBox(height: 16),
+
+          // --------------------
+          // LOG TYPE (CHOICE CHIPS)
+          // --------------------
+          const Text(
+            'Log type',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+
           const SizedBox(height: 8),
 
-          ToggleButtons(
-            isSelected: [
-              logType == 'memory',
-              logType == 'diary',
-            ],
-            onPressed: (index) {
-              setState(() {
-                logType = index == 0 ? 'memory' : 'diary';
-              });
-            },
-            children: const [
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text('Memory'),
+          Row(
+            children: [
+              ChoiceChip(
+                label: const Text('Memory'),
+                selected: logType == 'memory',
+                onSelected: (_) {
+                  setState(() {
+                    logType = 'memory';
+                    visibility = 'private'; // enforce rule
+                  });
+                },
               ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text('Diary'),
+              const SizedBox(width: 8),
+              ChoiceChip(
+                label: const Text('Diary'),
+                selected: logType == 'diary',
+                onSelected: (_) {
+                  setState(() {
+                    logType = 'diary';
+                  });
+                },
               ),
             ],
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
+
+          // --------------------
+          // VISIBILITY (CHOICE CHIPS)
+          // --------------------
+          const Text(
+            'Visibility',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+
+          const SizedBox(height: 8),
+
+          Row(
+            children: [
+              ChoiceChip(
+                label: const Text('Public'),
+                selected: visibility == 'public',
+                onSelected: logType == 'diary'
+                    ? (_) {
+                  setState(() {
+                    visibility = 'public';
+                  });
+                }
+                    : null,
+              ),
+              const SizedBox(width: 8),
+              ChoiceChip(
+                label: const Text('Private'),
+                selected: visibility == 'private',
+                onSelected: (_) {
+                  setState(() {
+                    visibility = 'private';
+                  });
+                },
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 6),
+
+          Text(
+            logType == 'memory'
+                ? 'Memory logs are always private.'
+                : visibility == 'public'
+                ? 'This log will be visible to others on this drink.'
+                : 'Only you can see this log.',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade600,
+            ),
+          ),
+
+          const SizedBox(height: 16),
 
           TextField(
             controller: reviewController,
@@ -153,7 +227,6 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
                     : 'Move the slider to rate',
               ),
             ),
-
           ),
         ],
       ),

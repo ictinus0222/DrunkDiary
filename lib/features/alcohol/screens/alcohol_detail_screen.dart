@@ -2,10 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../drink_logs/repositories/drink_log_repository.dart';
 import '../models/alcohol_model.dart';
 import '../../drink_logs/models/drink_log_model.dart';
 import '../../drink_logs/widgets/create_log_bottom_sheet.dart';
 import '../../drink_logs/widgets/drink_log_card.dart';
+import '../widgets/public_log_tile.dart';
 
 class AlcoholDetailScreen extends StatelessWidget {
   final AlcoholModel alcohol;
@@ -73,6 +75,45 @@ class AlcoholDetailScreen extends StatelessWidget {
               const SizedBox(height: 8),
 
               ...logs.map((log) => DrinkLogCard(log: log)),
+
+              const SizedBox(height: 24),
+              Text(
+                'Community',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+
+              FutureBuilder<List<DrinkLogModel>>(
+                future: fetchPublicLogsForAlcohol(alcohol.id),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        'No public logs yet. Be the first to log this drink.',
+                        style: TextStyle(color: Colors.grey.shade600),
+                      ),
+                    );
+                  }
+
+                  final logs = snapshot.data!;
+
+                  return Column(
+                    children: logs.map((log) {
+                      return PublicLogTile(log: log);
+                    }).toList(),
+                  );
+                },
+              ),
+
+
             ],
           );
         },

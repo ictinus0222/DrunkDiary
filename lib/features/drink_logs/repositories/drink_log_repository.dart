@@ -34,3 +34,19 @@ class DrinkLogRepository {
         .toList();
   }
 }
+  // 🌍 Public logs for Alcohol Detail Page
+Future<List<DrinkLogModel>> fetchPublicLogsForAlcohol(
+    String alcoholId,
+    ) async {
+  final snapshot = await FirebaseFirestore.instance
+      .collection('drink_logs')
+      .where('alcoholId', isEqualTo: alcoholId)
+      .where('visibility', isEqualTo: 'public')
+      .orderBy('createdAt', descending: true)
+      .limit(10)
+      .get();
+
+  return snapshot.docs
+      .map((doc) => DrinkLogModel.fromFirestore(doc))
+      .toList();
+}
