@@ -1,13 +1,13 @@
-import 'package:drunk_diary/routes/app_routes.dart';
-import 'package:drunk_diary/screens/home/home_screen.dart';
-import 'package:drunk_diary/screens/auth_screens/login_screen.dart';
-import 'package:drunk_diary/screens/auth_screens/onboarding_screen.dart';
-import 'package:drunk_diary/theme/app_theme.dart';
+import 'package:drunk_diary/app/app_routes.dart';
+import 'package:drunk_diary/features/home/screens/home_screen.dart';
+import 'package:drunk_diary/features/auth/screens/login_screen.dart';
+import 'package:drunk_diary/features/auth/screens/onboarding_screen.dart';
+import 'package:drunk_diary/app/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'auth/auth_gate.dart';
-import 'firebase_options.dart';
-import 'screens/splash_screen.dart';
+import 'core/auth/auth_gate.dart';
+import 'core/firebase/firebase_options.dart';
+import 'splash/splash_screen.dart';
 // imports
 
 void main() async { // app execution starts here
