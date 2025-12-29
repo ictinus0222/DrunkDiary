@@ -26,8 +26,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final Set<String> selectedTasteProfile = {};
   final Set<String> selectedDrinkingContext = {};
   final Set<String> selectedDiscoveryStyle = {};
+  String username = '';
+  bool isUsernameAvailable = false;
+  bool isCheckingUsername = false;
+  String? usernameError;
 
-  static const int totalSteps = 5;
+
+  static const int totalSteps = 6;
 
   void _pickDob() async {
     final now = DateTime.now();
@@ -93,6 +98,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         return _drinkingContextStep();
       case 4:
         return _discoveryStyleStep();
+      case 5:
+        return _usernameStep();
       default:
         return const SizedBox.shrink();
     }
@@ -451,45 +458,184 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         const SizedBox(height: 32),
 
         ElevatedButton(
-          onPressed: selectedDiscoveryStyle.isNotEmpty && isLoading == false
+          onPressed: selectedDrinkingContext.isNotEmpty
+              ? () {
+            setState(() => currentStep = 5); // Step 5 next
+          }
+              : null,
+          child: const Text('Continue'),
+        ),
+      ],
+    );
+  }
+
+  Widget _usernameStep() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text(
+          'Choose a username',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
+        ),
+
+        const SizedBox(height: 8),
+
+        const Text(
+          'This is how others will see you.',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.grey),
+        ),
+
+        const SizedBox(height: 32),
+
+        TextField(
+          onChanged: (value) {
+            setState(() {
+              username = value.toLowerCase();
+            });
+            _checkUsername(value);
+          },
+          decoration: InputDecoration(
+            hintText: 'username',
+            errorText: usernameError,
+            prefixText: '@',
+            suffixIcon: isCheckingUsername
+                ? const Padding(
+              padding: EdgeInsets.all(12),
+              child: SizedBox(
+                height: 16,
+                width: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            )
+                : isUsernameAvailable
+                ? const Icon(Icons.check, color: Colors.green)
+                : null,
+          ),
+        ),
+
+        const SizedBox(height: 32),
+
+        ElevatedButton(
+          onPressed: isUsernameAvailable && !isLoading
               ? _finishOnboarding
               : null,
           child: isLoading
               ? const CircularProgressIndicator(strokeWidth: 2)
               : const Text('Finish'),
-
         ),
       ],
     );
   }
 
 
+  Future<void> _checkUsername(String value) async {
+    final cleaned = value.trim().toLowerCase();
 
-Future<void> _finishOnboarding() async {
+    if (cleaned.length < 3) {
+      setState(() {
+        usernameError = 'Username must be at least 3 characters';
+        isUsernameAvailable = false;
+      });
+      return;
+    }
+
+    setState(() {
+      isCheckingUsername = true;
+      usernameError = null;
+    });
+
+    final doc = await FirebaseFirestore.instance
+        .collection('usernames')
+        .doc(cleaned)
+        .get();
+
+    setState(() {
+      isCheckingUsername = false;
+      isUsernameAvailable = !doc.exists;
+      usernameError = doc.exists ? 'Username already taken' : null;
+    });
+  }
+
+
+
+  Future<void> _finishOnboarding() async {
     setState(() => isLoading = true);
 
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    if (user == null) {
+      setState(() => isLoading = false);
+      return;
+    }
 
-    try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .set({
-        'dob': selectedDob,
-        'ageVerified': true,
-        'drinkPreferences': selectedDrinkPreferences.toList(),
-        'tasteProfile': selectedTasteProfile.toList(),
-        'drinkingContext': selectedDrinkingContext.toList(),
-        'discoveryStyle': selectedDiscoveryStyle.toList(),
-        'onboardingCompleted': true,
-        'createdAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
-    } catch (e) {
+    final cleanedUsername = username.trim().toLowerCase();
+
+    // 🔒 Hard guard
+    if (cleanedUsername.isEmpty || cleanedUsername.length < 3) {
       setState(() => isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to complete onboarding. Please try again.')),
+        const SnackBar(
+          content: Text('Please choose a valid username.'),
+        ),
       );
+      return;
+    }
+
+    final firestore = FirebaseFirestore.instance;
+    final usernameRef = firestore.collection('usernames').doc(cleanedUsername);
+    final userRef = firestore.collection('users').doc(user.uid);
+
+    try {
+      await firestore.runTransaction((transaction) async {
+        final usernameSnap = await transaction.get(usernameRef);
+
+        // ❌ Username already exists
+        if (usernameSnap.exists) {
+          throw Exception('USERNAME_TAKEN');
+        }
+
+        // ✅ Claim username
+        transaction.set(usernameRef, {'uid': user.uid});
+
+        // ✅ Save user profile
+        transaction.set(
+          userRef,
+          {
+            'username': cleanedUsername,
+            'dob': selectedDob,
+            'ageVerified': true,
+            'drinkPreferences': selectedDrinkPreferences.toList(),
+            'tasteProfile': selectedTasteProfile.toList(),
+            'drinkingContext': selectedDrinkingContext.toList(),
+            'discoveryStyle': selectedDiscoveryStyle.toList(),
+            'onboardingCompleted': true,
+            'createdAt': FieldValue.serverTimestamp(),
+          },
+          SetOptions(merge: true),
+        );
+      });
+    } catch (e) {
+      setState(() => isLoading = false);
+
+      if (e.toString().contains('USERNAME_TAKEN')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Username already taken. Try another.'),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Something went wrong. Please try again.'),
+          ),
+        );
+      }
+
       return;
     }
 
@@ -498,8 +644,11 @@ Future<void> _finishOnboarding() async {
     Navigator.pushNamedAndRemoveUntil(
       context,
       '/home',
-      (route) => false,
+          (route) => false,
     );
-}
+  }
+
+
+
 
 }
