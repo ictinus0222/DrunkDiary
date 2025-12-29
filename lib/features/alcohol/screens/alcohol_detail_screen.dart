@@ -35,6 +35,28 @@ class AlcoholDetailScreen extends StatelessWidget {
     );
   }
 
+  Future<(int, double)> _fetchGlobalStats() async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('drink_logs')
+        .where('alcoholId', isEqualTo: alcohol.id)
+        .where('visibility', isEqualTo: 'public') // important
+        .get();
+
+    final docs = snapshot.docs;
+
+    if (docs.isEmpty) return (0, 0.0);
+
+    final ratings = docs
+        .map((doc) => (doc['rating'] as num).toDouble())
+        .toList();
+
+    final avgRating =
+        ratings.reduce((a, b) => a + b) / ratings.length;
+
+    return (docs.length, avgRating);
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,10 +82,25 @@ class AlcoholDetailScreen extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              _AlcoholStats(
-                logCount: logCount,
-                avgRating: avgRating,
+              FutureBuilder<(int, double)>(
+                future: _fetchGlobalStats(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+
+                  final (logCount, avgRating) = snapshot.data!;
+
+                  return _AlcoholStats(
+                    logCount: logCount,
+                    avgRating: avgRating,
+                  );
+                },
               ),
+
 
               const SizedBox(height: 16),
 
