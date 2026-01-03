@@ -85,11 +85,11 @@ class HomeScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const ActivityScreen(),
+                    builder: (_) => const TimelineScreen(),
                   ),
                 );
               },
-              child: const Text("Go to Activity ⏳"),
+              child: const Text("Go to Timeline ⏳"),
             ),
             ElevatedButton(
               onPressed: () {

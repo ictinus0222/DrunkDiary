@@ -7,7 +7,8 @@ class AppRoutes {
   static const alcoholDetail = '/alcoholDetail';
   static const createLog = 'createLog';
   static const diary = '/diary';
-  static const activity = '/activity';
-  static const profile = '/profile';
+  static const timeline = '/timeline';
+  static const profile = '/profile'; //checking
   static const shelf = '/shelf';
+  static const search = '/search';
 }

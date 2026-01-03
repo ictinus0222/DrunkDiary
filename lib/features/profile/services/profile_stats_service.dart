@@ -1,24 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drunk_diary/features/profile/models/stats_model.dart';
-import 'package:flutter/material.dart';
 
 class ProfileStatsService {
-  static Future<ProfileStats> fetchStats(String userId) async {
+  static Future<ProfileStatsModel> fetchStats(String userId) async {
     final snapshot = await FirebaseFirestore.instance
         .collection('drink_logs')
         .where('userId', isEqualTo: userId)
         .get();
 
     return _computeProfileStats(snapshot);
-  }
+  } // Checked ☑️
 
-  static ProfileStats _computeProfileStats(QuerySnapshot snapshot) {
+  static ProfileStatsModel _computeProfileStats(QuerySnapshot snapshot) {
     final docs = snapshot.docs;
 
     final totalLogs = docs.length;
     final Set<String> uniqueAlcohols = {};
     double ratingSum = 0.0;
-    int ratingCount = 0; // ✅ int, not double
+    int ratingCount = 0;
 
     for (final doc in docs) {
       final data = doc.data() as Map<String, dynamic>;
@@ -33,16 +32,16 @@ class ProfileStatsService {
         ratingSum += rating.toDouble();
         ratingCount++;
       }
-    }
+    } // Checked ☑️
 
     final double avgRating =
-    ratingCount > 0 ? ratingSum / ratingCount : 0.0; // ✅ 0.0
+    ratingCount > 0 ? ratingSum / ratingCount : 0.0;
 
-    return ProfileStats(
+    return ProfileStatsModel(
       totalLogs: totalLogs,
       uniqueBottles: uniqueAlcohols.length,
       averageRating: avgRating,
-    );
+    ); // Checked ☑️
   }
 
 }

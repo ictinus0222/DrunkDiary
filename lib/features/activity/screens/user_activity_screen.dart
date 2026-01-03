@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 
 import '../../drink_logs/widgets/drink_log_card.dart';
 
-class ActivityScreen extends StatelessWidget {
-  static const routeName = '/activity';
-  const ActivityScreen({super.key});
+class TimelineScreen extends StatelessWidget {
+  static const routeName = '/timeline';
+  const TimelineScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +16,7 @@ class ActivityScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Activity ⏳'),
+        title: const Text('Your Timeline ⏳'),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance

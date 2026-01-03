@@ -23,19 +23,19 @@ class UserModel {
     required this.username,
   });
 
-  factory UserModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+  factory UserModel.fromFirestore(DocumentSnapshot userDoc) {
+    final userData = userDoc.data() as Map<String, dynamic>;
 
     return UserModel(
-      id: doc.id,
-      displayName: data['displayName'] ?? '',
-      photoUrl: data['photoUrl'],
-      ageVerified: data['ageVerified'] ?? false,
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      id: userDoc.id,
+      displayName: userData['displayName'] ?? '',
+      photoUrl: userData['photoUrl'],
+      ageVerified: userData['ageVerified'] ?? false,
+      createdAt: (userData['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       // Profile
-      bio: data['bio'],
-      isProfilePublic: data['isProfilePublic'] ?? false,
-      username: data['username'] ?? '',
+      bio: userData['bio'],
+      isProfilePublic: userData['isProfilePublic'] ?? false,
+      username: userData['username'] ?? '',
     );
   }
 

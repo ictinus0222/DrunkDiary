@@ -13,6 +13,7 @@ class AlcoholModel {
   final String origin;
   final String description;
   final String imageUrl;
+  // final String? thumbnailUrl;
 
   // Constructor:
   AlcoholModel({
@@ -24,6 +25,7 @@ class AlcoholModel {
     required this.origin,
     required this.description,
     required this.imageUrl,
+    // this.thumbnailUrl,
   });
 // Factory constructor: Firestore returns a DocumentSnapshot
   // We're casting raw data into a map
@@ -41,6 +43,7 @@ class AlcoholModel {
       origin: data['origin'],
       description: data['description'],
       imageUrl: data['imageUrl'],
+      // thumbnailUrl: data['thumbnailUrl'] ?? null,
     );
   }
 }

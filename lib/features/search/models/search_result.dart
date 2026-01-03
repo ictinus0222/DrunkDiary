@@ -1,13 +1,13 @@
 enum SearchResultType {
   alcohol,
-  user,
+  profile,
 }
 
-class SearchResult {
+class SearchResultModel {
   final SearchResultType type;
   final dynamic data;
 
-  SearchResult({
+  SearchResultModel({
     required this.type,
     required this.data,
   });

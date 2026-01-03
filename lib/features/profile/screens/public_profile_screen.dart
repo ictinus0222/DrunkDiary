@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../models/profile_data.dart';
+import '../models/profile_data_model.dart';
 import '../repositories/profile_repository.dart';
-import '../widgets/profile_content.dart';
-import '../widgets/profile_public_content.dart';
+import '../widgets/user_profile.dart';
+import '../widgets/public_profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 
@@ -23,7 +23,7 @@ class PublicProfileScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('@$username'),
       ),
-      body: FutureBuilder<ProfileData?>(
+      body: FutureBuilder<ProfileDataModel?>(
         future: repository.fetchPublicProfileByUsername(username),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -40,17 +40,17 @@ class PublicProfileScreen extends StatelessWidget {
           final currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
           final isOwner = currentUserId != null &&
-              currentUserId == profile.user.id;
+              currentUserId == profile.userData.id;
 
           return SingleChildScrollView(
             child: isOwner
-                ? ProfileContent(
-              user: profile.user,
-              stats: profile.stats,
+                ? UserProfile(
+              userModel: profile.userData,
+              userStats: profile.stats,
             )
-                : ProfilePublicContent(
-              user: profile.user,
-              stats: profile.stats,
+                : PublicProfile(
+              userModel: profile.userData,
+              userStats: profile.stats,
             ),
           );
 
