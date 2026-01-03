@@ -20,7 +20,7 @@ class DrinkLogRepository {
   }
 
   // 👤 Public logs for Public Profile
-  Future<List<DrinkLogModel>> fetchUserPublicLogs(
+  Future<List<DrinkLogModel>> fetchPublicLogsForUser(
       String userId,
       ) async {
     final snapshot = await _firestore

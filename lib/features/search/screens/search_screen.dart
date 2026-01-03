@@ -1,4 +1,4 @@
-import 'package:drunk_diary/features/search/screens/public_profile_screen.dart';
+import 'package:drunk_diary/features/profile/screens/public_profile_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../../alcohol/models/alcohol_model.dart';

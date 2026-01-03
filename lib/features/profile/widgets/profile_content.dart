@@ -1,3 +1,4 @@
+import 'package:drunk_diary/features/profile/widgets/profile_base_content.dart';
 import 'package:flutter/material.dart';
 
 import '../models/stats_model.dart';
@@ -30,6 +31,34 @@ class _ProfileContentState extends State<ProfileContent> {
     isProfilePublic = widget.user.isProfilePublic;
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return ProfileBaseContent(
+      user: widget.user,
+      stats: widget.stats,
+      footer: [
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Public Profile'),
+          subtitle: const Text('Allow others to view your profile'),
+          value: isProfilePublic,
+          onChanged: isUpdating ? null : _toggleProfileVisibility,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          isProfilePublic
+              ? 'Your profile is visible via a shareable link.'
+              : 'Your profile is private. Only you can view it.',
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'On DrunkDiary since ${widget.user.createdAt.month}/${widget.user.createdAt.year}',
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+        ),
+      ],
+    );
+  }
   Future<void> _toggleProfileVisibility(bool value) async {
     setState(() {
       isProfilePublic = value;
@@ -42,7 +71,7 @@ class _ProfileContentState extends State<ProfileContent> {
         isProfilePublic: value,
       );
     } catch (e) {
-      // Rollback on failure (safe fallback)
+      // Rollback on failure
       setState(() {
         isProfilePublic = !value;
       });
@@ -53,164 +82,4 @@ class _ProfileContentState extends State<ProfileContent> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 32,
-                backgroundImage:
-                widget.user.photoUrl != null
-                    ? NetworkImage(widget.user.photoUrl!)
-                    : null,
-                child: widget.user.photoUrl == null
-                    ? const Icon(Icons.person, size: 32)
-                    : null,
-              ),
-              const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.user.displayName,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '@${widget.user.username}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          if (widget.user.bio == null || widget.user.bio!.isEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text(
-                'No bio yet',
-                style: TextStyle(
-                  color: Colors.grey.shade700,
-                  fontSize: 14,
-                  height: 1.4,
-                ),
-              ),
-            ),
-
-          const SizedBox(height: 24),
-
-          // Stats Row
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(color: Colors.grey.shade200),
-                bottom: BorderSide(color: Colors.grey.shade200),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _StatItem(
-                  label: 'Drinks',
-                  value: widget.stats.totalLogs.toString(),
-                ),
-                _StatItem(
-                  label: 'Bottles',
-                  value: widget.stats.uniqueBottles.toString(),
-                ),
-                _StatItem(
-                  label: 'Avg',
-                  value: widget.stats.averageRating == 0
-                      ? '–'
-                      : widget.stats.averageRating.toStringAsFixed(1),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // 🔐 Public / Private Toggle
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Public Profile'),
-            subtitle: const Text(
-              'Allow others to view your profile',
-            ),
-            value: isProfilePublic,
-            onChanged: isUpdating ? null : _toggleProfileVisibility,
-          ),
-
-          const SizedBox(height: 8),
-
-          Text(
-            isProfilePublic
-                ? 'Your profile is visible via a shareable link.'
-                : 'Your profile is private. Only you can view it.',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade600,
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          Text(
-            'On DrunkDiary since ${widget.user.createdAt.month}/${widget.user.createdAt.year}',
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StatItem extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _StatItem({
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            letterSpacing: 0.5,
-            color: Colors.grey.shade600,
-          ),
-        ),
-      ],
-    );
-  }
 }

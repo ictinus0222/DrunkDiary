@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../profile/models/profile_data.dart';
-import '../../profile/repositories/profile_repository.dart';
-import '../../profile/widgets/profile_content.dart';
+import '../models/profile_data.dart';
+import '../repositories/profile_repository.dart';
+import '../widgets/profile_content.dart';
+import '../widgets/profile_public_content.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 class PublicProfileScreen extends StatelessWidget {
   final String username;
@@ -34,12 +37,23 @@ class PublicProfileScreen extends StatelessWidget {
 
           final profile = snapshot.data!;
 
+          final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+
+          final isOwner = currentUserId != null &&
+              currentUserId == profile.user.id;
+
           return SingleChildScrollView(
-            child: ProfileContent(
+            child: isOwner
+                ? ProfileContent(
+              user: profile.user,
+              stats: profile.stats,
+            )
+                : ProfilePublicContent(
               user: profile.user,
               stats: profile.stats,
             ),
           );
+
         },
       ),
     );
