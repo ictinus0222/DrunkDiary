@@ -47,126 +47,157 @@ class DrinkLogCard extends StatelessWidget {
     }
   }
   Widget _diaryLayout() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Icon(Icons.local_bar, size: 20),
+        _photoIfExists(),
 
-        const SizedBox(width: 8),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Icon(Icons.local_bar, size: 20),
+            const SizedBox(width: 8),
 
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'You drank ${log.alcoholName}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 4),
-
-              Row(
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(log.rating.toStringAsFixed(1)),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.star, size: 14),
+                  Text(
+                    'You drank ${log.alcoholName}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  Row(
+                    children: [
+                      Text(log.rating.toStringAsFixed(1)),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.star, size: 14),
+                    ],
+                  ),
+
+                  if (log.note != null && log.note!.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      log.note!,
+                      style: const TextStyle(
+                        fontStyle: FontStyle.italic,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
                 ],
               ),
-
-              if (log.note != null && log.note!.isNotEmpty) ...[
-                const SizedBox(height: 6),
-                Text(
-                  log.note!,
-                  style: const TextStyle(
-                    fontStyle: FontStyle.italic,
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-
-        Column(
-          children: [
-            _timeText(),
-            ],
-        ),
-      ],
-
-
-    );
-  }
-  Widget _memoryLayout() {
-    return Row(
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  'You rated ${log.alcoholName}',
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-
-                const SizedBox(width: 6),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      log.rating.toStringAsFixed(1),
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.star, size: 16),
-
-
-                  ],
-                ),
-
-
-              ],
             ),
 
-            if (log.note != null && log.note!.isNotEmpty) ...[
-              const SizedBox(height: 6),
-              Text(
-                log.note!,
-                style: const TextStyle(
-                  fontStyle: FontStyle.italic,
-                  color: Colors.grey,
-                ),
-              ),
-            ],
-          ],
-        ),
+            const SizedBox(width: 8),
 
-        const Spacer(),
-
-
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
             _timeText(),
           ],
         ),
       ],
     );
   }
+
+  Widget _memoryLayout() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _photoIfExists(),
+
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'You rated ${log.alcoholName}',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        log.rating.toStringAsFixed(1),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.star, size: 16),
+                    ],
+                  ),
+
+                  if (log.note != null && log.note!.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      log.note!,
+                      style: const TextStyle(
+                        fontStyle: FontStyle.italic,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+
+            _timeText(),
+          ],
+        ),
+      ],
+    );
+  }
+
 
   Widget _timeText() {
     return Text(
       timeago.format(log.createdAt),
       style: const TextStyle(fontSize: 12, color: Colors.grey),
+    );
+  }
+
+  Widget _photoIfExists() {
+    if (log.photoUrl == null || log.photoUrl!.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: AspectRatio(
+            aspectRatio: 4 / 5,
+            child: Image.network(
+              log.photoUrl!,
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                  color: Colors.grey.shade900,
+                  alignment: Alignment.center,
+                  child: const CircularProgressIndicator(strokeWidth: 2),
+                );
+              },
+              errorBuilder: (_, __, ___) {
+                return Container(
+                  color: Colors.grey.shade900,
+                  alignment: Alignment.center,
+                  child: const Icon(Icons.broken_image),
+                );
+              },
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+      ],
     );
   }
 

@@ -21,6 +21,10 @@ class DrinkLogModel {
   final DateTime createdAt;
   final DateTime? consumedAt;
 
+  final String? photoUrl;
+  final DateTime? photoUploadedAt;
+
+
   DrinkLogModel({
     required this.id,
     required this.userId,
@@ -35,6 +39,9 @@ class DrinkLogModel {
     required this.visibility,
     required this.createdAt,
     this.consumedAt,
+
+    this.photoUrl,
+    this.photoUploadedAt,
   });
 
   factory DrinkLogModel.fromFirestore(DocumentSnapshot doc) {
@@ -63,6 +70,11 @@ class DrinkLogModel {
       consumedAt: data['consumedAt'] != null
           ? (data['consumedAt'] as Timestamp).toDate()
           : null,
+      photoUrl: data['photoUrl'],
+      photoUploadedAt: data['photoUploadedAt'] != null
+          ? (data['photoUploadedAt'] as Timestamp).toDate()
+          : null,
+
     );
 
   }
@@ -82,6 +94,8 @@ class DrinkLogModel {
       'createdAt': Timestamp.fromDate(createdAt),
       'consumedAt':
       consumedAt != null ? Timestamp.fromDate(consumedAt!) : null,
+      'photoUrl': photoUrl,
+      'photoUploadedAt': photoUploadedAt,
     };
   }
 }
