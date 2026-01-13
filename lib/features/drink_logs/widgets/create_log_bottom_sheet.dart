@@ -32,6 +32,8 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
 
   final ImagePicker _picker = ImagePicker();
 
+  List<TaggedUser> taggedUsers = [];
+
   Future<void> pickPhoto(BuildContext context) async {
     showModalBottomSheet(
       context: context,
@@ -174,6 +176,45 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
     }
   }
 
+  Widget _buildUserChip(TaggedUser user) {
+    return Chip(
+      avatar: user.photoUrl != null
+          ? CircleAvatar(
+        backgroundImage: NetworkImage(user.photoUrl!),
+      )
+          : const CircleAvatar(
+        child: Icon(Icons.person, size: 14),
+      ),
+      label: Text(user.username),
+      deleteIcon: const Icon(Icons.close, size: 18),
+      onDeleted: () {
+        setState(() {
+          taggedUsers.removeWhere((u) => u.userId == user.userId);
+        });
+      },
+    );
+  }
+
+  void _openTagPeopleSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) {
+        return const _TagPeopleBottomSheet();
+      },
+    ).then((result) {
+      if (result is List<TaggedUser>) {
+        setState(() {
+          taggedUsers = result;
+        });
+      }
+    });
+  }
+
+
   @override
   void dispose() {
     reviewController.dispose();
@@ -289,7 +330,46 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
                 ),
               ],
             ),
-        
+
+            const SizedBox(height: 16),
+
+// --------------------
+// TAG PEOPLE
+// --------------------
+            Text(
+              'With',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+
+            const SizedBox(height: 8),
+
+            GestureDetector(
+              onTap: () => _openTagPeopleSheet(context),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade900,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade700),
+                ),
+                child: taggedUsers.isEmpty
+                    ? Row(
+                  children: const [
+                    Icon(Icons.person_add_alt_1_outlined, size: 18),
+                    SizedBox(width: 8),
+                    Text('Tag people'),
+                  ],
+                )
+                    : Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: taggedUsers.map(_buildUserChip).toList(),
+                ),
+              ),
+            ),
+
+
             const SizedBox(height: 6),
         
             Text(
@@ -414,3 +494,176 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
     );
   }
 }
+// Tagged User Model
+class TaggedUser {
+  final String userId;
+  final String username;
+  final String? photoUrl;
+
+  TaggedUser({
+    required this.userId,
+    required this.username,
+    this.photoUrl,
+  });
+}
+ // Tag People Bottom Sheet
+class _TagPeopleBottomSheet extends StatefulWidget {
+  const _TagPeopleBottomSheet();
+
+  @override
+  State<_TagPeopleBottomSheet> createState() => _TagPeopleBottomSheetState();
+}
+
+class _TagPeopleBottomSheetState extends State<_TagPeopleBottomSheet> {
+  final TextEditingController searchController = TextEditingController();
+
+  // UI-only local selection
+  final List<TaggedUser> selectedUsers = [];
+  final List<TaggedUser> searchResults = [];
+  bool isSearching = false;
+
+  Future<void> _searchUsers(String query) async {
+    if (query.trim().isEmpty) {
+      setState(() {
+        searchResults.clear();
+      });
+      return;
+    }
+
+    setState(() => isSearching = true);
+
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where(
+        'username',
+        isGreaterThanOrEqualTo: query,
+      )
+          .where(
+        'username',
+        isLessThanOrEqualTo: '$query\uf8ff',
+      )
+          .limit(10)
+          .get();
+
+      final results = snapshot.docs.map((doc) {
+        final data = doc.data();
+        return TaggedUser(
+          userId: doc.id,
+          username: data['username'] ?? 'Unknown',
+          photoUrl: data['photoUrl'],
+        );
+      }).toList();
+
+      setState(() {
+        searchResults
+          ..clear()
+          ..addAll(results);
+      });
+    } catch (e) {
+      // silent fail for now (UI-only scope)
+    } finally {
+      setState(() => isSearching = false);
+    }
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        16,
+        16,
+        16,
+        MediaQuery.of(context).viewInsets.bottom + 16,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Tag people',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          ),
+
+          const SizedBox(height: 12),
+
+          TextField(
+            controller: searchController,
+            onChanged: _searchUsers,
+            decoration: InputDecoration(
+              hintText: 'Search by username',
+              prefixIcon: const Icon(Icons.search),
+              filled: true,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+
+
+          const SizedBox(height: 16),
+
+          if (isSearching)
+            const Center(child: CircularProgressIndicator())
+          else if (searchResults.isEmpty)
+            const Center(
+              child: Text(
+                'No users found',
+                style: TextStyle(color: Colors.grey),
+              ),
+            )
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              itemCount: searchResults.length,
+              itemBuilder: (context, index) {
+                final user = searchResults[index];
+                final isSelected = selectedUsers
+                    .any((u) => u.userId == user.userId);
+
+                return ListTile(
+                  leading: user.photoUrl != null
+                      ? CircleAvatar(
+                    backgroundImage: NetworkImage(user.photoUrl!),
+                  )
+                      : const CircleAvatar(
+                    child: Icon(Icons.person),
+                  ),
+                  title: Text(user.username),
+                  trailing: isSelected
+                      ? const Icon(Icons.check, color: Colors.green)
+                      : null,
+                  onTap: () {
+                    setState(() {
+                      if (isSelected) {
+                        selectedUsers
+                            .removeWhere((u) => u.userId == user.userId);
+                      } else {
+                        selectedUsers.add(user);
+                      }
+                    });
+                  },
+                );
+              },
+            ),
+
+
+          const SizedBox(height: 24),
+
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context, selectedUsers);
+              },
+              child: const Text('Done'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
