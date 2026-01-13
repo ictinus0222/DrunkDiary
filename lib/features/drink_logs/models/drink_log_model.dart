@@ -24,6 +24,11 @@ class DrinkLogModel {
   final String? photoUrl;
   final DateTime? photoUploadedAt;
 
+  final bool isShared;
+  final String? createdByUserId;
+  final List<String> taggedUserIds;
+  final String? sourceLogId;
+
 
   DrinkLogModel({
     required this.id,
@@ -42,6 +47,11 @@ class DrinkLogModel {
 
     this.photoUrl,
     this.photoUploadedAt,
+
+    this.isShared = false,
+    this.createdByUserId,
+    this.taggedUserIds = const [],
+    this.sourceLogId,
   });
 
   factory DrinkLogModel.fromFirestore(DocumentSnapshot doc) {
@@ -75,6 +85,12 @@ class DrinkLogModel {
           ? (data['photoUploadedAt'] as Timestamp).toDate()
           : null,
 
+      isShared: data['isShared'] == true,
+      createdByUserId: data['createdByUserId'],
+      taggedUserIds: data['taggedUserIds'] != null
+        ? List<String>.from(data['taggedUserIds'])
+          : const [],
+      sourceLogId: data['sourceLogId'],
     );
 
   }
@@ -96,6 +112,12 @@ class DrinkLogModel {
       consumedAt != null ? Timestamp.fromDate(consumedAt!) : null,
       'photoUrl': photoUrl,
       'photoUploadedAt': photoUploadedAt,
+
+      if (isShared) 'isShared': true,
+      if (createdByUserId != null) 'createdByUserId': createdByUserId,
+      if (taggedUserIds.isNotEmpty) 'taggedUserIds': taggedUserIds,
+      if (sourceLogId != null) 'sourceLogId': sourceLogId,
+'
     };
   }
 }
