@@ -117,7 +117,6 @@ class DrinkLogModel {
       if (createdByUserId != null) 'createdByUserId': createdByUserId,
       if (taggedUserIds.isNotEmpty) 'taggedUserIds': taggedUserIds,
       if (sourceLogId != null) 'sourceLogId': sourceLogId,
-'
     };
   }
 }
