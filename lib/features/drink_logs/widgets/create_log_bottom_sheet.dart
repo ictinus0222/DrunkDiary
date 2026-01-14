@@ -110,6 +110,12 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
     final user = FirebaseAuth.instance.currentUser!;
     setState(() => isSaving = true);
 
+    final firestore = FirebaseFirestore.instance;
+
+    // UI state: from tagging UI
+    final bool isSharedLog = taggedUsers.isNotEmpty;
+
+
     final log = DrinkLogModel(
       id: '',
       userId: user.uid,
@@ -129,39 +135,69 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
     );
 
     try {
-      final logRef = await FirebaseFirestore.instance
-      .collection('drink_logs')
-      .add(log.toMap());
+      if (!isSharedLog) {
+        // --------------------
+        // SINGLE LOG (existing behaviour)
+        // --------------------
+        final logRef = await firestore
+            .collection('drink_logs')
+            .add(log.toMap());
 
-      if(selectedPhoto != null) {
-        try {
-          setState(() => isUploadingPhoto = true);
+        await _uploadPhotoIfNeeded(
+          logRef: logRef,
+          userId: user.uid,
+        );
+      } else {
+        // --------------------
+        // SHARED LOGS
+        // --------------------
 
-          final storageRef = FirebaseStorage.instance
-          .ref()
-          .child('drink_logs')
-          .child(user.uid)
-          .child('${logRef.id}.jpg');
+        // 1. Create creator log FIRST
+        final creatorLogRef = await firestore
+            .collection('drink_logs')
+            .add(
+          log.copyWith(
+            isShared: true,
+            createdByUserId: user.uid,
+            taggedUserIds: taggedUsers.map((u) => u.userId).toList(),
+          ).toMap(),
+        );
 
-          await storageRef.putFile(selectedPhoto!);
+        final sourceLogId = creatorLogRef.id;
 
-          final downloadUrl = await storageRef.getDownloadURL();
+        await _uploadPhotoIfNeeded(
+          logRef: creatorLogRef,
+          userId: user.uid,
+        );
 
-          await logRef.update({
-            'photoUrl': downloadUrl,
-            'photoUploadedAt': FieldValue.serverTimestamp(),
-          });
-        } catch (e) {
-          // Photo failed, log still exists - this is OK
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Photo upload failed. You can retry later.'),
-              ),
-            );
-          }
+        // 2. Create one log per tagged user
+        final taggedUserProfiles = await Future.wait(
+          taggedUsers.map(
+                (u) => _getUserProfile(u.userId),
+          ),
+        );
+
+        for (int i = 0; i < taggedUsers.length; i++) {
+          final taggedUser = taggedUsers[i];
+          final profile = taggedUserProfiles[i];
+
+          final sharedLog = log.copyWith(
+            userId: taggedUser.userId,
+            isShared: true,
+            createdByUserId: user.uid,
+            taggedUserIds: taggedUsers.map((u) => u.userId).toList(),
+            sourceLogId: sourceLogId,
+          ).copyWith(
+            username: profile['username'] ?? 'Unknown',
+            userPhotoUrl: profile['photoUrl'],
+          );
+
+          await firestore
+              .collection('drink_logs')
+              .add(sharedLog.toMap());
         }
       }
+
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
@@ -173,6 +209,49 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
       }
     } finally {
       if (mounted) setState(() => isSaving = false);
+    }
+  }
+  Future<Map<String, dynamic>> _getUserProfile(String userId) async {
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .get();
+
+    return doc.data() ?? {};
+  }
+  Future<void> _uploadPhotoIfNeeded({
+    required DocumentReference logRef,
+    required String userId,
+}) async {
+    if (selectedPhoto == null) return;
+
+    try {
+      setState(() => isUploadingPhoto = true);
+
+      final storageRef = FirebaseStorage.instance
+      .ref()
+      .child('drink_logs')
+      .child(userId)
+      .child('${logRef.id}.jpg');
+
+      await storageRef.putFile(selectedPhoto!);
+
+      final downloadUrl = await storageRef.getDownloadURL();
+
+      await logRef.update({
+        'photoUrl': downloadUrl,
+        'photoUploadedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Photo upload failed. You can retry later.'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => isUploadingPhoto = false);
     }
   }
 
@@ -333,9 +412,9 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
 
             const SizedBox(height: 16),
 
-// --------------------
-// TAG PEOPLE
-// --------------------
+          // --------------------
+          // TAG PEOPLE
+          // --------------------
             Text(
               'With',
               style: TextStyle(fontWeight: FontWeight.w600),

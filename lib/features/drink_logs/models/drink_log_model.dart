@@ -119,4 +119,38 @@ class DrinkLogModel {
       if (sourceLogId != null) 'sourceLogId': sourceLogId,
     };
   }
+  DrinkLogModel copyWith({
+    String? userId,
+    String? username,
+    String? userPhotoUrl,
+    double? rating,
+    String? note,
+    String? visibility,
+    bool? isShared,
+    String? createdByUserId,
+    List<String>? taggedUserIds,
+    String? sourceLogId,
+  }) {
+    return DrinkLogModel(
+      id: id,
+      userId: userId ?? this.userId,
+      alcoholId: alcoholId,
+      username: username ?? this.username,
+      userPhotoUrl: userPhotoUrl ?? this.userPhotoUrl,
+      alcoholName: alcoholName,
+      alcoholType: alcoholType,
+      rating: rating ?? this.rating,
+      note: note ?? this.note,
+      logType: logType,
+      visibility: visibility ?? this.visibility,
+      createdAt: createdAt,
+      consumedAt: consumedAt,
+      photoUrl: photoUrl,
+      photoUploadedAt: photoUploadedAt,
+      isShared: isShared ?? this.isShared,
+      createdByUserId: createdByUserId ?? this.createdByUserId,
+      taggedUserIds: taggedUserIds ?? this.taggedUserIds,
+      sourceLogId: sourceLogId ?? this.sourceLogId,
+    );
+  }
 }

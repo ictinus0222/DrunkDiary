@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:drunk_diary/features/drink_logs/widgets/create_log_bottom_sheet.dart';
 import '../models/drink_log_model.dart';
 
 class DrinkLogRepository {
@@ -49,4 +50,37 @@ Future<List<DrinkLogModel>> fetchPublicLogsForAlcohol(
   return snapshot.docs
       .map((doc) => DrinkLogModel.fromFirestore(doc))
       .toList();
+}
+
+Future<void> createSharedDrinkLogs({
+  required DrinkLogModel baseLog,
+  required List<TaggedUser> taggedUsers,
+}) async {
+  final firestore = FirebaseFirestore.instance;
+
+  // Create host log first
+  final hostRef = await firestore
+      .collection('drink_logs')
+      .add(
+    baseLog.copyWith(
+      isShared: taggedUsers.isNotEmpty,
+      createdByUserId: baseLog.userId,
+      taggedUserIds: taggedUsers.map((u) => u.userId).toList(),
+    ).toMap(),
+  );
+
+  final sourceLogId = hostRef.id;
+
+  // Create logs for tagged users
+  for (final user in taggedUsers) {
+    final sharedLog = baseLog.copyWith(
+      userId: user.userId,
+      isShared: true,
+      createdByUserId: baseLog.userId,
+      taggedUserIds: taggedUsers.map((u) => u.userId).toList(),
+      sourceLogId: sourceLogId,
+    );
+
+    await firestore.collection('drink_logs').add(sharedLog.toMap());
+  }
 }
