@@ -51,6 +51,43 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
     }
   }
 
+  Future<void> _deleteLog() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete log?'),
+        content: const Text(
+          'This will remove it from your diary and timeline. '
+              'This action can’t be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    await FirebaseFirestore.instance
+        .collection('drink_logs')
+        .doc(widget.log.id)
+        .delete();
+
+    if (mounted) {
+      Navigator.pop(context); // close bottom sheet
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -131,6 +168,10 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
         const SizedBox(height: 24),
 
         _timestamp(),
+
+        const SizedBox(height: 16),
+
+        _deleteAction(),
       ],
     );
   }
@@ -185,7 +226,26 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
         const SizedBox(height: 24),
 
         _timestamp(),
+
+        const SizedBox(height: 16),
+
+        _deleteAction(),
       ],
+    );
+  }
+
+  // =======================
+  // DELETE ACTION (MVP)
+  // =======================
+  Widget _deleteAction() {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: const Icon(Icons.delete, color: Colors.red),
+      title: const Text(
+        'Delete log',
+        style: TextStyle(color: Colors.red),
+      ),
+      onTap: _deleteLog,
     );
   }
 
