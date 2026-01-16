@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drunk_diary/features/drink_logs/models/drink_log_model.dart';
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -25,7 +26,6 @@ class DrinkLogCard extends StatelessWidget {
           ),
           builder: (_) => LogDetailBottomSheet(log: log),
         );
-
       },
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -46,6 +46,10 @@ class DrinkLogCard extends StatelessWidget {
         return _diaryLayout();
     }
   }
+
+  // ---------------------------
+  // DIARY LAYOUT
+  // ---------------------------
   Widget _diaryLayout() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,10 +57,10 @@ class DrinkLogCard extends StatelessWidget {
         _photoIfExists(),
 
         Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.local_bar, size: 20),
-            const SizedBox(width: 8),
+            _drinkThumbnail(),
+            const SizedBox(width: 10),
 
             Expanded(
               child: Column(
@@ -90,12 +94,13 @@ class DrinkLogCard extends StatelessWidget {
                       ),
                     ),
                   ],
+
+                  _sharedIndicator(),
                 ],
               ),
             ),
 
             const SizedBox(width: 8),
-
             _timeText(),
           ],
         ),
@@ -103,6 +108,9 @@ class DrinkLogCard extends StatelessWidget {
     );
   }
 
+  // ---------------------------
+  // MEMORY LAYOUT
+  // ---------------------------
   Widget _memoryLayout() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,7 +118,11 @@ class DrinkLogCard extends StatelessWidget {
         _photoIfExists(),
 
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _drinkThumbnail(),
+            const SizedBox(width: 10),
+
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,14 +130,15 @@ class DrinkLogCard extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        'You rated ${log.alcoholName}',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
+                      Expanded(
+                        child: Text(
+                          'You rated ${log.alcoholName}',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 6),
                       Text(
                         log.rating.toStringAsFixed(1),
                         style: const TextStyle(fontWeight: FontWeight.bold),
@@ -145,6 +158,8 @@ class DrinkLogCard extends StatelessWidget {
                       ),
                     ),
                   ],
+
+                  _sharedIndicator(),
                 ],
               ),
             ),
@@ -156,7 +171,121 @@ class DrinkLogCard extends StatelessWidget {
     );
   }
 
+  // ---------------------------
+  // DRINK THUMBNAIL
+  // ---------------------------
+  Widget _drinkThumbnail() {
+    return FutureBuilder<DocumentSnapshot>(
+      future: FirebaseFirestore.instance
+          .collection('alcohols') // 👈 change if needed
+          .doc(log.alcoholId)
+          .get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return _thumbnailPlaceholder();
+        }
 
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return _thumbnailFallback();
+        }
+
+        final data = snapshot.data!.data() as Map<String, dynamic>;
+        final imageUrl = data['imageUrl'];
+
+        if (imageUrl == null || imageUrl.isEmpty) {
+          return _thumbnailFallback();
+        }
+
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(
+            imageUrl,
+            width: 48,
+            height: 48,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => _thumbnailFallback(),
+          ),
+        );
+      },
+    );
+  }
+
+
+  // ---------------------------
+  // SHARED LOG UI
+  // ---------------------------
+  Widget _sharedIndicator() {
+    if (!log.isShared || log.taggedUserIds.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+
+        Text(
+          'with ${log.taggedUserIds.length} people',
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.grey,
+          ),
+        ),
+
+        const SizedBox(height: 6),
+
+        Row(
+          children: log.taggedUserIds.map((uid) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: _userAvatar(uid),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _userAvatar(String userId) {
+    return FutureBuilder<DocumentSnapshot>(
+      future: FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return _fallbackAvatar(userId);
+        }
+
+        final data = snapshot.data!.data() as Map<String, dynamic>;
+        final photoUrl = data['photoUrl'];
+
+        if (photoUrl == null || photoUrl.isEmpty) {
+          return _fallbackAvatar(userId);
+        }
+
+        return CircleAvatar(
+          radius: 14,
+          backgroundImage: NetworkImage(photoUrl),
+        );
+      },
+    );
+  }
+
+  Widget _fallbackAvatar(String userId) {
+    return CircleAvatar(
+      radius: 14,
+      backgroundColor: Colors.grey.shade300,
+      child: Text(
+        userId.substring(0, 1).toUpperCase(),
+        style: const TextStyle(fontSize: 12, color: Colors.black),
+      ),
+    );
+  }
+
+  // ---------------------------
+  // HELPERS
+  // ---------------------------
   Widget _timeText() {
     return Text(
       timeago.format(log.createdAt),
@@ -178,21 +307,6 @@ class DrinkLogCard extends StatelessWidget {
             child: Image.network(
               log.photoUrl!,
               fit: BoxFit.cover,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return Container(
-                  color: Colors.grey.shade900,
-                  alignment: Alignment.center,
-                  child: const CircularProgressIndicator(strokeWidth: 2),
-                );
-              },
-              errorBuilder: (_, __, ___) {
-                return Container(
-                  color: Colors.grey.shade900,
-                  alignment: Alignment.center,
-                  child: const Icon(Icons.broken_image),
-                );
-              },
             ),
           ),
         ),
@@ -200,6 +314,34 @@ class DrinkLogCard extends StatelessWidget {
       ],
     );
   }
+  Widget _thumbnailPlaceholder() {
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade800,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      alignment: Alignment.center,
+      child: const SizedBox(
+        width: 16,
+        height: 16,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      ),
+    );
+  }
 
+  Widget _thumbnailFallback() {
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade800,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      alignment: Alignment.center,
+      child: const Icon(Icons.local_bar, color: Colors.grey),
+    );
+  }
 
 }

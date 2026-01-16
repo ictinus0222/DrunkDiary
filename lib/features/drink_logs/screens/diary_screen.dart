@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../models/drink_log_model.dart';
+import '../../drink_logs/widgets/drink_log_card.dart';
 
 class DiaryTimelineScreen extends StatelessWidget {
   static const routeName = '/diaryTimeline';
@@ -15,13 +16,13 @@ class DiaryTimelineScreen extends StatelessWidget {
     return FirebaseFirestore.instance
         .collection('drink_logs')
         .where('userId', isEqualTo: user.uid)
-        .where('logType', isEqualTo: 'diary')
+        .where('logType', isEqualTo: 'diary') // ✅ diary-only
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map(
-        (snapshot) => snapshot.docs
-        .map((doc) => DrinkLogModel.fromFirestore(doc))
-        .toList(),
+          (snapshot) => snapshot.docs
+          .map((doc) => DrinkLogModel.fromFirestore(doc))
+          .toList(),
     );
   }
 
@@ -38,27 +39,24 @@ class DiaryTimelineScreen extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          // Error state
-          // if (snapshot.hasError) {
-          //   return const Center(child: Text('Something went wrong'));
-          // }
 
+          // Error state
           if (snapshot.hasError) {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.error_outline, size: 48, color: Colors.grey),
-                    const SizedBox(height: 12),
-                    const Text(
+                  children: const [
+                    Icon(Icons.error_outline, size: 48, color: Colors.grey),
+                    SizedBox(height: 12),
+                    Text(
                       'Unable to load your diary right now.',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 16),
                     ),
-                    const SizedBox(height: 8),
-                    const Text(
+                    SizedBox(height: 8),
+                    Text(
                       'Please try again later.',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.grey),
@@ -68,7 +66,6 @@ class DiaryTimelineScreen extends StatelessWidget {
               ),
             );
           }
-
 
           final logs = snapshot.data ?? [];
 
@@ -82,42 +79,17 @@ class DiaryTimelineScreen extends StatelessWidget {
             );
           }
 
-          // Timeline list
+          // ✅ Diary timeline using shared card
           return ListView.separated(
             padding: const EdgeInsets.all(12),
             itemCount: logs.length,
             separatorBuilder: (_, __) => const SizedBox(height: 8),
             itemBuilder: (context, index) {
-              final log = logs[index];
-
-              return Card(
-                child: ListTile(
-                  title: Text(log.alcoholName),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Rating: ${log.rating}'),
-                      if (log.note != null && log.note!.isNotEmpty)
-                        Text(
-                          log.note!,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                    ],
-                  ),
-                  trailing: Text(
-                    _formatDate(log.createdAt),
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                ),
-              );
+              return DrinkLogCard(log: logs[index]);
             },
           );
         },
       ),
     );
-  }
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
   }
 }

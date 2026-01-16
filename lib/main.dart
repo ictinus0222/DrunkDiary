@@ -1,5 +1,5 @@
 import 'package:drunk_diary/app/app_routes.dart';
-import 'package:drunk_diary/features/drink_logs/screens/diary_timeline_screen.dart';
+import 'package:drunk_diary/features/drink_logs/screens/diary_screen.dart';
 import 'package:drunk_diary/features/drink_logs/screens/shelf_screen.dart';
 import 'package:drunk_diary/features/home/screens/home_screen.dart';
 import 'package:drunk_diary/features/auth/screens/login_screen.dart';
