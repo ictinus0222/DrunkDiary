@@ -31,26 +31,28 @@ class DrinkLogCard extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Padding(
           padding: const EdgeInsets.all(12),
-          child: _buildContentByLogType(),
+          child: _buildContentByLogKind(),
         ),
       ),
     );
   }
 
-  Widget _buildContentByLogType() {
-    switch (log.logType) {
-      case 'memory':
-        return _memoryLayout();
-      case 'diary':
+  Widget _buildContentByLogKind() {
+    switch (log.logKind) {
+      case LogKind.review:
+        return _reviewLayout();
+
+      case LogKind.log:
       default:
-        return _diaryLayout();
+        return _logLayout();
     }
   }
 
+
   // ---------------------------
-  // DIARY LAYOUT
+  // LOG LAYOUT
   // ---------------------------
-  Widget _diaryLayout() {
+  Widget _logLayout() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -109,9 +111,9 @@ class DrinkLogCard extends StatelessWidget {
   }
 
   // ---------------------------
-  // MEMORY LAYOUT
+  // Review LAYOUT
   // ---------------------------
-  Widget _memoryLayout() {
+  Widget _reviewLayout() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

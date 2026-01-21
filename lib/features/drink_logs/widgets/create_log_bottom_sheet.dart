@@ -4,36 +4,39 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../alcohol/models/alcohol_model.dart';
 import '../models/drink_log_model.dart';
-import 'package:image_picker/image_picker.dart';
 
 class CreateLogBottomSheet extends StatefulWidget {
   final AlcoholModel alcohol;
   const CreateLogBottomSheet({super.key, required this.alcohol});
 
   @override
-  State<CreateLogBottomSheet> createState() => _CreateLogBottomSheetState();
+  State<CreateLogBottomSheet> createState() =>
+      _CreateLogBottomSheetState();
 }
 
-class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
-  double rating = 0;
-  bool hasRated = false;
+class _CreateLogBottomSheetState
+    extends State<CreateLogBottomSheet> {
+  bool? liked; // 👍 true | 👎 false | null
+  bool showNoteField = false;
 
-  String logType = 'memory';
-  String visibility = 'private';
+  final TextEditingController noteController =
+  TextEditingController();
 
-  final TextEditingController reviewController = TextEditingController();
   bool isSaving = false;
-
-  File? selectedPhoto;
   bool isUploadingPhoto = false;
 
+  File? selectedPhoto;
   final ImagePicker _picker = ImagePicker();
 
   List<TaggedUser> taggedUsers = [];
 
+  // =====================
+  // PHOTO PICKER
+  // =====================
   Future<void> pickPhoto(BuildContext context) async {
     showModalBottomSheet(
       context: context,
@@ -49,7 +52,16 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
               title: const Text('Take a photo'),
               onTap: () async {
                 Navigator.pop(context);
-                await _pickFromCamera();
+                final picked = await _picker.pickImage(
+                  source: ImageSource.camera,
+                  imageQuality: 80,
+                  maxWidth: 1080,
+                  maxHeight: 1350,
+                );
+                if (picked != null) {
+                  setState(() =>
+                  selectedPhoto = File(picked.path));
+                }
               },
             ),
             ListTile(
@@ -57,7 +69,16 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
               title: const Text('Choose from gallery'),
               onTap: () async {
                 Navigator.pop(context);
-                await _pickFromGallery();
+                final picked = await _picker.pickImage(
+                  source: ImageSource.gallery,
+                  imageQuality: 80,
+                  maxWidth: 1080,
+                  maxHeight: 1350,
+                );
+                if (picked != null) {
+                  setState(() =>
+                  selectedPhoto = File(picked.path));
+                }
               },
             ),
           ],
@@ -66,144 +87,56 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
     );
   }
 
-  Future<void> _pickFromCamera() async {
-    final XFile? picked = await _picker.pickImage(
-      source: ImageSource.camera,
-      imageQuality: 80,
-      maxWidth: 1080,
-      maxHeight: 1350,
-    );
-
-    if (picked != null) {
-      setState(() {
-        selectedPhoto = File(picked.path);
-      });
-    }
-  }
-
-  Future<void> _pickFromGallery() async {
-    final XFile? picked = await _picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 80,
-      maxWidth: 1080,
-      maxHeight: 1350,
-    );
-
-    if (picked != null) {
-      setState(() {
-        selectedPhoto = File(picked.path);
-      });
-    }
-  }
-
-
+  // =====================
+  // SAVE LOG
+  // =====================
   Future<void> saveLog() async {
     if (isSaving) return;
-
-    final userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .get();
-    final username = userDoc['username'];
-    final photoUrl = userDoc['photoUrl'];
 
     final user = FirebaseAuth.instance.currentUser!;
     setState(() => isSaving = true);
 
-    final firestore = FirebaseFirestore.instance;
-
-    // UI state: from tagging UI
-    final bool isSharedLog = taggedUsers.isNotEmpty;
-
-
-    final log = DrinkLogModel(
-      id: '',
-      userId: user.uid,
-      alcoholId: widget.alcohol.id,
-      username: username ?? 'Unknown',
-      userPhotoUrl: photoUrl,
-      alcoholName: widget.alcohol.name,
-      alcoholType: widget.alcohol.type,
-      rating: rating,
-      note: reviewController.text.isNotEmpty
-          ? reviewController.text
-          : null,
-      logType: logType,
-      visibility: visibility,
-      createdAt: DateTime.now(),
-      consumedAt: logType == 'diary' ? DateTime.now() : null,
-    );
-
     try {
-      if (!isSharedLog) {
-        // --------------------
-        // SINGLE LOG (existing behaviour)
-        // --------------------
-        final logRef = await firestore
-            .collection('drink_logs')
-            .add(log.toMap());
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
 
-        await _uploadPhotoIfNeeded(
-          logRef: logRef,
-          userId: user.uid,
-        );
-      } else {
-        // --------------------
-        // SHARED LOGS
-        // --------------------
+      final log = DrinkLogModel(
+        id: '',
+        userId: user.uid,
+        alcoholId: widget.alcohol.id,
+        username: userDoc['username'] ?? 'Unknown',
+        userPhotoUrl: userDoc['photoUrl'],
+        alcoholName: widget.alcohol.name,
+        alcoholType: widget.alcohol.type,
+        rating: liked == true ? 1 : liked == false ? 0 : 0,
+        note: noteController.text.isNotEmpty
+            ? noteController.text
+            : null,
+        logKind: LogKind.log,
+        createdAt: DateTime.now(),
+        isShared: taggedUsers.isNotEmpty,
+        createdByUserId:
+        taggedUsers.isNotEmpty ? user.uid : null,
+        taggedUserIds:
+        taggedUsers.map((u) => u.userId).toList(),
+      );
 
-        // 1. Create creator log FIRST
-        final creatorLogRef = await firestore
-            .collection('drink_logs')
-            .add(
-          log.copyWith(
-            isShared: true,
-            createdByUserId: user.uid,
-            taggedUserIds: taggedUsers.map((u) => u.userId).toList(),
-          ).toMap(),
-        );
+      final logRef = await FirebaseFirestore.instance
+          .collection('drink_logs')
+          .add(log.toMap());
 
-        final sourceLogId = creatorLogRef.id;
-
-        await _uploadPhotoIfNeeded(
-          logRef: creatorLogRef,
-          userId: user.uid,
-        );
-
-        // 2. Create one log per tagged user
-        final taggedUserProfiles = await Future.wait(
-          taggedUsers.map(
-                (u) => _getUserProfile(u.userId),
-          ),
-        );
-
-        for (int i = 0; i < taggedUsers.length; i++) {
-          final taggedUser = taggedUsers[i];
-          final profile = taggedUserProfiles[i];
-
-          final sharedLog = log.copyWith(
-            userId: taggedUser.userId,
-            isShared: true,
-            createdByUserId: user.uid,
-            taggedUserIds: taggedUsers.map((u) => u.userId).toList(),
-            sourceLogId: sourceLogId,
-          ).copyWith(
-            username: profile['username'] ?? 'Unknown',
-            userPhotoUrl: profile['photoUrl'],
-          );
-
-          await firestore
-              .collection('drink_logs')
-              .add(sharedLog.toMap());
-        }
+      if (selectedPhoto != null) {
+        await _uploadPhoto(logRef, user.uid);
       }
 
       if (mounted) Navigator.pop(context);
-    } catch (e) {
+    } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Could not save log. Please try again.'),
+            content: Text('Could not save log'),
           ),
         );
       }
@@ -211,55 +144,59 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
       if (mounted) setState(() => isSaving = false);
     }
   }
-  Future<Map<String, dynamic>> _getUserProfile(String userId) async {
-    final doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .get();
 
-    return doc.data() ?? {};
-  }
-  Future<void> _uploadPhotoIfNeeded({
-    required DocumentReference logRef,
-    required String userId,
-}) async {
-    if (selectedPhoto == null) return;
-
+  Future<void> _uploadPhoto(
+      DocumentReference logRef,
+      String userId,
+      ) async {
     try {
       setState(() => isUploadingPhoto = true);
 
-      final storageRef = FirebaseStorage.instance
-      .ref()
-      .child('drink_logs')
-      .child(userId)
-      .child('${logRef.id}.jpg');
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child('drink_logs')
+          .child(userId)
+          .child('${logRef.id}.jpg');
 
-      await storageRef.putFile(selectedPhoto!);
+      await ref.putFile(selectedPhoto!);
 
-      final downloadUrl = await storageRef.getDownloadURL();
+      final url = await ref.getDownloadURL();
 
       await logRef.update({
-        'photoUrl': downloadUrl,
+        'photoUrl': url,
         'photoUploadedAt': FieldValue.serverTimestamp(),
       });
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Photo upload failed. You can retry later.'),
-          ),
-        );
-      }
     } finally {
-      if (mounted) setState(() => isUploadingPhoto = false);
+      if (mounted) {
+        setState(() => isUploadingPhoto = false);
+      }
     }
+  }
+
+  // =====================
+  // TAG PEOPLE
+  // =====================
+  void _openTagPeopleSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => const _TagPeopleBottomSheet(),
+    ).then((result) {
+      if (result is List<TaggedUser>) {
+        setState(() => taggedUsers = result);
+      }
+    });
   }
 
   Widget _buildUserChip(TaggedUser user) {
     return Chip(
       avatar: user.photoUrl != null
           ? CircleAvatar(
-        backgroundImage: NetworkImage(user.photoUrl!),
+        backgroundImage:
+        NetworkImage(user.photoUrl!),
       )
           : const CircleAvatar(
         child: Icon(Icons.person, size: 14),
@@ -268,38 +205,16 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
       deleteIcon: const Icon(Icons.close, size: 18),
       onDeleted: () {
         setState(() {
-          taggedUsers.removeWhere((u) => u.userId == user.userId);
+          taggedUsers
+              .removeWhere((u) => u.userId == user.userId);
         });
       },
     );
   }
 
-  void _openTagPeopleSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (_) {
-        return const _TagPeopleBottomSheet();
-      },
-    ).then((result) {
-      if (result is List<TaggedUser>) {
-        setState(() {
-          taggedUsers = result;
-        });
-      }
-    });
-  }
-
-
-  @override
-  void dispose() {
-    reviewController.dispose();
-    super.dispose();
-  }
-
+  // =====================
+  // UI
+  // =====================
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -311,131 +226,83 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
       ),
       child: SingleChildScrollView(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Log ${widget.alcohol.name}',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-        
-            const SizedBox(height: 12),
-        
-            Text('Rating: ${rating.toStringAsFixed(1)}'),
-            Slider(
-              value: rating,
-              min: 0,
-              max: 5,
-              divisions: 10,
-              onChanged: (value) {
-                setState(() {
-                  rating = value;
-                  hasRated = true;
-                });
-              },
-            ),
-        
-            const SizedBox(height: 16),
-        
-            // --------------------
-            // LOG TYPE (CHOICE CHIPS)
-            // --------------------
+
+            const SizedBox(height: 6),
             const Text(
-              'Log type',
+              'A quick moment — only you can see this.',
+              style:
+              TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+
+            const SizedBox(height: 16),
+
+            // 👍 / 👎
+            const Text(
+              'Your take',
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
-        
             const SizedBox(height: 8),
-        
             Row(
               children: [
-                ChoiceChip(
-                  label: const Text('Memory'),
-                  selected: logType == 'memory',
-                  onSelected: (_) {
-                    setState(() {
-                      logType = 'memory';
-                      visibility = 'private'; // enforce rule
-                    });
-                  },
+                Expanded(
+                  child: OutlinedButton.icon(
+                    icon: Icon(
+                      Icons.thumb_up,
+                      color:
+                      liked == true ? Colors.green : null,
+                    ),
+                    label: const Text('Like'),
+                    onPressed: () =>
+                        setState(() => liked = true),
+                  ),
                 ),
-                const SizedBox(width: 8),
-                ChoiceChip(
-                  label: const Text('Diary'),
-                  selected: logType == 'diary',
-                  onSelected: (_) {
-                    setState(() {
-                      logType = 'diary';
-                    });
-                  },
-                ),
-              ],
-            ),
-        
-            const SizedBox(height: 16),
-        
-            // --------------------
-            // VISIBILITY (CHOICE CHIPS)
-            // --------------------
-            const Text(
-              'Visibility',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-        
-            const SizedBox(height: 8),
-        
-            Row(
-              children: [
-                ChoiceChip(
-                  label: const Text('Public'),
-                  selected: visibility == 'public',
-                  onSelected: logType == 'diary'
-                      ? (_) {
-                    setState(() {
-                      visibility = 'public';
-                    });
-                  }
-                      : null,
-                ),
-                const SizedBox(width: 8),
-                ChoiceChip(
-                  label: const Text('Private'),
-                  selected: visibility == 'private',
-                  onSelected: (_) {
-                    setState(() {
-                      visibility = 'private';
-                    });
-                  },
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    icon: Icon(
+                      Icons.thumb_down,
+                      color:
+                      liked == false ? Colors.red : null,
+                    ),
+                    label: const Text('Dislike'),
+                    onPressed: () =>
+                        setState(() => liked = false),
+                  ),
                 ),
               ],
             ),
 
             const SizedBox(height: 16),
 
-          // --------------------
-          // TAG PEOPLE
-          // --------------------
-            Text(
+            // 👥 TAG PEOPLE
+            const Text(
               'With',
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
-
             const SizedBox(height: 8),
-
             GestureDetector(
               onTap: () => _openTagPeopleSheet(context),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 12, vertical: 12),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade900,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade700),
+                  border:
+                  Border.all(color: Colors.grey.shade700),
                 ),
                 child: taggedUsers.isEmpty
                     ? Row(
                   children: const [
-                    Icon(Icons.person_add_alt_1_outlined, size: 18),
+                    Icon(Icons.person_add_alt_1_outlined,
+                        size: 18),
                     SizedBox(width: 8),
                     Text('Tag people'),
                   ],
@@ -443,128 +310,90 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
                     : Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children: taggedUsers.map(_buildUserChip).toList(),
+                  children: taggedUsers
+                      .map(_buildUserChip)
+                      .toList(),
                 ),
               ),
             ),
 
-
-            const SizedBox(height: 6),
-        
-            Text(
-              logType == 'memory'
-                  ? 'Memory logs are always private.'
-                  : visibility == 'public'
-                  ? 'This log will be visible to others on this drink.'
-                  : 'Only you can see this log.',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
-            ),
-        
             const SizedBox(height: 16),
-        
-            TextField(
-              controller: reviewController,
-              maxLines: 3,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                hintText: 'Add a note (optional)',
-                filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+
+            // NOTE
+            TextButton.icon(
+              icon: const Icon(Icons.edit_note),
+              label: const Text('Add a note'),
+              onPressed: () =>
+                  setState(() => showNoteField = !showNoteField),
+            ),
+
+            if (showNoteField) ...[
+              const SizedBox(height: 8),
+              TextField(
+                controller: noteController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText:
+                  'What made this moment memorable?',
+                  filled: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
-            ),
-        
+            ],
+
             const SizedBox(height: 16),
-        
-            // --------------------
-            // PHOTO PICKER
-            // --------------------
-            Text(
-              'Photo (optional)',
+
+            // PHOTO
+            const Text(
+              'Add a photo',
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
-        
             const SizedBox(height: 8),
-        
             GestureDetector(
-              onTap: isSaving ? null : () => pickPhoto(context),
+              onTap: () => pickPhoto(context),
               child: Container(
                 height: 120,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: Colors.grey.shade900,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade700),
+                  border:
+                  Border.all(color: Colors.grey.shade700),
                 ),
                 child: selectedPhoto == null
                     ? const Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.camera_alt_outlined, size: 28),
-                      SizedBox(height: 6),
-                      Text('Add a photo'),
-                    ],
-                  ),
+                  child:
+                  Icon(Icons.camera_alt_outlined),
                 )
-                    : Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.file(
-                        selectedPhoto!,
-                        width: double.infinity,
-                        height: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Positioned(
-                      top: 6,
-                      right: 6,
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedPhoto = null;
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: Colors.black54,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.close, size: 16),
-                        ),
-                      ),
-                    ),
-                  ],
+                    : ClipRRect(
+                  borderRadius:
+                  BorderRadius.circular(12),
+                  child: Image.file(
+                    selectedPhoto!,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ),
-        
-            const SizedBox(height: 16),
-        
-        
+
+            const SizedBox(height: 20),
+
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: hasRated && !isSaving ? saveLog : null,
+                onPressed: isSaving ? null : saveLog,
                 child: isSaving
                     ? const SizedBox(
                   height: 20,
                   width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child:
+                  CircularProgressIndicator(
+                      strokeWidth: 2),
                 )
-                    : Text(
-                  hasRated
-                      ? 'Save Log'
-                      : 'Move the slider to rate',
-                ),
+                    : const Text('Save log'),
               ),
             ),
           ],
@@ -573,7 +402,10 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
     );
   }
 }
-// Tagged User Model
+
+// =====================
+// TAGGED USER MODEL
+// =====================
 class TaggedUser {
   final String userId;
   final String username;
@@ -585,67 +417,59 @@ class TaggedUser {
     this.photoUrl,
   });
 }
- // Tag People Bottom Sheet
+
+// =====================
+// TAG PEOPLE SHEET
+// =====================
 class _TagPeopleBottomSheet extends StatefulWidget {
   const _TagPeopleBottomSheet();
 
   @override
-  State<_TagPeopleBottomSheet> createState() => _TagPeopleBottomSheetState();
+  State<_TagPeopleBottomSheet> createState() =>
+      _TagPeopleBottomSheetState();
 }
 
-class _TagPeopleBottomSheetState extends State<_TagPeopleBottomSheet> {
-  final TextEditingController searchController = TextEditingController();
+class _TagPeopleBottomSheetState
+    extends State<_TagPeopleBottomSheet> {
+  final TextEditingController searchController =
+  TextEditingController();
 
-  // UI-only local selection
   final List<TaggedUser> selectedUsers = [];
   final List<TaggedUser> searchResults = [];
   bool isSearching = false;
 
   Future<void> _searchUsers(String query) async {
     if (query.trim().isEmpty) {
-      setState(() {
-        searchResults.clear();
-      });
+      setState(() => searchResults.clear());
       return;
     }
 
     setState(() => isSearching = true);
 
-    try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .where(
-        'username',
-        isGreaterThanOrEqualTo: query,
-      )
-          .where(
-        'username',
-        isLessThanOrEqualTo: '$query\uf8ff',
-      )
-          .limit(10)
-          .get();
+    final snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('username', isGreaterThanOrEqualTo: query)
+        .where('username',
+        isLessThanOrEqualTo: '$query\uf8ff')
+        .limit(10)
+        .get();
 
-      final results = snapshot.docs.map((doc) {
-        final data = doc.data();
-        return TaggedUser(
-          userId: doc.id,
-          username: data['username'] ?? 'Unknown',
-          photoUrl: data['photoUrl'],
-        );
-      }).toList();
+    final results = snapshot.docs.map((doc) {
+      final data = doc.data();
+      return TaggedUser(
+        userId: doc.id,
+        username: data['username'] ?? 'Unknown',
+        photoUrl: data['photoUrl'],
+      );
+    }).toList();
 
-      setState(() {
-        searchResults
-          ..clear()
-          ..addAll(results);
-      });
-    } catch (e) {
-      // silent fail for now (UI-only scope)
-    } finally {
-      setState(() => isSearching = false);
-    }
+    setState(() {
+      searchResults
+        ..clear()
+        ..addAll(results);
+      isSearching = false;
+    });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -658,11 +482,11 @@ class _TagPeopleBottomSheetState extends State<_TagPeopleBottomSheet> {
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
             'Tag people',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            style:
+            TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           ),
 
           const SizedBox(height: 12),
@@ -681,18 +505,10 @@ class _TagPeopleBottomSheetState extends State<_TagPeopleBottomSheet> {
             ),
           ),
 
-
           const SizedBox(height: 16),
 
           if (isSearching)
-            const Center(child: CircularProgressIndicator())
-          else if (searchResults.isEmpty)
-            const Center(
-              child: Text(
-                'No users found',
-                style: TextStyle(color: Colors.grey),
-              ),
-            )
+            const CircularProgressIndicator()
           else
             ListView.builder(
               shrinkWrap: true,
@@ -705,20 +521,22 @@ class _TagPeopleBottomSheetState extends State<_TagPeopleBottomSheet> {
                 return ListTile(
                   leading: user.photoUrl != null
                       ? CircleAvatar(
-                    backgroundImage: NetworkImage(user.photoUrl!),
+                    backgroundImage:
+                    NetworkImage(user.photoUrl!),
                   )
                       : const CircleAvatar(
                     child: Icon(Icons.person),
                   ),
                   title: Text(user.username),
                   trailing: isSelected
-                      ? const Icon(Icons.check, color: Colors.green)
+                      ? const Icon(Icons.check,
+                      color: Colors.green)
                       : null,
                   onTap: () {
                     setState(() {
                       if (isSelected) {
-                        selectedUsers
-                            .removeWhere((u) => u.userId == user.userId);
+                        selectedUsers.removeWhere(
+                                (u) => u.userId == user.userId);
                       } else {
                         selectedUsers.add(user);
                       }
@@ -728,15 +546,13 @@ class _TagPeopleBottomSheetState extends State<_TagPeopleBottomSheet> {
               },
             ),
 
-
           const SizedBox(height: 24),
 
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context, selectedUsers);
-              },
+              onPressed: () =>
+                  Navigator.pop(context, selectedUsers),
               child: const Text('Done'),
             ),
           ),
@@ -745,4 +561,3 @@ class _TagPeopleBottomSheetState extends State<_TagPeopleBottomSheet> {
     );
   }
 }
-

@@ -18,47 +18,18 @@ class LogDetailBottomSheet extends StatefulWidget {
 }
 
 class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
-  late String visibility;
-  bool isUpdating = false;
+  bool isDeleting = false;
 
-  @override
-  void initState() {
-    super.initState();
-    visibility = widget.log.visibility;
-  }
-
-  Future<void> _updateVisibility(String value) async {
-    if (value == visibility) return;
-
-    setState(() {
-      visibility = value;
-      isUpdating = true;
-    });
-
-    try {
-      await FirebaseFirestore.instance
-          .collection('drink_logs')
-          .doc(widget.log.id)
-          .update({
-        'visibility': value,
-      });
-    } finally {
-      if (mounted) {
-        setState(() {
-          isUpdating = false;
-        });
-      }
-    }
-  }
-
+  // =======================
+  // DELETE LOG
+  // =======================
   Future<void> _deleteLog() async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete log?'),
         content: const Text(
-          'This will remove it from your diary and timeline. '
-              'This action can’t be undone.',
+          'This action can’t be undone.',
         ),
         actions: [
           TextButton(
@@ -78,14 +49,14 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
 
     if (confirm != true) return;
 
+    setState(() => isDeleting = true);
+
     await FirebaseFirestore.instance
         .collection('drink_logs')
         .doc(widget.log.id)
         .delete();
 
-    if (mounted) {
-      Navigator.pop(context); // close bottom sheet
-    }
+    if (mounted) Navigator.pop(context);
   }
 
   @override
@@ -97,24 +68,28 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
         16,
         MediaQuery.of(context).viewInsets.bottom + 16,
       ),
-      child: _buildContentByLogType(),
+      child: _buildContentByLogKind(),
     );
   }
 
-  Widget _buildContentByLogType() {
-    switch (widget.log.logType) {
-      case 'memory':
-        return _memoryDetail();
-      case 'diary':
+  // =======================
+  // CONTENT SWITCH
+  // =======================
+  Widget _buildContentByLogKind() {
+    switch (widget.log.logKind) {
+      case LogKind.review:
+        return _reviewDetail();
+
+      case LogKind.log:
       default:
-        return _diaryDetail();
+        return _logDetail();
     }
   }
 
   // =======================
-  // DIARY LOG DETAIL
+  // LOG DETAIL (PRIVATE)
   // =======================
-  Widget _diaryDetail() {
+  Widget _logDetail() {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,13 +113,18 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
 
         Row(
           children: [
-            const Icon(Icons.star, size: 22),
+            Icon(
+              widget.log.rating >= 1
+                  ? Icons.thumb_up
+                  : Icons.thumb_down,
+              size: 22,
+            ),
             const SizedBox(width: 6),
             Text(
-              widget.log.rating.toStringAsFixed(1),
+              widget.log.rating >= 1 ? 'Liked' : 'Didn’t like',
               style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -152,7 +132,8 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
 
         const SizedBox(height: 16),
 
-        if (widget.log.note != null && widget.log.note!.isNotEmpty)
+        if (widget.log.note != null &&
+            widget.log.note!.isNotEmpty)
           Text(
             widget.log.note!,
             style: const TextStyle(
@@ -160,10 +141,6 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
               fontStyle: FontStyle.italic,
             ),
           ),
-
-        const SizedBox(height: 24),
-
-        _visibilityToggle(),
 
         const SizedBox(height: 24),
 
@@ -177,15 +154,15 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
   }
 
   // =======================
-  // MEMORY LOG DETAIL
+  // REVIEW DETAIL (PUBLIC)
   // =======================
-  Widget _memoryDetail() {
+  Widget _reviewDetail() {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'You rated ${widget.log.alcoholName}',
+          'Review of ${widget.log.alcoholName}',
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
@@ -210,20 +187,26 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
 
         const SizedBox(height: 20),
 
-        if (widget.log.note != null && widget.log.note!.isNotEmpty)
+        if (widget.log.note != null &&
+            widget.log.note!.isNotEmpty)
           Text(
             widget.log.note!,
             style: const TextStyle(
               fontSize: 16,
-              fontStyle: FontStyle.italic,
             ),
           ),
 
         const SizedBox(height: 24),
 
-        _visibilityToggle(),
+        const Text(
+          'This review is public.',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey,
+          ),
+        ),
 
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
 
         _timestamp(),
 
@@ -235,66 +218,17 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
   }
 
   // =======================
-  // DELETE ACTION (MVP)
+  // DELETE ACTION
   // =======================
   Widget _deleteAction() {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: const Icon(Icons.delete, color: Colors.red),
       title: const Text(
-        'Delete log',
+        'Delete',
         style: TextStyle(color: Colors.red),
       ),
-      onTap: _deleteLog,
-    );
-  }
-
-  // =======================
-  // VISIBILITY TOGGLE
-  // =======================
-  Widget _visibilityToggle() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Visibility',
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-
-        const SizedBox(height: 8),
-
-        Row(
-          children: [
-            ChoiceChip(
-              label: const Text('Public'),
-              selected: visibility == 'public',
-              onSelected: isUpdating
-                  ? null
-                  : (_) => _updateVisibility('public'),
-            ),
-            const SizedBox(width: 8),
-            ChoiceChip(
-              label: const Text('Private'),
-              selected: visibility == 'private',
-              onSelected: isUpdating
-                  ? null
-                  : (_) => _updateVisibility('private'),
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 6),
-
-        Text(
-          visibility == 'public'
-              ? 'This log is visible to others on this drink.'
-              : 'Only you can see this log.',
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey.shade600,
-          ),
-        ),
-      ],
+      onTap: isDeleting ? null : _deleteLog,
     );
   }
 

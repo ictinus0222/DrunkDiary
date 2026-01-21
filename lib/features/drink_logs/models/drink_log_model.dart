@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+enum LogKind {log, review}
+
 // DrinkLogModel is one user interaction with one drink, not a static entity
 // TODO: fix for when document is deleted, malformed or empty.
 class DrinkLogModel {
@@ -15,8 +17,7 @@ class DrinkLogModel {
   final double rating;
   final String? note;
 
-  final String logType;        // diary | log
-  final String visibility;     // private | public
+  final LogKind logKind;
 
   final DateTime createdAt;
   final DateTime? consumedAt;
@@ -40,8 +41,7 @@ class DrinkLogModel {
     required this.alcoholType,
     required this.rating,
     this.note,
-    required this.logType,
-    required this.visibility,
+    required this.logKind,
     required this.createdAt,
     this.consumedAt,
 
@@ -69,10 +69,10 @@ class DrinkLogModel {
       alcoholType: data['alcoholType'] as String,
       rating: (data['rating'] as num).toDouble(),
       note: data['note'] as String?,
-      logType: data['logType'] as String,
-      visibility: data['visibility'] is String
-          ? data['visibility']
-          : (data['isPublic'] == true ? 'public' : 'private'),
+
+      logKind: data['logKind'] == 'review'
+        ? LogKind.review
+      : LogKind.log,
 
       createdAt: createdAtTs != null
           ? createdAtTs.toDate()
@@ -105,8 +105,7 @@ class DrinkLogModel {
       'alcoholType': alcoholType,
       'rating': rating,
       'note': note,
-      'logType': logType,
-      'visibility': visibility,
+      'logKind': logKind.name,
       'createdAt': Timestamp.fromDate(createdAt),
       'consumedAt':
       consumedAt != null ? Timestamp.fromDate(consumedAt!) : null,
@@ -141,8 +140,7 @@ class DrinkLogModel {
       alcoholType: alcoholType,
       rating: rating ?? this.rating,
       note: note ?? this.note,
-      logType: logType,
-      visibility: visibility ?? this.visibility,
+      logKind: logKind ?? this.logKind,
       createdAt: createdAt,
       consumedAt: consumedAt,
       photoUrl: photoUrl,

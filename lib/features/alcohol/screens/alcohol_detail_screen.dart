@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../drink_logs/repositories/drink_log_repository.dart';
+import '../../drink_logs/widgets/create_review_bottom_sheet.dart';
 import '../models/alcohol_model.dart';
 import '../../drink_logs/models/drink_log_model.dart';
 import '../../drink_logs/widgets/create_log_bottom_sheet.dart';
@@ -158,30 +159,58 @@ class AlcoholDetailScreen extends StatelessWidget {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  useSafeArea: true,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(16),
-                    ),
-                  ),
-                  builder: (_) => CreateLogBottomSheet(
-                    alcohol: alcohol,
-                  ),
-                );
-              },
-              child: const Text('Log this drink'),
-            ),
+          child: Row(
+            children: [
+              // LOG button
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      useSafeArea: true,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(16),
+                        ),
+                      ),
+                      builder: (_) => CreateLogBottomSheet(
+                        alcohol: alcohol,
+                      ),
+                    );
+                  },
+                  child: const Text('LOG'),
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              // REVIEW button
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      useSafeArea: true,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(16),
+                        ),
+                      ),
+                      builder: (_) => CreateReviewBottomSheet(
+                         alcohol: alcohol,
+                      ),
+                    );
+                  },
+                  child: const Text('REVIEW'),
+                ),
+              ),
+            ],
           ),
         ),
       ),
+
     );
   }
 }
