@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../alcohol/models/alcohol_model.dart';
-import '../models/drink_log_model.dart';
+import '../models/drink_model_dto.dart';
 
 class CreateReviewBottomSheet extends StatefulWidget {
   final AlcoholModel alcohol;

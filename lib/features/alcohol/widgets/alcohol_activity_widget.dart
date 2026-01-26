@@ -3,7 +3,7 @@ import 'package:drunk_diary/features/drink_logs/widgets/log_detail_bottom_sheet.
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../../drink_logs/models/drink_log_model.dart';
+import '../../drink_logs/models/drink_model_dto.dart';
 
 class AlcoholActivityWidget extends StatelessWidget {
   final String alcoholId;

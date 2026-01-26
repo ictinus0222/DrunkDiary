@@ -1,6 +1,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:drunk_diary/features/drink_logs/models/drink_log_model.dart';
+import 'package:drunk_diary/features/drink_logs/models/drink_model_dto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 

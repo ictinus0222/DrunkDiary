@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../models/drink_log_model.dart';
+import '../models/drink_model_dto.dart';
 
 class LogDetailBottomSheet extends StatefulWidget {
   final DrinkLogModel log;

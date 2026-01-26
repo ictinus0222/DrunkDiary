@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../drink_logs/models/drink_log_model.dart';
+import '../../drink_logs/models/drink_model_dto.dart';
 
 class PublicLogTile extends StatelessWidget {
   final DrinkLogModel log;

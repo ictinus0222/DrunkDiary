@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../models/drink_log_model.dart';
+import '../models/drink_model_dto.dart';
 import '../../drink_logs/widgets/drink_log_card.dart';
 
 class DiaryTimelineScreen extends StatelessWidget {

@@ -5,15 +5,17 @@ import 'package:flutter/material.dart';
 import '../../drink_logs/repositories/drink_log_repository.dart';
 import '../../drink_logs/widgets/create_review_bottom_sheet.dart';
 import '../models/alcohol_model.dart';
-import '../../drink_logs/models/drink_log_model.dart';
+import '../../drink_logs/models/drink_model_dto.dart';
 import '../../drink_logs/widgets/create_log_bottom_sheet.dart';
 import '../../drink_logs/widgets/drink_log_card.dart';
 import '../widgets/public_log_tile.dart';
 
 class AlcoholDetailScreen extends StatelessWidget {
+  final DrinkLogRepository _drinkLogRepository = DrinkLogRepository();
+
   final AlcoholModel alcohol;
 
-  const AlcoholDetailScreen({
+  AlcoholDetailScreen({
     super.key,
     required this.alcohol,
   });
@@ -122,7 +124,7 @@ class AlcoholDetailScreen extends StatelessWidget {
               const SizedBox(height: 8),
 
               FutureBuilder<List<DrinkLogModel>>(
-                future: fetchPublicLogsForAlcohol(alcohol.id),
+                future: _drinkLogRepository.fetchReviewsForAlcohol(alcohol.id),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Padding(
@@ -135,21 +137,22 @@ class AlcoholDetailScreen extends StatelessWidget {
                     return Padding(
                       padding: const EdgeInsets.all(16),
                       child: Text(
-                        'No public logs yet. Be the first to log this drink.',
+                        'No reviews yet. Be the first to review this drink.',
                         style: TextStyle(color: Colors.grey.shade600),
                       ),
                     );
                   }
 
-                  final logs = snapshot.data!;
+                  final reviews = snapshot.data!;
 
                   return Column(
-                    children: logs.map((log) {
-                      return PublicLogTile(log: log);
+                    children: reviews.map((review) {
+                      return PublicLogTile(log: review);
                     }).toList(),
                   );
                 },
               ),
+
 
 
             ],

@@ -1,86 +1,115 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:drunk_diary/features/drink_logs/widgets/create_log_bottom_sheet.dart';
-import '../models/drink_log_model.dart';
+
+import '../models/drink_model_dto.dart';
 
 class DrinkLogRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // 🌍 Public logs for Alcohol Detail Page
-  Future<List<DrinkLogModel>> fetchPublicLogsForAlcohol(
+  // ============================
+  // 🍾 REVIEWS FOR ALCOHOL PAGE
+  // (public by definition)
+  // ============================
+  Future<List<DrinkLogModel>> fetchReviewsForAlcohol(
       String alcoholId,
       ) async {
     final snapshot = await _firestore
         .collection('drink_logs')
         .where('alcoholId', isEqualTo: alcoholId)
-        .where('visibility', isEqualTo: 'public')
+        .where('logKind', isEqualTo: 'review')
+        .orderBy('createdAt', descending: true)
+        .limit(10)
         .get();
 
     return snapshot.docs
-        .map((doc) => DrinkLogModel.fromFirestore(doc))
+        .map(DrinkLogModel.fromFirestore)
         .toList();
   }
 
-  // 👤 Public logs for Public Profile
-  Future<List<DrinkLogModel>> fetchPublicLogsForUser(
+  // ============================
+  // 👤 USER REVIEWS (PUBLIC PROFILE)
+  // ============================
+  Future<List<DrinkLogModel>> fetchReviewsForUser(
       String userId,
       ) async {
     final snapshot = await _firestore
         .collection('drink_logs')
         .where('userId', isEqualTo: userId)
-        .where('visibility', isEqualTo: 'public')
+        .where('logKind', isEqualTo: 'review')
+        .orderBy('createdAt', descending: true)
         .get();
 
     return snapshot.docs
-        .map((doc) => DrinkLogModel.fromFirestore(doc))
+        .map(DrinkLogModel.fromFirestore)
         .toList();
   }
-}
-  // 🌍 Public logs for Alcohol Detail Page
-Future<List<DrinkLogModel>> fetchPublicLogsForAlcohol(
-    String alcoholId,
-    ) async {
-  final snapshot = await FirebaseFirestore.instance
-      .collection('drink_logs')
-      .where('alcoholId', isEqualTo: alcoholId)
-      .where('visibility', isEqualTo: 'public')
-      .orderBy('createdAt', descending: true)
-      .limit(10)
-      .get();
 
-  return snapshot.docs
-      .map((doc) => DrinkLogModel.fromFirestore(doc))
-      .toList();
-}
+  // ============================
+  // 📝 USER LOGS (PRIVATE TIMELINE)
+  // ============================
+  Future<List<DrinkLogModel>> fetchLogsForUser(
+      String userId,
+      ) async {
+    final snapshot = await _firestore
+        .collection('drink_logs')
+        .where('userId', isEqualTo: userId)
+        .where('logKind', isEqualTo: 'log')
+        .orderBy('createdAt', descending: true)
+        .get();
 
-Future<void> createSharedDrinkLogs({
-  required DrinkLogModel baseLog,
-  required List<TaggedUser> taggedUsers,
-}) async {
-  final firestore = FirebaseFirestore.instance;
+    return snapshot.docs
+        .map(DrinkLogModel.fromFirestore)
+        .toList();
+  }
 
-  // Create host log first
-  final hostRef = await firestore
-      .collection('drink_logs')
-      .add(
-    baseLog.copyWith(
-      isShared: taggedUsers.isNotEmpty,
-      createdByUserId: baseLog.userId,
-      taggedUserIds: taggedUsers.map((u) => u.userId).toList(),
-    ).toMap(),
-  );
+  // ============================
+  // ➕ CREATE SINGLE LOG / REVIEW
+  // ============================
+  Future<void> createDrinkLog(
+      DrinkLogModel log,
+      ) async {
+    await _firestore
+        .collection('drink_logs')
+        .add(log.toMap());
+  }
 
-  final sourceLogId = hostRef.id;
-
-  // Create logs for tagged users
-  for (final user in taggedUsers) {
-    final sharedLog = baseLog.copyWith(
-      userId: user.userId,
-      isShared: true,
-      createdByUserId: baseLog.userId,
-      taggedUserIds: taggedUsers.map((u) => u.userId).toList(),
-      sourceLogId: sourceLogId,
+  // ============================
+  // 👥 CREATE SHARED LOGS (LOG ONLY)
+  // ============================
+  Future<void> createSharedLogs({
+    required DrinkLogModel baseLog,
+    required List<String> taggedUserIds,
+  }) async {
+    assert(
+    baseLog.logKind == LogKind.log,
+    'Shared logs are only allowed for logKind=log',
     );
 
-    await firestore.collection('drink_logs').add(sharedLog.toMap());
+    // 1️⃣ Create host log
+    final hostRef = await _firestore
+        .collection('drink_logs')
+        .add(
+      baseLog.copyWith(
+        isShared: true,
+        createdByUserId: baseLog.userId,
+        taggedUserIds: taggedUserIds,
+      ).toMap(),
+    );
+
+    final sourceLogId = hostRef.id;
+
+    // 2️⃣ Create one log per tagged user
+    for (final taggedUserId in taggedUserIds) {
+      final sharedLog = baseLog.copyWith(
+        userId: taggedUserId,
+        isShared: true,
+        createdByUserId: baseLog.userId,
+        taggedUserIds: taggedUserIds,
+        sourceLogId: sourceLogId,
+      );
+
+      await _firestore
+          .collection('drink_logs')
+          .add(sharedLog.toMap());
+    }
   }
 }
