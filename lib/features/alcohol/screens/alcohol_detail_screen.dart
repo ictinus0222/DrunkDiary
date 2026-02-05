@@ -3,7 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../drink_logs/repositories/drink_log_repository.dart';
+// import '../../drink_logs/widgets/create_review_bottom_sheet.dart';
 import '../../drink_logs/widgets/create_review_bottom_sheet.dart';
+import '../../drink_logs/widgets/edit_review_screen.dart';
 import '../models/alcohol_model.dart';
 import '../../drink_logs/models/drink_model_dto.dart';
 import '../../drink_logs/widgets/create_log_bottom_sheet.dart';
@@ -58,6 +60,64 @@ class AlcoholDetailScreen extends StatelessWidget {
 
     return (docs.length, avgRating);
   }
+
+  Future<void> onWriteReviewPressed(BuildContext context) async {
+    final userId = FirebaseAuth.instance.currentUser!.uid;
+    final alcoholId = alcohol.id;
+
+    final query = await FirebaseFirestore.instance
+        .collection('drink_logs')
+        .where('userId', isEqualTo: userId)
+        .where('alcoholId', isEqualTo: alcoholId)
+        .where('logKind', isEqualTo: 'review')
+        .limit(1)
+        .get();
+
+    if (query.docs.isNotEmpty) {
+      // ✅ Review exists → EDIT
+      final review = DrinkLogModel.fromFirestore(query.docs.first);
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ReviewEditorScreen(
+            alcohol: alcohol,
+            existingReview: review,
+          ),
+        ),
+      );
+    } else {
+      // ❌ No review → CREATE (bottom sheet)
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        useSafeArea: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(16),
+          ),
+        ),
+        builder: (_) => CreateReviewBottomSheet(
+          alcohol: alcohol,
+        ),
+      );
+    }
+  }
+
+  Future<bool> _hasUserReviewed() async {
+    final userId = FirebaseAuth.instance.currentUser!.uid;
+
+    final query = await FirebaseFirestore.instance
+        .collection('drink_logs')
+        .where('userId', isEqualTo: userId)
+        .where('alcoholId', isEqualTo: alcohol.id)
+        .where('logKind', isEqualTo: 'review')
+        .limit(1)
+        .get();
+
+    return query.docs.isNotEmpty;
+  }
+
 
 
   @override
@@ -190,25 +250,20 @@ class AlcoholDetailScreen extends StatelessWidget {
 
               // REVIEW button
               Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      useSafeArea: true,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(16),
-                        ),
-                      ),
-                      builder: (_) => CreateReviewBottomSheet(
-                         alcohol: alcohol,
-                      ),
+                child: FutureBuilder<bool>(
+                  future: _hasUserReviewed(),
+                  builder: (context, snapshot) {
+                    final hasReviewed = snapshot.data ?? false;
+
+                    return ElevatedButton(
+                      onPressed: () => onWriteReviewPressed(context),
+                      child: Text(hasReviewed ? 'EDIT REVIEW' : 'REVIEW'),
                     );
                   },
-                  child: const Text('REVIEW'),
                 ),
               ),
+
+
             ],
           ),
         ),

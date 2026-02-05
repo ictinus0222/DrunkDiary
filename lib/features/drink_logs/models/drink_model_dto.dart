@@ -55,45 +55,54 @@ class DrinkLogModel {
   });
 
   factory DrinkLogModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>?;
+
+    if (data == null) {
+      throw Exception('DrinkLog document ${doc.id} has no data');
+    }
 
     final Timestamp? createdAtTs = data['createdAt'] as Timestamp?;
 
     return DrinkLogModel(
       id: doc.id,
-      userId: data['userId'] as String,
-      alcoholId: data['alcoholId'] as String,
-      username: data['username'] ?? 'Unknown',
-      userPhotoUrl: data['userPhotoUrl'],
-      alcoholName: data['alcoholName'] as String,
-      alcoholType: data['alcoholType'] as String,
-      rating: (data['rating'] as num).toDouble(),
+
+      userId: data['userId'] as String? ?? '',
+      alcoholId: data['alcoholId'] as String? ?? '',
+
+      username: data['username'] as String? ?? 'Unknown',
+      userPhotoUrl: data['userPhotoUrl'] as String?,
+
+      alcoholName: data['alcoholName'] as String? ?? 'Unknown drink',
+      alcoholType: data['alcoholType'] as String? ?? 'unknown',
+
+      rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
       note: data['note'] as String?,
 
       logKind: data['logKind'] == 'review'
-        ? LogKind.review
-      : LogKind.log,
+          ? LogKind.review
+          : LogKind.log,
 
-      createdAt: createdAtTs != null
-          ? createdAtTs.toDate()
-          : DateTime.fromMillisecondsSinceEpoch(0),
-      consumedAt: data['consumedAt'] != null
-          ? (data['consumedAt'] as Timestamp).toDate()
-          : null,
-      photoUrl: data['photoUrl'],
-      photoUploadedAt: data['photoUploadedAt'] != null
-          ? (data['photoUploadedAt'] as Timestamp).toDate()
-          : null,
+      createdAt: createdAtTs?.toDate() ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+
+      consumedAt: (data['consumedAt'] as Timestamp?)?.toDate(),
+
+      photoUrl: data['photoUrl'] as String?,
+      photoUploadedAt:
+      (data['photoUploadedAt'] as Timestamp?)?.toDate(),
 
       isShared: data['isShared'] == true,
-      createdByUserId: data['createdByUserId'],
-      taggedUserIds: data['taggedUserIds'] != null
-        ? List<String>.from(data['taggedUserIds'])
-          : const [],
-      sourceLogId: data['sourceLogId'],
-    );
+      createdByUserId: data['createdByUserId'] as String?,
 
+      taggedUserIds: (data['taggedUserIds'] as List?)
+          ?.whereType<String>()
+          .toList() ??
+          const [],
+
+      sourceLogId: data['sourceLogId'] as String?,
+    );
   }
+
 
   Map<String, dynamic> toMap() {
     return {
@@ -140,7 +149,7 @@ class DrinkLogModel {
       alcoholType: alcoholType,
       rating: rating ?? this.rating,
       note: note ?? this.note,
-      logKind: logKind ?? this.logKind,
+      logKind: this.logKind,
       createdAt: createdAt,
       consumedAt: consumedAt,
       photoUrl: photoUrl,

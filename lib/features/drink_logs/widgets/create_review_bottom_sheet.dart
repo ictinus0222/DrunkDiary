@@ -105,8 +105,11 @@ class _CreateReviewBottomSheetState
           .doc(user.uid)
           .get();
 
+      // 🔒 DETERMINISTIC REVIEW ID
+      final reviewDocId = '${user.uid}_${widget.alcohol.id}';
+
       final review = DrinkLogModel(
-        id: '',
+        id: reviewDocId,
         userId: user.uid,
         alcoholId: widget.alcohol.id,
         username: userDoc['username'] ?? 'Unknown',
@@ -119,16 +122,22 @@ class _CreateReviewBottomSheetState
         createdAt: DateTime.now(),
       );
 
-      final ref = await FirebaseFirestore.instance
+      final ref = FirebaseFirestore.instance
           .collection('drink_logs')
-          .add(review.toMap());
+          .doc(reviewDocId);
+
+      // ✅ CREATE OR OVERWRITE (idempotent)
+      await ref.set(
+        review.toMap(),
+        SetOptions(merge: true),
+      );
 
       if (selectedPhoto != null) {
         await _uploadPhoto(ref, user.uid);
       }
 
       if (mounted) Navigator.pop(context);
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -140,6 +149,7 @@ class _CreateReviewBottomSheetState
       if (mounted) setState(() => isSaving = false);
     }
   }
+
 
   Future<void> _uploadPhoto(
       DocumentReference ref,
@@ -171,134 +181,99 @@ class _CreateReviewBottomSheetState
   // --------------------
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        16,
-        16,
-        MediaQuery.of(context).viewInsets.bottom + 16,
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Review ${widget.alcohol.name}',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+    return Material(
+      color: Theme.of(context).colorScheme.surface,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          16,
+          16,
+          16,
+          MediaQuery.of(context).viewInsets.bottom + 16,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // TITLE
+              Text(
+                'Review ${widget.alcohol.name}',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
 
-            const SizedBox(height: 6),
-            const Text(
-              'Your public opinion — visible to everyone.',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
-            ),
+              const SizedBox(height: 6),
+              const Text(
+                'Your public opinion — visible to everyone.',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
-            // ⭐ RATING
-            const Text(
-              'Your rating',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Text('${rating.toStringAsFixed(1)} / 5'),
-            Slider(
-              value: rating,
-              min: 0,
-              max: 5,
-              divisions: 10,
-              onChanged: (value) {
-                setState(() {
-                  rating = value;
-                  hasRated = true;
-                });
-              },
-            ),
+              // ⭐ RATING
+              const Text(
+                'Your rating',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              Text('${rating.toStringAsFixed(1)} / 5'),
+              Slider(
+                value: rating,
+                min: 0,
+                max: 5,
+                divisions: 10,
+                onChanged: (value) {
+                  setState(() {
+                    rating = value;
+                    hasRated = true;
+                  });
+                },
+              ),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
-            // REVIEW TEXT
-            const Text(
-              'Your review',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: reviewController,
-              maxLines: 4,
-              textCapitalization:
-              TextCapitalization.sentences,
-              decoration: InputDecoration(
-                hintText:
-                'What did you like or dislike about it?',
-                filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+              // 📝 REVIEW NOTE
+              const Text(
+                'Your review',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: reviewController,
+                maxLines: 4,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(
+                  hintText: 'What did you like or dislike about it?',
+                  filled: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
-            // // PHOTO
-            // const Text(
-            //   'Add a photo (optional)',
-            //   style: TextStyle(fontWeight: FontWeight.w600),
-            // ),
-            // const SizedBox(height: 8),
-            // GestureDetector(
-            //   onTap: () => pickPhoto(context),
-            //   child: Container(
-            //     height: 120,
-            //     width: double.infinity,
-            //     decoration: BoxDecoration(
-            //       color: Colors.grey.shade900,
-            //       borderRadius: BorderRadius.circular(12),
-            //       border:
-            //       Border.all(color: Colors.grey.shade700),
-            //     ),
-            //     child: selectedPhoto == null
-            //         ? const Center(
-            //       child: Icon(
-            //         Icons.camera_alt_outlined,
-            //       ),
-            //     )
-            //         : ClipRRect(
-            //       borderRadius:
-            //       BorderRadius.circular(12),
-            //       child: Image.file(
-            //         selectedPhoto!,
-            //         fit: BoxFit.cover,
-            //       ),
-            //     ),
-            //   ),
-            // ),
-            //
-            // const SizedBox(height: 20),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: hasRated && !isSaving
-                    ? saveReview
-                    : null,
-                child: isSaving
-                    ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child:
-                  CircularProgressIndicator(
-                      strokeWidth: 2),
-                )
-                    : const Text('Publish review'),
+              // 🚀 PUBLISH
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: hasRated && !isSaving ? saveReview : null,
+                  child: isSaving
+                      ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                      : const Text('Publish review'),
+                ),
               ),
-            ),
-          ],
+            ],
+
+          ),
         ),
       ),
     );
   }
+
 
   @override
   void dispose() {
