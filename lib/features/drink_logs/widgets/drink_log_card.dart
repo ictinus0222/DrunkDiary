@@ -1,8 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:drunk_diary/features/drink_logs/models/drink_model_dto.dart';
 import 'package:flutter/material.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
+import '../models/drink_model_dto.dart';
 import 'log_detail_bottom_sheet.dart';
 
 class DrinkLogCard extends StatelessWidget {
@@ -10,13 +8,9 @@ class DrinkLogCard extends StatelessWidget {
 
   const DrinkLogCard({super.key, required this.log});
 
-  String get relativeTime {
-    return timeago.format(log.createdAt, locale: 'en');
-  }
-
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return GestureDetector(
       onTap: () {
         showModalBottomSheet(
           context: context,
@@ -27,323 +21,187 @@ class DrinkLogCard extends StatelessWidget {
           builder: (_) => LogDetailBottomSheet(log: log),
         );
       },
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: _buildContentByLogKind(),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFF121212),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _headerImage(),
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _titleRow(),
+                  const SizedBox(height: 6),
+                  _metaRow(),
+                  const SizedBox(height: 14),
+                  _caption(),
+                  const SizedBox(height: 14),
+                  _chipsRow(),
+                  const SizedBox(height: 14),
+                  _sharedRow(),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildContentByLogKind() {
-    switch (log.logKind) {
-      case LogKind.review:
-        return _reviewLayout();
-
-      case LogKind.log:
-      default:
-        return _logLayout();
-    }
-  }
-
-
-  // ---------------------------
-  // LOG LAYOUT
-  // ---------------------------
-  Widget _logLayout() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _photoIfExists(),
-
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _drinkThumbnail(),
-            const SizedBox(width: 10),
-
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'You drank ${log.alcoholName}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 4),
-
-                  Row(
-                    children: [
-                      Text(log.rating.toStringAsFixed(1)),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.star, size: 14),
-                    ],
-                  ),
-
-                  if (log.note != null && log.note!.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      log.note!,
-                      style: const TextStyle(
-                        fontStyle: FontStyle.italic,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-
-                  _sharedIndicator(),
-                ],
-              ),
-            ),
-
-            const SizedBox(width: 8),
-            _timeText(),
-          ],
-        ),
-      ],
-    );
-  }
-
-  // ---------------------------
-  // Review LAYOUT
-  // ---------------------------
-  Widget _reviewLayout() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _photoIfExists(),
-
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _drinkThumbnail(),
-            const SizedBox(width: 10),
-
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'You rated ${log.alcoholName}',
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        log.rating.toStringAsFixed(1),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.star, size: 16),
-                    ],
-                  ),
-
-                  if (log.note != null && log.note!.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      log.note!,
-                      style: const TextStyle(
-                        fontStyle: FontStyle.italic,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-
-                  _sharedIndicator(),
-                ],
-              ),
-            ),
-
-            _timeText(),
-          ],
-        ),
-      ],
-    );
-  }
-
-  // ---------------------------
-  // DRINK THUMBNAIL
-  // ---------------------------
-  Widget _drinkThumbnail() {
-    return FutureBuilder<DocumentSnapshot>(
-      future: FirebaseFirestore.instance
-          .collection('alcohols') // 👈 change if needed
-          .doc(log.alcoholId)
-          .get(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return _thumbnailPlaceholder();
-        }
-
-        if (!snapshot.hasData || !snapshot.data!.exists) {
-          return _thumbnailFallback();
-        }
-
-        final data = snapshot.data!.data() as Map<String, dynamic>;
-        final imageUrl = data['imageUrl'];
-
-        if (imageUrl == null || imageUrl.isEmpty) {
-          return _thumbnailFallback();
-        }
-
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Image.network(
-            imageUrl,
-            width: 48,
-            height: 48,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => _thumbnailFallback(),
-          ),
-        );
-      },
-    );
-  }
-
-
-  // ---------------------------
-  // SHARED LOG UI
-  // ---------------------------
-  Widget _sharedIndicator() {
-    if (!log.isShared || log.taggedUserIds.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 8),
-
-        Text(
-          'with ${log.taggedUserIds.length} people',
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.grey,
-          ),
-        ),
-
-        const SizedBox(height: 6),
-
-        Row(
-          children: log.taggedUserIds.map((uid) {
-            return Padding(
-              padding: const EdgeInsets.only(right: 6),
-              child: _userAvatar(uid),
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
-  Widget _userAvatar(String userId) {
-    return FutureBuilder<DocumentSnapshot>(
-      future: FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .get(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData || !snapshot.data!.exists) {
-          return _fallbackAvatar(userId);
-        }
-
-        final data = snapshot.data!.data() as Map<String, dynamic>;
-        final photoUrl = data['photoUrl'];
-
-        if (photoUrl == null || photoUrl.isEmpty) {
-          return _fallbackAvatar(userId);
-        }
-
-        return CircleAvatar(
-          radius: 14,
-          backgroundImage: NetworkImage(photoUrl),
-        );
-      },
-    );
-  }
-
-  Widget _fallbackAvatar(String userId) {
-    return CircleAvatar(
-      radius: 14,
-      backgroundColor: Colors.grey.shade300,
-      child: Text(
-        userId.substring(0, 1).toUpperCase(),
-        style: const TextStyle(fontSize: 12, color: Colors.black),
-      ),
-    );
-  }
-
-  // ---------------------------
-  // HELPERS
-  // ---------------------------
-  Widget _timeText() {
-    return Text(
-      timeago.format(log.createdAt),
-      style: const TextStyle(fontSize: 12, color: Colors.grey),
-    );
-  }
-
-  Widget _photoIfExists() {
+  // ----------------------------
+  // HEADER IMAGE
+  // ----------------------------
+  Widget _headerImage() {
     if (log.photoUrl == null || log.photoUrl!.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    return Column(
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      child: AspectRatio(
+        aspectRatio: 16 / 9,
+        child: Image.network(
+          log.photoUrl!,
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+
+  // ----------------------------
+  // TITLE + RATING
+  // ----------------------------
+  Widget _titleRow() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: AspectRatio(
-            aspectRatio: 4 / 5,
-            child: Image.network(
-              log.photoUrl!,
-              fit: BoxFit.cover,
+        Expanded(
+          child: Text(
+            log.alcoholName,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        Row(
+          children: List.generate(
+            5,
+                (index) => Icon(
+              index < log.rating.round()
+                  ? Icons.star
+                  : Icons.star_border,
+              color: Colors.amber,
+              size: 16,
+            ),
+          ),
+        ),
       ],
     );
   }
-  Widget _thumbnailPlaceholder() {
-    return Container(
-      width: 48,
-      height: 48,
-      decoration: BoxDecoration(
-        color: Colors.grey.shade800,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      alignment: Alignment.center,
-      child: const SizedBox(
-        width: 16,
-        height: 16,
-        child: CircularProgressIndicator(strokeWidth: 2),
+
+  // ----------------------------
+  // DATE + VISIBILITY
+  // ----------------------------
+  Widget _metaRow() {
+    return Text(
+      '${_formattedDate()} • Public',
+      style: TextStyle(
+        fontSize: 13,
+        color: Colors.grey.shade400,
       ),
     );
   }
 
-  Widget _thumbnailFallback() {
-    return Container(
-      width: 48,
-      height: 48,
-      decoration: BoxDecoration(
-        color: Colors.grey.shade800,
-        borderRadius: BorderRadius.circular(8),
+  String _formattedDate() {
+    return '${log.createdAt.day} '
+        '${_monthName(log.createdAt.month)}, '
+        '${log.createdAt.year}';
+  }
+
+  String _monthName(int month) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return months[month - 1];
+  }
+
+  // ----------------------------
+  // CAPTION
+  // ----------------------------
+  Widget _caption() {
+    if (log.note == null || log.note!.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Text(
+      log.note!,
+      style: TextStyle(
+        fontSize: 14,
+        color: Colors.grey.shade300,
       ),
-      alignment: Alignment.center,
-      child: const Icon(Icons.local_bar, color: Colors.grey),
     );
   }
 
+  // ----------------------------
+  // INFO CHIPS (model-safe)
+  // ----------------------------
+  Widget _chipsRow() {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        _chip(log.alcoholType),
+        _chip(log.logKind == LogKind.review ? 'Review' : 'Log'),
+      ],
+    );
+  }
+
+  Widget _chip(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade800,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 12,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  // ----------------------------
+  // SHARED USERS
+  // ----------------------------
+  Widget _sharedRow() {
+    if (!log.isShared || log.taggedUserIds.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Row(
+      children: [
+        const Icon(Icons.person_outline, size: 16, color: Colors.grey),
+        const SizedBox(width: 6),
+        Text(
+          'With ${log.taggedUserIds.length} people',
+          style: TextStyle(
+            fontSize: 13,
+            color: Colors.grey.shade400,
+          ),
+        ),
+      ],
+    );
+  }
 }
