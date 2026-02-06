@@ -16,7 +16,7 @@ class TimelineScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Timeline ⏳'),
+        title: const Text('Your Journey'),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
