@@ -45,9 +45,13 @@ Based on the onboarding flow and feature structure, the target users are individ
   - **Acceptance Criteria:** User uses a 0-5 slider, provides text, and an optional photo. Saves with `logKind: LogKind.review`. Uses a deterministic ID (`{userId}_{alcoholId}`) to prevent duplicates.
   - **Edge Cases:** Attempting to review the same drink twice overwrites the existing review.
 - **Diary (formerly User Timeline)**
-  - **Description:** Chronological feed of the user's previous logs, acting as the primary diary.
-  - **User Story:** As a user, I want to see my logs in order in my diary.
-  - **Acceptance Criteria:** Fetches `drink_logs` for `userId`, calculates Total, Avg Rating, and Favorite category dynamically.
+  - **Description:** Chronological feed of the user's previous logs, acting as the primary diary. Support for multiple view layouts:
+    - **Timeline Layout:** A list-based view showing full log cards with details (Note, Context, Tags).
+    - **Gallery Layout:** A grid-based view showing only closeups of the drink photos.
+  - **User Story:** As a user, I want to see my logs in order in my diary, and be able to switch to a visual gallery of my drinks.
+  - **Acceptance Criteria:** 
+    - Fetches `drink_logs` for `userId`, calculates Total, Avg Rating, and Favorite category dynamically.
+    - Includes a layout switcher button that toggles between Timeline and Gallery views.
   - **Edge Cases:** Empty state shows a prompt to "log your first drink".
 - **The Shelf**
   - **Description:** Aggregates all user logs and groups them by `alcoholId`.

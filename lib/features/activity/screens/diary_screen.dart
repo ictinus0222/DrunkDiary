@@ -4,6 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../drink_logs/widgets/drink_log_card.dart';
+import '../../drink_logs/widgets/log_detail_bottom_sheet.dart';
+import '../../alcohol/models/alcohol_model.dart';
+
+enum DiaryLayout { timeline, gallery }
 
 class DiaryScreen extends StatefulWidget {
   static const routeName = '/diary';
@@ -15,6 +19,7 @@ class DiaryScreen extends StatefulWidget {
 
 class _DiaryScreenState extends State<DiaryScreen> {
   String _selectedFilter = 'All';
+  DiaryLayout _currentLayout = DiaryLayout.timeline;
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +48,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
             final logs = allLogs.where((log) {
               if (_selectedFilter == 'All') return true;
               if (_selectedFilter == 'Logs') return log.logKind == LogKind.log;
-              if (_selectedFilter == 'Reviews')
+              if (_selectedFilter == 'Reviews') {
                 return log.logKind == LogKind.review;
+              }
               return true;
             }).toList();
 
@@ -57,15 +63,24 @@ class _DiaryScreenState extends State<DiaryScreen> {
                 const SizedBox(height: 16),
                 _FiltersRow(
                   selectedFilter: _selectedFilter,
+                  currentLayout: _currentLayout,
                   onFilterChanged: (filter) {
                     setState(() {
                       _selectedFilter = filter;
                     });
                   },
+                  onLayoutChanged: (layout) {
+                    setState(() {
+                      _currentLayout = layout;
+                    });
+                  },
                 ),
                 const SizedBox(height: 8),
                 Expanded(
-                  child: _DiaryList(logs: logs),
+                  child: _DiaryList(
+                    logs: logs,
+                    layout: _currentLayout,
+                  ),
                 ),
               ],
             );
@@ -213,11 +228,15 @@ class _StatCard extends StatelessWidget {
 
 class _FiltersRow extends StatelessWidget {
   final String selectedFilter;
+  final DiaryLayout currentLayout;
   final ValueChanged<String> onFilterChanged;
+  final ValueChanged<DiaryLayout> onLayoutChanged;
 
   const _FiltersRow({
     required this.selectedFilter,
+    required this.currentLayout,
     required this.onFilterChanged,
+    required this.onLayoutChanged,
   });
 
   @override
@@ -244,7 +263,21 @@ class _FiltersRow extends StatelessWidget {
             onTap: () => onFilterChanged('Reviews'),
           ),
           const Spacer(),
-          const Icon(Icons.grid_view, color: Colors.white),
+          IconButton(
+            onPressed: () {
+              onLayoutChanged(
+                currentLayout == DiaryLayout.timeline
+                    ? DiaryLayout.gallery
+                    : DiaryLayout.timeline,
+              );
+            },
+            icon: Icon(
+              currentLayout == DiaryLayout.timeline
+                  ? Icons.grid_view
+                  : Icons.view_agenda_outlined,
+              color: Colors.white,
+            ),
+          ),
         ],
       ),
     );
@@ -290,7 +323,12 @@ class _FilterChip extends StatelessWidget {
 
 class _DiaryList extends StatelessWidget {
   final List<DrinkLogModel> logs;
-  const _DiaryList({required this.logs});
+  final DiaryLayout layout;
+
+  const _DiaryList({
+    required this.logs,
+    required this.layout,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -303,12 +341,126 @@ class _DiaryList extends StatelessWidget {
       );
     }
 
+    if (layout == DiaryLayout.gallery) {
+      return GridView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 0.85,
+        ),
+        itemCount: logs.length,
+        itemBuilder: (context, index) {
+          return _GalleryItem(log: logs[index]);
+        },
+      );
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.only(bottom: 16),
       itemCount: logs.length,
       itemBuilder: (context, index) {
         return DrinkLogCard(log: logs[index]);
       },
+    );
+  }
+}
+
+class _GalleryItem extends StatelessWidget {
+  final DrinkLogModel log;
+  const _GalleryItem({required this.log});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        // reuse same detail view as card
+        showModalBottomSheet(
+          context: context,
+          useSafeArea: true,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          builder: (_) => LogDetailBottomSheet(log: log),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: Colors.grey.shade900,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: log.photoUrl != null && log.photoUrl!.isNotEmpty
+                  ? Image.network(
+                      log.photoUrl!,
+                      fit: BoxFit.cover,
+                    )
+                  : FutureBuilder<DocumentSnapshot>(
+                      future: FirebaseFirestore.instance
+                          .collection('alcohols')
+                          .doc(log.alcoholId)
+                          .get(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData && snapshot.data!.exists) {
+                          final alcohol =
+                              AlcoholModel.fromFirestore(snapshot.data!);
+                          return Image.network(
+                            alcohol.imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              color: Colors.grey.shade800,
+                              child: const Icon(Icons.local_bar,
+                                  color: Colors.white24),
+                            ),
+                          );
+                        }
+                        return Container(
+                          color: Colors.grey.shade800,
+                          child:
+                              const Center(child: CircularProgressIndicator()),
+                        );
+                      },
+                    ),
+            ),
+
+            // Gradient Overlay for visibility
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.4),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            // Title at bottom
+            Positioned(
+              bottom: 8,
+              left: 12,
+              right: 12,
+              child: Text(
+                log.alcoholName,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

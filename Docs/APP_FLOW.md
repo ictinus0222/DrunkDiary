@@ -107,8 +107,9 @@ AuthGate
 * **Screen:** `DiaryScreen`
   * **Route:** `/diary`
   * **Access:** Authenticated
-  * **Purpose:** Fetches user's `drink_logs` and displays a chronological feed with summary stats.
-  * **State Variants:** Loading (CircularProgressIndicator), Empty ("Your first drink memory is waiting").
+  * **Purpose:** Fetches user's `drink_logs` and displays them in a customizable diary view. Includes summary stats and a layout switcher.
+  * **State Variants:** Loading (CircularProgressIndicator), Empty ("Your first drink memory is waiting"), Layouts (Timeline vs. Gallery).
+  * **Actions Available:** Switch between Timeline Layout (detailed list) and Gallery Layout (photo grid).
 * **Screen:** `SearchScreen`
   * **Route:** `/search`
   * **Access:** Authenticated
