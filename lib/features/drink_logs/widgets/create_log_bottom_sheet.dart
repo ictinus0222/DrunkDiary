@@ -165,45 +165,93 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
   // =====================
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color(0xFF141414), // Dark background matching theme
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       padding: EdgeInsets.fromLTRB(
+        24,
         16,
-        16,
-        16,
-        MediaQuery.of(context).viewInsets.bottom + 16,
+        24,
+        MediaQuery.of(context).viewInsets.bottom + 24,
       ),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
+            // Drag handle pill
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 24),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade800,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
             Text(
               'Log ${widget.alcohol.name}',
-              style: Theme.of(context).textTheme.titleLarge,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
             ),
 
             const SizedBox(height: 6),
-            const Text(
+            Text(
               'A quick moment — only you can see this.',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade400),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
             // 👍 / 👎
             const Text(
               'Your take',
-              style: TextStyle(fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
                     icon: Icon(
-                      Icons.thumb_up,
-                      color: liked == true ? Colors.green : null,
+                      Icons.thumb_up_alt_outlined,
+                      color:
+                          liked == true ? Colors.green : Colors.grey.shade400,
+                      size: 20,
                     ),
-                    label: const Text('Like'),
+                    label: Text(
+                      'Like',
+                      style: TextStyle(
+                        color:
+                            liked == true ? Colors.green : Colors.grey.shade400,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      side: BorderSide(
+                        color:
+                            liked == true ? Colors.green : Colors.grey.shade800,
+                        width: 1.5,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      backgroundColor: liked == true
+                          ? Colors.green.withOpacity(0.1)
+                          : Colors.transparent,
+                    ),
                     onPressed: () => setState(() => liked = true),
                   ),
                 ),
@@ -211,86 +259,170 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
                 Expanded(
                   child: OutlinedButton.icon(
                     icon: Icon(
-                      Icons.thumb_down,
-                      color: liked == false ? Colors.red : null,
+                      Icons.thumb_down_alt_outlined,
+                      color: liked == false ? Colors.red : Colors.grey.shade400,
+                      size: 20,
                     ),
-                    label: const Text('Dislike'),
+                    label: Text(
+                      'Dislike',
+                      style: TextStyle(
+                        color:
+                            liked == false ? Colors.red : Colors.grey.shade400,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      side: BorderSide(
+                        color:
+                            liked == false ? Colors.red : Colors.grey.shade800,
+                        width: 1.5,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      backgroundColor: liked == false
+                          ? Colors.red.withOpacity(0.1)
+                          : Colors.transparent,
+                    ),
                     onPressed: () => setState(() => liked = false),
                   ),
                 ),
               ],
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
             // NOTE
-            TextButton.icon(
-              icon: const Icon(Icons.edit_note),
-              label: const Text('Add a note'),
-              onPressed: () => setState(() => showNoteField = !showNoteField),
+            InkWell(
+              onTap: () => setState(() => showNoteField = !showNoteField),
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      showNoteField ? Icons.close : Icons.edit_note,
+                      color: Colors.amber,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      showNoteField ? 'Remove note' : 'Add a note',
+                      style: const TextStyle(
+                        color: Colors.amber,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
 
             if (showNoteField) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               TextField(
                 controller: noteController,
                 maxLines: 3,
+                style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: 'What made this moment memorable?',
+                  hintStyle: TextStyle(color: Colors.grey.shade600),
                   filled: true,
+                  fillColor: const Color(0xFF1E1E1E),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                    borderSide: BorderSide(color: Colors.grey.shade800),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide:
+                        const BorderSide(color: Colors.amber, width: 1.5),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade800),
                   ),
                 ),
               ),
             ],
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
             // PHOTO
             const Text(
               'Add a photo',
-              style: TextStyle(fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             GestureDetector(
               onTap: () => pickPhoto(context),
               child: Container(
-                height: 120,
+                height: 160,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade900,
+                  color: const Color(0xFF1E1E1E),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade700),
+                  border: Border.all(color: Colors.grey.shade800),
+                  image: selectedPhoto != null
+                      ? DecorationImage(
+                          image: FileImage(selectedPhoto!),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                 ),
                 child: selectedPhoto == null
-                    ? const Center(
-                        child: Icon(Icons.camera_alt_outlined),
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.camera_alt_outlined,
+                              size: 32, color: Colors.grey.shade500),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Tap to upload',
+                            style: TextStyle(
+                                color: Colors.grey.shade500, fontSize: 13),
+                          ),
+                        ],
                       )
-                    : ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.file(
-                          selectedPhoto!,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
+                    : null,
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 32),
 
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: isSaving ? null : saveLog,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.amber,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  disabledBackgroundColor: Colors.amber.withOpacity(0.5),
+                ),
                 child: isSaving
                     ? const SizedBox(
                         height: 20,
                         width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.black),
                       )
-                    : const Text('Save log'),
+                    : const Text(
+                        'Save log',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
               ),
             ),
           ],

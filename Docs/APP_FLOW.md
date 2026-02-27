@@ -123,6 +123,10 @@ AuthGate
   * **Access:** Authenticated
   * **Purpose:** Aggregates, counts, and averages the user's logs grouped by alcohol.
   * **State Variants:** Loading (CircularProgressIndicator), Empty ("Your shelf is empty").
+* **Screen:** `ProfileScreen`
+  * **Route:** `/profile` (if any)
+  * **Access:** Authenticated
+  * **Purpose:** Displays the user's personal profile including basic info (avatar, username), dynamic statistics (Drinks Tried, Favorite Type, Top Rated), a horizontal "Public Shelf" showcasing recently logged alcohols, and a "Recent Activity" vertical feed of individual drink logs. Contains a settings action in the app bar.
 
 ## 5. Decision Points (Derived from Conditionals)
 

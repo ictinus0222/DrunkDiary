@@ -105,9 +105,7 @@ class AlcoholDetailScreen extends StatelessWidget {
         context: context,
         isScrollControlled: true,
         useSafeArea: true,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-        ),
+        backgroundColor: Colors.transparent,
         builder: (_) => CreateReviewBottomSheet(
           alcohol: alcohol,
         ),

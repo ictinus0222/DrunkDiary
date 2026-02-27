@@ -14,8 +14,25 @@ class ProfileScreen extends StatelessWidget {
     final repository = ProfileRepository();
 
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: const Text('Profile',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
+        backgroundColor: Colors.black,
+        elevation: 0,
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade900,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.settings, color: Colors.grey),
+              onPressed: () {},
+            ),
+          ),
+        ],
       ),
       body: FutureBuilder<ProfileDataModel>(
         future: repository.fetchUserProfile(userId),
