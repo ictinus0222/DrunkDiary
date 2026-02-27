@@ -63,6 +63,7 @@ class _ReviewEditorScreenState extends State<ReviewEditorScreen> {
 
       'username': currentUsername,
       'rating': _rating,
+      'isLiked': null,
       'note': _noteController.text.trim(),
       'logKind': dto.LogKind.review.name,
       'updatedAt': Timestamp.now(),

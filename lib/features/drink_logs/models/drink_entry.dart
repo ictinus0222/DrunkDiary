@@ -10,7 +10,8 @@ abstract class DrinkEntry {
   final String alcoholName;
   final String alcoholType;
 
-  final double rating;
+  final double? rating;
+  final bool? isLiked;
   final String? note;
 
   final LogKind logKind;
@@ -28,7 +29,8 @@ abstract class DrinkEntry {
     this.userPhotoUrl,
     required this.alcoholName,
     required this.alcoholType,
-    required this.rating,
+    this.rating,
+    this.isLiked,
     this.note,
     required this.logKind,
     required this.createdAt,

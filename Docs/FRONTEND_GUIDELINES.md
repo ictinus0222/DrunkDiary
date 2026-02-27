@@ -55,6 +55,9 @@ No explicit custom shadow scales or elevation configurations identified in the i
 
 ### Cards
 *   Implemented primarily using `Container` widgets wrapped with `decoration: BoxDecoration(color: Colors.grey.shade900, borderRadius: BorderRadius.circular(12/16))`.
+*   **Card Differentiation (Logs vs Reviews):** 
+    *   Log Cards: Subtle grey border or flatter background (`Colors.grey.shade900`). Focus on icon indicator (thumbs up/down).
+    *   Review Cards: Slightly elevated or distinct subtle accent (e.g. faint amber border/gradient or different shade of grey `Colors.grey.shade800`) to highlight a formal rating constraint.
 
 ### Bottom Navigation
 *   **BottomNavigationBar:** Fixed type (`BottomNavigationBarType.fixed`) containing exactly 5 tabs.

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../../drink_logs/models/drink_model_dto.dart';
@@ -31,32 +30,30 @@ class PublicLogTile extends StatelessWidget {
                           : null,
                       child: log.userPhotoUrl == null
                           ? Text(
-                        log.username.isNotEmpty
-                            ? log.username[0].toUpperCase()
-                            : '?',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: Colors.black,
-                        ),
-                      )
+                              log.username.isNotEmpty
+                                  ? log.username[0].toUpperCase()
+                                  : '?',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                                color: Colors.black,
+                              ),
+                            )
                           : null,
                     ),
-
-
                     const SizedBox(width: 8),
-
                     Text(
                       log.username,
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ],
                 ),
-
-                Text('⭐ ${log.rating.toStringAsFixed(1)}'),
+                if (log.logKind == LogKind.review)
+                  Text('⭐ ${(log.rating ?? 0.0).toStringAsFixed(1)}')
+                else
+                  Text(log.isLiked == true ? '👍' : '👎'),
               ],
             ),
-
 
             if (log.note != null && log.note!.isNotEmpty) ...[
               const SizedBox(height: 6),

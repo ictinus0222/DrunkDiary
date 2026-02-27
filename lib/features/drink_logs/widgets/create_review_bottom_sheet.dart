@@ -22,13 +22,11 @@ class CreateReviewBottomSheet extends StatefulWidget {
       _CreateReviewBottomSheetState();
 }
 
-class _CreateReviewBottomSheetState
-    extends State<CreateReviewBottomSheet> {
+class _CreateReviewBottomSheetState extends State<CreateReviewBottomSheet> {
   double rating = 0;
   bool hasRated = false;
 
-  final TextEditingController reviewController =
-  TextEditingController();
+  final TextEditingController reviewController = TextEditingController();
 
   bool isSaving = false;
 
@@ -62,8 +60,7 @@ class _CreateReviewBottomSheetState
                   maxHeight: 1350,
                 );
                 if (picked != null) {
-                  setState(() =>
-                  selectedPhoto = File(picked.path));
+                  setState(() => selectedPhoto = File(picked.path));
                 }
               },
             ),
@@ -79,8 +76,7 @@ class _CreateReviewBottomSheetState
                   maxHeight: 1350,
                 );
                 if (picked != null) {
-                  setState(() =>
-                  selectedPhoto = File(picked.path));
+                  setState(() => selectedPhoto = File(picked.path));
                 }
               },
             ),
@@ -117,14 +113,14 @@ class _CreateReviewBottomSheetState
         alcoholName: widget.alcohol.name,
         alcoholType: widget.alcohol.type,
         rating: rating,
+        isLiked: null,
         note: reviewController.text.trim(),
         logKind: LogKind.review,
         createdAt: DateTime.now(),
       );
 
-      final ref = FirebaseFirestore.instance
-          .collection('drink_logs')
-          .doc(reviewDocId);
+      final ref =
+          FirebaseFirestore.instance.collection('drink_logs').doc(reviewDocId);
 
       // ✅ CREATE OR OVERWRITE (idempotent)
       await ref.set(
@@ -150,11 +146,10 @@ class _CreateReviewBottomSheetState
     }
   }
 
-
   Future<void> _uploadPhoto(
-      DocumentReference ref,
-      String userId,
-      ) async {
+    DocumentReference ref,
+    String userId,
+  ) async {
     try {
       setState(() => isUploadingPhoto = true);
 
@@ -259,21 +254,19 @@ class _CreateReviewBottomSheetState
                   onPressed: hasRated && !isSaving ? saveReview : null,
                   child: isSaving
                       ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                       : const Text('Publish review'),
                 ),
               ),
             ],
-
           ),
         ),
       ),
     );
   }
-
 
   @override
   void dispose() {

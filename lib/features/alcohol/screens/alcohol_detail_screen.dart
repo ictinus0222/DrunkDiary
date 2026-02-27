@@ -31,26 +31,50 @@ class AlcoholDetailScreen extends StatelessWidget {
             snapshot.docs.map(DrinkLogModel.fromFirestore).toList());
   }
 
-  Future<(int, double)> _fetchPersonalStats() async {
+  Stream<(int, double, int, int)> _advancedStatsStream() {
     final user = FirebaseAuth.instance.currentUser!;
-    final snapshot = await FirebaseFirestore.instance
+    return FirebaseFirestore.instance
         .collection('drink_logs')
-        .where('userId', isEqualTo: user.uid)
         .where('alcoholId', isEqualTo: alcohol.id)
-        .get();
+        .snapshots()
+        .map((snapshot) {
+      final docs = snapshot.docs;
+      if (docs.isEmpty) return (0, 0.0, 0, 0);
 
-    final docs = snapshot.docs;
-    if (docs.isEmpty) return (0, 0.0);
+      final ratingDocs = docs.where((d) => d['logKind'] == 'review').toList();
+      double avgRating = 0.0;
+      if (ratingDocs.isNotEmpty) {
+        final ratings = ratingDocs
+            .map((doc) => (doc.data()['rating'] as num?)?.toDouble() ?? 0.0)
+            .toList();
+        avgRating = ratings.reduce((a, b) => a + b) / ratings.length;
+      }
 
-    final ratingDocs = docs.where((d) => d['logKind'] == 'review').toList();
-    double avgRating = 0.0;
-    if (ratingDocs.isNotEmpty) {
-      final ratings =
-          ratingDocs.map((doc) => (doc['rating'] as num).toDouble()).toList();
-      avgRating = ratings.reduce((a, b) => a + b) / ratings.length;
-    }
+      final personalLogs = docs.where((d) => d['userId'] == user.uid).toList();
 
-    return (docs.length, avgRating);
+      int likes = 0;
+      int dislikes = 0;
+      final generalLogs = docs.where((d) => d['logKind'] == 'log').toList();
+      for (var doc in generalLogs) {
+        final data = doc.data() as Map<String, dynamic>? ?? {};
+        final bool? isLiked = data.containsKey('isLiked')
+            ? data['isLiked'] as bool?
+            : ((data['rating'] as num?)?.toDouble() ?? 0.0) >= 1.0;
+
+        if (isLiked == true) {
+          likes++;
+        } else if (isLiked == false) {
+          dislikes++;
+        }
+      }
+
+      int likeRatio = 0;
+      if (likes + dislikes > 0) {
+        likeRatio = (likes * 100 / (likes + dislikes)).round();
+      }
+
+      return (docs.length, avgRating, personalLogs.length, likeRatio);
+    });
   }
 
   Future<void> onWriteReviewPressed(BuildContext context) async {
@@ -147,11 +171,16 @@ class AlcoholDetailScreen extends StatelessWidget {
               _HeroImage(alcohol: alcohol),
               const SizedBox(height: 24),
               _ProductInfo(alcohol: alcohol),
-              FutureBuilder<(int, double)>(
-                future: _fetchPersonalStats(),
+              StreamBuilder<(int, double, int, int)>(
+                stream: _advancedStatsStream(),
                 builder: (context, statsSnapshot) {
-                  final (logCount, avgRating) = statsSnapshot.data ?? (0, 0.0);
-                  return _WineStats(logCount: logCount, avgRating: avgRating);
+                  final (totalLogs, avgRating, personalLogs, likeRatio) =
+                      statsSnapshot.data ?? (0, 0.0, 0, 0);
+                  return _WineStats(
+                      totalLogs: totalLogs,
+                      personalLogs: personalLogs,
+                      avgRating: avgRating,
+                      likeRatio: likeRatio);
                 },
               ),
               _AboutSection(alcohol: alcohol),
@@ -315,10 +344,17 @@ class _ProductInfo extends StatelessWidget {
 }
 
 class _WineStats extends StatelessWidget {
-  final int logCount;
+  final int totalLogs;
+  final int personalLogs;
   final double avgRating;
+  final int likeRatio;
 
-  const _WineStats({required this.logCount, required this.avgRating});
+  const _WineStats({
+    required this.totalLogs,
+    required this.personalLogs,
+    required this.avgRating,
+    required this.likeRatio,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -330,7 +366,7 @@ class _WineStats extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('User reviews',
+              const Text('Community Stats',
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -364,12 +400,14 @@ class _WineStats extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _StatCol(label: 'Total Logs', value: logCount.toString()),
+                _StatCol(label: 'Total Logs', value: totalLogs.toString()),
+                Container(height: 32, width: 1, color: Colors.grey.shade700),
+                _StatCol(label: 'Your Logs', value: personalLogs.toString()),
                 Container(height: 32, width: 1, color: Colors.grey.shade700),
                 _StatCol(
-                    label: 'Avg Rating',
-                    value: avgRating.toStringAsFixed(1),
-                    icon: Icons.star),
+                    label: 'Like Ratio',
+                    value: '$likeRatio%',
+                    icon: Icons.thumb_up_alt_outlined),
               ],
             ),
           ),

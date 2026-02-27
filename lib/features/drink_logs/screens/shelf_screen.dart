@@ -26,65 +26,71 @@ class _ShelfScreenState extends State<ShelfScreen> {
     fetchShelfData();
   }
 
-Future<void> fetchShelfData() async {
-  final user = FirebaseAuth.instance.currentUser;
-  if (user == null) return;
+  Future<void> fetchShelfData() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
 
-  final currentUserId = user.uid;
+    final currentUserId = user.uid;
 
-  // Fetch all logs from the current user (memory + diary)
-  final logsSnapshot = await FirebaseFirestore.instance
-  .collection('drink_logs')
-  .where('userId', isEqualTo: currentUserId)
-  .get();
+    // Fetch all logs from the current user (memory + diary)
+    final logsSnapshot = await FirebaseFirestore.instance
+        .collection('drink_logs')
+        .where('userId', isEqualTo: currentUserId)
+        .get();
 
-  // Group logs by alcoholId
-  final Map<String, List<QueryDocumentSnapshot>> groupedLogs = {};
+    // Group logs by alcoholId
+    final Map<String, List<QueryDocumentSnapshot>> groupedLogs = {};
 
-  for (var log in logsSnapshot.docs) {
-    final alcoholId =  log['alcoholId'];
-    groupedLogs.putIfAbsent(alcoholId, () => []).add(log);
+    for (var log in logsSnapshot.docs) {
+      final alcoholId = log['alcoholId'];
+      groupedLogs.putIfAbsent(alcoholId, () => []).add(log);
+    }
+
+    // Fetch alcohol docs + compute meta
+    List<AlcoholModel> alcohols = [];
+    Map<String, int> counts = {};
+    Map<String, double> ratings = {};
+
+    for (var entry in groupedLogs.entries) {
+      final alcoholId = entry.key;
+      final logs = entry.value;
+
+      final alcoholDoc = await FirebaseFirestore.instance
+          .collection('alcohols')
+          .doc(alcoholId)
+          .get();
+
+      if (!alcoholDoc.exists) continue;
+
+      alcohols.add(AlcoholModel.fromFirestore(alcoholDoc));
+
+      counts[alcoholId] = logs.length;
+
+      final reviewLogs = logs
+          .where((l) =>
+              (l.data() as Map<String, dynamic>?)?['logKind'] == 'review')
+          .toList();
+      final ratingsList = reviewLogs
+          .map((l) =>
+              ((l.data() as Map<String, dynamic>?)?['rating'] as num?)
+                  ?.toDouble() ??
+              0.0)
+          .toList();
+
+      final totalRating =
+          ratingsList.isEmpty ? 0.0 : ratingsList.reduce((a, b) => a + b);
+
+      ratings[alcoholId] =
+          reviewLogs.isEmpty ? 0.0 : totalRating / reviewLogs.length;
+    }
+
+    setState(() {
+      shelfAlcohols = alcohols;
+      logCounts = counts;
+      avgRatings = ratings;
+      isLoading = false;
+    });
   }
-
-  // Fetch alcohol docs + compute meta
-  List<AlcoholModel> alcohols = [];
-  Map<String, int> counts = {};
-  Map<String, double> ratings = {};
-
-  for (var entry in groupedLogs.entries) {
-    final alcoholId = entry.key;
-    final logs = entry.value;
-
-    final alcoholDoc = await FirebaseFirestore.instance
-    .collection('alcohols')
-    .doc(alcoholId)
-    .get();
-
-    if (!alcoholDoc.exists) continue;
-
-    alcohols.add(AlcoholModel.fromFirestore(alcoholDoc));
-
-    counts[alcoholId] = logs.length;
-
-    final ratingsList = logs
-        .map((l) => (l['rating'] ?? 0).toDouble() ?? 0)
-        .toList();
-
-    final totalRating = ratingsList.isEmpty
-        ? 0
-        : ratingsList.reduce((a, b) => a + b);
-
-
-    ratings[alcoholId] = totalRating / logs.length;
-  }
-
-  setState(() {
-    shelfAlcohols = alcohols;
-    logCounts = counts;
-    avgRatings = ratings;
-    isLoading = false;
-  });
-}
 
   @override
   Widget build(BuildContext context) {
@@ -96,28 +102,27 @@ Future<void> fetchShelfData() async {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : shelfAlcohols.isEmpty
-          ? const Center(
-        child: Text("Your shelf is empty 🍻"),
-      )
-          : GridView.builder(
-        padding: const EdgeInsets.all(12),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          childAspectRatio: 0.7,
-        ),
-        itemCount: shelfAlcohols.length,
-        itemBuilder: (context, index) {
-          final alcohol = shelfAlcohols[index];
-          final alcoholId = alcohol.id;
+              ? const Center(
+                  child: Text("Your shelf is empty 🍻"),
+                )
+              : GridView.builder(
+                  padding: const EdgeInsets.all(12),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    childAspectRatio: 0.7,
+                  ),
+                  itemCount: shelfAlcohols.length,
+                  itemBuilder: (context, index) {
+                    final alcohol = shelfAlcohols[index];
+                    final alcoholId = alcohol.id;
 
-          return ShelfCard(
-            alcohol: alcohol,
-            logCount: logCounts[alcoholId] ?? 0,
-            avgRating: avgRatings[alcoholId] ?? 0,
-          );
-        },
-      ),
+                    return ShelfCard(
+                      alcohol: alcohol,
+                      logCount: logCounts[alcoholId] ?? 0,
+                      avgRating: avgRatings[alcoholId] ?? 0,
+                    );
+                  },
+                ),
     );
   }
-
 }

@@ -60,9 +60,9 @@ Based on the onboarding flow and feature structure, the target users are individ
   - **User Story:** As a user, I can search for a specific "Whisky" or other alcohol.
   - **Acceptance Criteria:** Queries `alcohols` collection and displays a list of "Alcohols".
 - **Alcohol Details**
-  - **Description:** Displays alcohol information and personal stats.
-  - **User Story:** As a user, I can view details of a drink and see my rating.
-  - **Acceptance Criteria:** Displays alcohol information. Exposes the "LOG" and "REVIEW" action buttons.
+  - **Description:** Displays alcohol information, personal logs, and global community stats.
+  - **User Story:** As a user, I can view details of a drink, see my personal logs, and view community statistics like total global logs, global average rating, and a global like ratio.
+  - **Acceptance Criteria:** Queries all logs for the specified alcohol to calculate global total logs, personal total logs, average community rating, and the global like-to-dislike ratio. Exposes logging actions.
 
 ### P2 (Minor or Utility Features Already Present)
 - **Diary Timeline:** A specialized timeline view querying `drink_logs` specifically for `logType: 'diary'`.

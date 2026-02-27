@@ -103,11 +103,8 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
         userPhotoUrl: userDoc['photoUrl'],
         alcoholName: widget.alcohol.name,
         alcoholType: widget.alcohol.type,
-        rating: liked == true
-            ? 1
-            : liked == false
-                ? 0
-                : 0,
+        rating: null,
+        isLiked: liked,
         note: noteController.text.isNotEmpty ? noteController.text : null,
         logKind: LogKind.log,
         createdAt: DateTime.now(),

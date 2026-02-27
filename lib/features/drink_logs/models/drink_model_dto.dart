@@ -14,7 +14,8 @@ class DrinkLogModel {
   final String alcoholName;
   final String alcoholType;
 
-  final double rating;
+  final double? rating;
+  final bool? isLiked;
   final String? note;
 
   final LogKind logKind;
@@ -33,7 +34,8 @@ class DrinkLogModel {
     this.userPhotoUrl,
     required this.alcoholName,
     required this.alcoholType,
-    required this.rating,
+    this.rating,
+    this.isLiked,
     this.note,
     required this.logKind,
     required this.createdAt,
@@ -59,7 +61,8 @@ class DrinkLogModel {
       userPhotoUrl: data['userPhotoUrl'] as String?,
       alcoholName: data['alcoholName'] as String? ?? 'Unknown drink',
       alcoholType: data['alcoholType'] as String? ?? 'unknown',
-      rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
+      rating: (data['rating'] as num?)?.toDouble(),
+      isLiked: data['isLiked'] as bool?,
       note: data['note'] as String?,
       logKind: data['logKind'] == 'review' ? LogKind.review : LogKind.log,
       createdAt:
@@ -79,6 +82,7 @@ class DrinkLogModel {
       'alcoholName': alcoholName,
       'alcoholType': alcoholType,
       'rating': rating,
+      'isLiked': isLiked,
       'note': note,
       'logKind': logKind.name,
       'createdAt': Timestamp.fromDate(createdAt),
@@ -93,6 +97,7 @@ class DrinkLogModel {
     String? username,
     String? userPhotoUrl,
     double? rating,
+    bool? isLiked,
     String? note,
     String? visibility,
   }) {
@@ -105,6 +110,7 @@ class DrinkLogModel {
       alcoholName: alcoholName,
       alcoholType: alcoholType,
       rating: rating ?? this.rating,
+      isLiked: isLiked ?? this.isLiked,
       note: note ?? this.note,
       logKind: logKind,
       createdAt: createdAt,

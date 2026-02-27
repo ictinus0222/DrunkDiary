@@ -13,8 +13,7 @@ class LogDetailBottomSheet extends StatefulWidget {
   });
 
   @override
-  State<LogDetailBottomSheet> createState() =>
-      _LogDetailBottomSheetState();
+  State<LogDetailBottomSheet> createState() => _LogDetailBottomSheetState();
 }
 
 class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
@@ -101,27 +100,21 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
             fontWeight: FontWeight.bold,
           ),
         ),
-
         const SizedBox(height: 4),
-
         Text(
           widget.log.alcoholType,
           style: const TextStyle(color: Colors.grey),
         ),
-
         const SizedBox(height: 16),
-
         Row(
           children: [
             Icon(
-              widget.log.rating >= 1
-                  ? Icons.thumb_up
-                  : Icons.thumb_down,
+              widget.log.isLiked == true ? Icons.thumb_up : Icons.thumb_down,
               size: 22,
             ),
             const SizedBox(width: 6),
             Text(
-              widget.log.rating >= 1 ? 'Liked' : 'Didn’t like',
+              widget.log.isLiked == true ? 'Liked' : 'Didn’t like',
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -129,11 +122,8 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
             ),
           ],
         ),
-
         const SizedBox(height: 16),
-
-        if (widget.log.note != null &&
-            widget.log.note!.isNotEmpty)
+        if (widget.log.note != null && widget.log.note!.isNotEmpty)
           Text(
             widget.log.note!,
             style: const TextStyle(
@@ -141,13 +131,9 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
               fontStyle: FontStyle.italic,
             ),
           ),
-
         const SizedBox(height: 24),
-
         _timestamp(),
-
         const SizedBox(height: 16),
-
         _deleteAction(),
       ],
     );
@@ -168,15 +154,13 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
             fontWeight: FontWeight.w600,
           ),
         ),
-
         const SizedBox(height: 12),
-
         Row(
           children: [
             const Icon(Icons.star, size: 24),
             const SizedBox(width: 6),
             Text(
-              widget.log.rating.toStringAsFixed(1),
+              (widget.log.rating ?? 0.0).toStringAsFixed(1),
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -184,20 +168,15 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
             ),
           ],
         ),
-
         const SizedBox(height: 20),
-
-        if (widget.log.note != null &&
-            widget.log.note!.isNotEmpty)
+        if (widget.log.note != null && widget.log.note!.isNotEmpty)
           Text(
             widget.log.note!,
             style: const TextStyle(
               fontSize: 16,
             ),
           ),
-
         const SizedBox(height: 24),
-
         const Text(
           'This review is public.',
           style: TextStyle(
@@ -205,13 +184,9 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
             color: Colors.grey,
           ),
         ),
-
         const SizedBox(height: 16),
-
         _timestamp(),
-
         const SizedBox(height: 16),
-
         _deleteAction(),
       ],
     );

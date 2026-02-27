@@ -94,12 +94,13 @@ class _StatsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final total = logs.length;
 
-    final ratedLogs = logs
-        .toList(); // Fixed dead code warning. l.rating is double, not double?
-    final double? avgRating = ratedLogs.isEmpty
+    final reviewLogs = logs
+        .where((l) => l.logKind == LogKind.review && l.rating != null)
+        .toList();
+    final double? avgRating = reviewLogs.isEmpty
         ? null
-        : ratedLogs.map((l) => l.rating).reduce((a, b) => a + b) /
-            ratedLogs.length;
+        : reviewLogs.map((l) => l.rating!).reduce((a, b) => a + b) /
+            reviewLogs.length;
 
     final favorite = _getFavoriteCategory(logs);
 

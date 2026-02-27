@@ -24,7 +24,15 @@ class DrinkLogCard extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFF121212),
+          color: log.logKind == LogKind.review
+              ? Colors.grey.shade900
+              : const Color(0xFF121212),
+          border: Border.all(
+            color: log.logKind == LogKind.review
+                ? Colors.amber.withOpacity(0.3)
+                : Colors.grey.shade800,
+            width: 1,
+          ),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
@@ -89,16 +97,25 @@ class DrinkLogCard extends StatelessWidget {
             ),
           ),
         ),
-        Row(
-          children: List.generate(
-            5,
-            (index) => Icon(
-              index < log.rating.round() ? Icons.star : Icons.star_border,
-              color: Colors.amber,
-              size: 16,
+        if (log.logKind == LogKind.review)
+          Row(
+            children: List.generate(
+              5,
+              (index) => Icon(
+                index < (log.rating?.round() ?? 0)
+                    ? Icons.star
+                    : Icons.star_border,
+                color: Colors.amber,
+                size: 16,
+              ),
             ),
+          )
+        else
+          Icon(
+            log.isLiked == true ? Icons.thumb_up : Icons.thumb_down,
+            color: log.isLiked == true ? Colors.green : Colors.red,
+            size: 20,
           ),
-        ),
       ],
     );
   }

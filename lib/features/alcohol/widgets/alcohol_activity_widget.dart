@@ -50,12 +50,13 @@ class AlcoholActivityWidget extends StatelessWidget {
 
         // 📊 Stats
         final logCount = logs.length;
-        final ratedLogs = logs
-            .toList(); // Fixed dead code warning. l.rating is double, not double?
-        final avgRating = ratedLogs.isEmpty
+        final reviewLogs = logs
+            .where((l) => l.logKind == LogKind.review && l.rating != null)
+            .toList();
+        final avgRating = reviewLogs.isEmpty
             ? 0.0
-            : ratedLogs.map((l) => l.rating).reduce((a, b) => a + b) /
-                ratedLogs.length;
+            : reviewLogs.map((l) => l.rating!).reduce((a, b) => a + b) /
+                reviewLogs.length;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,7 +99,9 @@ class AlcoholActivityWidget extends StatelessWidget {
 
                 return ListTile(
                   title: Text(
-                    "Rated ${log.rating.toStringAsFixed(1)} ★",
+                    log.logKind == LogKind.review
+                        ? "Rated ${(log.rating ?? 0.0).toStringAsFixed(1)} ★"
+                        : "Logged (${log.isLiked == true ? '👍' : '👎'})",
                   ),
                   subtitle: log.note != null && log.note!.isNotEmpty
                       ? Text(
