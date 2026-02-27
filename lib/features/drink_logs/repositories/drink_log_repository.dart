@@ -40,7 +40,7 @@ class DrinkLogRepository {
   }
 
   // ============================
-  // 📝 USER LOGS (PRIVATE TIMELINE)
+  // 📝 USER LOGS (PRIVATE DIARY)
   // ============================
   Future<List<DrinkLogModel>> fetchLogsForUser(
     String userId,

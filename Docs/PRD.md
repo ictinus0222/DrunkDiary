@@ -44,9 +44,9 @@ Based on the onboarding flow and feature structure, the target users are individ
   - **User Story:** As a user, I want to review an alcohol so I can see my rating later.
   - **Acceptance Criteria:** User uses a 0-5 slider, provides text, and an optional photo. Saves with `logKind: LogKind.review`. Uses a deterministic ID (`{userId}_{alcoholId}`) to prevent duplicates.
   - **Edge Cases:** Attempting to review the same drink twice overwrites the existing review.
-- **User Timeline**
-  - **Description:** Chronological feed of the user's previous logs.
-  - **User Story:** As a user, I want to see my logs in order.
+- **Diary (formerly User Timeline)**
+  - **Description:** Chronological feed of the user's previous logs, acting as the primary diary.
+  - **User Story:** As a user, I want to see my logs in order in my diary.
   - **Acceptance Criteria:** Fetches `drink_logs` for `userId`, calculates Total, Avg Rating, and Favorite category dynamically.
   - **Edge Cases:** Empty state shows a prompt to "log your first drink".
 - **The Shelf**
@@ -68,11 +68,10 @@ Based on the onboarding flow and feature structure, the target users are individ
   - **Acceptance Criteria:** Queries all logs for the specified alcohol to calculate global total logs, personal total logs, average community rating, and the global like-to-dislike ratio. Exposes logging actions.
 
 ### P2 (Minor or Utility Features Already Present)
-- **Diary Timeline:** A specialized timeline view querying `drink_logs` specifically for `logType: 'diary'`.
 
 ## 7. Explicitly OUT OF SCOPE (Critical Section)
 The following are NOT implemented in the codebase:
-- **Timeline Filtering:** The Timeline screen has UI chips for "All", "Public", and "Private", but they are placeholder components without backing query logic.
+- **Timeline Filtering:** The Diary screen has UI chips for "All", "Public", and "Private", but they are placeholder components without backing query logic.
 - **Alternative Authentication:** Apple Sign-In, Email/Password, and Phone Auth are not present. Only Google Auth is implemented.
 - **Dynamic Legal Age Limits:** The system currently hardcodes the legal age constraint to 18 worldwide. It does not check country-specific limits.
 - **Log Management:** Deleting or editing standard logs is not clearly implemented (only editing public reviews is supported).
@@ -83,12 +82,12 @@ The following are NOT implemented in the codebase:
 - **Scenario 1: Account Creation & Onboarding**
   - **Context:** User downloads the app and signs in.
   - **Step-by-step:** Tap "Continue with Google" -> Allow popup -> Select Date of Birth (must calculate to 18+) -> Select drink styles (Beer, Whisky) -> Select taste (Smooth) -> Select context (House parties) -> Select discovery style -> Type a username.
-  - **System Behavior:** Runs transaction to claim username. Saves user document to Firestore. Redirects to Home Timeline.
+  - **System Behavior:** Runs transaction to claim username. Saves user document to Firestore. Redirects to Home Diary.
   - **Error States:** If DOB makes user <18, blocks progress. If username is taken, transaction fails and displays "Username already taken".
 - **Scenario 2: Searching and Logging a Drink**
   - **Context:** User is at a bar and wants to log a drink.
   - **Step-by-step:** Go to Search Tab -> Type drink name -> Tap Alcohol -> Tap "LOG" -> Tap "Like" thumb -> Save log.
-  - **System Behavior:** Bottom sheet closes, log is pushed to `drink_logs` collection, and timeline immediately refreshes via StreamBuilder.
+  - **System Behavior:** Bottom sheet closes, log is pushed to `drink_logs` collection, and diary immediately refreshes via StreamBuilder.
 
 ## 9. Dependencies & Constraints
 - **External APIs/SDKs:** Firebase Authentication, Cloud Firestore, Firebase Storage.

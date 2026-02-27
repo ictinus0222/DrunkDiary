@@ -73,16 +73,15 @@ AuthGate
 ├── LoginScreen
 ├── OnboardingScreen
 └── HomeScreen (BottomNavigationBar)
-    ├── Tab 0: TimelineScreen
+    ├── Tab 0: DiaryScreen
     ├── Tab 1: SearchScreen
     │   ├── AlcoholDetailScreen
     │   │   ├── CreateLogBottomSheet (Modal)
     │   │   ├── CreateReviewBottomSheet (Modal)
     │   │   └── ReviewEditorScreen
-    ├── Tab 2: DiaryTimelineScreen
-    ├── Tab 3: ShelfScreen
+    ├── Tab 2: ShelfScreen
     │   └── AlcoholDetailScreen
-    └── Tab 4: ProfileScreen
+    └── Tab 3: ProfileScreen
 ```
 
 ## 4. Screen Inventory (Code-Verified)
@@ -105,8 +104,8 @@ AuthGate
   * **Route:** `/home`
   * **Access:** Authenticated (Complete Profile)
   * **Purpose:** Hosts the `BottomNavigationBar` and manages switching between the 5 primary tabs.
-* **Screen:** `TimelineScreen`
-  * **Route:** `/timeline`
+* **Screen:** `DiaryScreen`
+  * **Route:** `/diary`
   * **Access:** Authenticated
   * **Purpose:** Fetches user's `drink_logs` and displays a chronological feed with summary stats.
   * **State Variants:** Loading (CircularProgressIndicator), Empty ("Your first drink memory is waiting").
