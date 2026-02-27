@@ -10,16 +10,14 @@ class ReviewEntry extends DrinkEntry {
     super.userPhotoUrl,
     required super.alcoholName,
     required super.alcoholType,
-    required double rating, // ⭐ required
-    required String note,   // 📝 required
+    required super.rating, // ⭐ required
+    required String super.note, // 📝 required
     required super.createdAt,
     super.photoUrl,
     super.photoUploadedAt,
   }) : super(
-    rating: rating,
-    note: note,
-    logKind: LogKind.review,
-  );
+          logKind: LogKind.review,
+        );
 
   factory ReviewEntry.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;

@@ -136,8 +136,7 @@ class _StatsRow extends StatelessWidget {
     final Map<String, int> countMap = {};
 
     for (final log in logs) {
-      if (log.alcoholType == null) continue;
-      countMap[log.alcoholType!] = (countMap[log.alcoholType!] ?? 0) + 1;
+      countMap[log.alcoholType] = (countMap[log.alcoholType] ?? 0) + 1;
     }
 
     if (countMap.isEmpty) return null;

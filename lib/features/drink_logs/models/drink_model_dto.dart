@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum LogKind {log, review}
+enum LogKind { log, review }
 
 // DrinkLogModel is one user interaction with one drink, not a static entity
 // TODO: fix for when document is deleted, malformed or empty.
@@ -30,7 +30,6 @@ class DrinkLogModel {
   final List<String> taggedUserIds;
   final String? sourceLogId;
 
-
   DrinkLogModel({
     required this.id,
     required this.userId,
@@ -44,10 +43,8 @@ class DrinkLogModel {
     required this.logKind,
     required this.createdAt,
     this.consumedAt,
-
     this.photoUrl,
     this.photoUploadedAt,
-
     this.isShared = false,
     this.createdByUserId,
     this.taggedUserIds = const [],
@@ -65,44 +62,28 @@ class DrinkLogModel {
 
     return DrinkLogModel(
       id: doc.id,
-
       userId: data['userId'] as String? ?? '',
       alcoholId: data['alcoholId'] as String? ?? '',
-
       username: data['username'] as String? ?? 'Unknown',
       userPhotoUrl: data['userPhotoUrl'] as String?,
-
       alcoholName: data['alcoholName'] as String? ?? 'Unknown drink',
       alcoholType: data['alcoholType'] as String? ?? 'unknown',
-
       rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
       note: data['note'] as String?,
-
-      logKind: data['logKind'] == 'review'
-          ? LogKind.review
-          : LogKind.log,
-
-      createdAt: createdAtTs?.toDate() ??
-          DateTime.fromMillisecondsSinceEpoch(0),
-
+      logKind: data['logKind'] == 'review' ? LogKind.review : LogKind.log,
+      createdAt:
+          createdAtTs?.toDate() ?? DateTime.fromMillisecondsSinceEpoch(0),
       consumedAt: (data['consumedAt'] as Timestamp?)?.toDate(),
-
       photoUrl: data['photoUrl'] as String?,
-      photoUploadedAt:
-      (data['photoUploadedAt'] as Timestamp?)?.toDate(),
-
+      photoUploadedAt: (data['photoUploadedAt'] as Timestamp?)?.toDate(),
       isShared: data['isShared'] == true,
       createdByUserId: data['createdByUserId'] as String?,
-
-      taggedUserIds: (data['taggedUserIds'] as List?)
-          ?.whereType<String>()
-          .toList() ??
-          const [],
-
+      taggedUserIds:
+          (data['taggedUserIds'] as List?)?.whereType<String>().toList() ??
+              const [],
       sourceLogId: data['sourceLogId'] as String?,
     );
   }
-
 
   Map<String, dynamic> toMap() {
     return {
@@ -116,17 +97,16 @@ class DrinkLogModel {
       'note': note,
       'logKind': logKind.name,
       'createdAt': Timestamp.fromDate(createdAt),
-      'consumedAt':
-      consumedAt != null ? Timestamp.fromDate(consumedAt!) : null,
+      'consumedAt': consumedAt != null ? Timestamp.fromDate(consumedAt!) : null,
       'photoUrl': photoUrl,
       'photoUploadedAt': photoUploadedAt,
-
       if (isShared) 'isShared': true,
       if (createdByUserId != null) 'createdByUserId': createdByUserId,
       if (taggedUserIds.isNotEmpty) 'taggedUserIds': taggedUserIds,
       if (sourceLogId != null) 'sourceLogId': sourceLogId,
     };
   }
+
   DrinkLogModel copyWith({
     String? userId,
     String? username,
@@ -149,7 +129,7 @@ class DrinkLogModel {
       alcoholType: alcoholType,
       rating: rating ?? this.rating,
       note: note ?? this.note,
-      logKind: this.logKind,
+      logKind: logKind,
       createdAt: createdAt,
       consumedAt: consumedAt,
       photoUrl: photoUrl,

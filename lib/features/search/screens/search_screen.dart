@@ -26,14 +26,11 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
         title: const Text('Search'),
       ),
-
       body: Column(
         children: [
-
           Padding(
             padding: const EdgeInsets.all(16),
             // Search Bar
@@ -47,61 +44,53 @@ class _SearchScreenState extends State<SearchScreen> {
                 setState(() => query = value.trim().toLowerCase());
               },
             ),
-
           ),
-
           Expanded(
-            child: query.isEmpty ?
-            const Center(
-
-              child: Text('Start typing to search'),
-
-            )
+            child: query.isEmpty
+                ? const Center(
+                    child: Text('Start typing to search'),
+                  )
                 : FutureBuilder(
-              future: _search(query),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(
-                      child: CircularProgressIndicator());
-                }
+                    future: _search(query),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
 
-                final results = snapshot.data!;
+                      final results = snapshot.data!;
 
-                if (results.isEmpty) {
-                  return const Center(
-                    child: Text('No results found'),
-                  );
-                }
+                      if (results.isEmpty) {
+                        return const Center(
+                          child: Text('No results found'),
+                        );
+                      }
 
-                return ListView(
-                  children: _buildResults(results),
-                );
-              },
-            ),
+                      return ListView(
+                        children: _buildResults(results),
+                      );
+                    },
+                  ),
           ),
         ],
-
       ),
     );
   }
 
   // _search()
   Future<List<SearchResultModel>> _search(String query) async {
-    final alcohols =
-    await _alcoholRepo.searchAlcohols(query);
+    final alcohols = await _alcoholRepo.searchAlcohols(query);
 
-    final users =
-    await _profileRepo.searchPublicUsers(query);
+    final users = await _profileRepo.searchPublicUsers(query);
 
     return [
       ...alcohols.map(
-            (alcohol) => SearchResultModel(
+        (alcohol) => SearchResultModel(
           type: SearchResultType.alcohol,
           data: alcohol,
         ),
       ),
       ...users.map(
-            (profile) => SearchResultModel(
+        (profile) => SearchResultModel(
           type: SearchResultType.profile,
           data: profile,
         ),
@@ -112,9 +101,9 @@ class _SearchScreenState extends State<SearchScreen> {
   // _buildResults()
   List<Widget> _buildResults(List<SearchResultModel> results) {
     final alcoholResults =
-    results.where((i) => i.type == SearchResultType.alcohol);
+        results.where((i) => i.type == SearchResultType.alcohol);
     final userResults =
-    results.where((i) => i.type == SearchResultType.profile);
+        results.where((i) => i.type == SearchResultType.profile);
 
     return [
       if (alcoholResults.isNotEmpty) ...[
@@ -147,18 +136,13 @@ class _SearchScreenState extends State<SearchScreen> {
     final alcohol = result.data as AlcoholModel;
 
     return ListTile(
-
       leading: CircleAvatar(
         backgroundImage: // TODO: add thumbnail
-        alcohol.imageUrl != null ? NetworkImage(alcohol.imageUrl!) : null,
-        child:
-        alcohol.imageUrl == null ? const Icon(Icons.local_bar) : null,
+            NetworkImage(alcohol.imageUrl!),
+        child: null,
       ),
-
       title: Text(alcohol.name),
-
       subtitle: Text('${alcohol.brand} • ${alcohol.type}'),
-
       onTap: () {
         Navigator.push(
           context,
@@ -167,7 +151,6 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         );
       },
-
     );
   }
 
@@ -176,28 +159,21 @@ class _SearchScreenState extends State<SearchScreen> {
     final user = result.data as UserModel;
 
     return ListTile(
-
       leading: CircleAvatar(
         backgroundImage:
-        user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
-        child:
-        user.photoUrl == null ? const Icon(Icons.person) : null,
+            user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
+        child: user.photoUrl == null ? const Icon(Icons.person) : null,
       ),
-
       title: Text(user.displayName),
-
       subtitle: Text('@${user.username}'),
-
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) =>
-                PublicProfileScreen(username: user.username),
+            builder: (_) => PublicProfileScreen(username: user.username),
           ),
         );
       },
-
     );
   }
 }
