@@ -4,10 +4,17 @@ class AppThemes {
   static final darkTheme = ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: Color.fromARGB(1, 255, 193, 7),
+      seedColor: const Color.fromARGB(255, 255, 193, 7), // Amber
       brightness: Brightness.dark,
     ),
-    scaffoldBackgroundColor: Color.fromARGB(1, 14, 14, 14),
+    scaffoldBackgroundColor: const Color.fromARGB(255, 14, 14, 14),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      backgroundColor: Colors.black,
+      selectedItemColor: Colors.amber,
+      unselectedItemColor: Colors.grey.shade600,
+      elevation: 0,
+      type: BottomNavigationBarType.fixed,
+    ),
     fontFamily: 'Roboto',
   );
 

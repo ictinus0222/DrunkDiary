@@ -5,9 +5,16 @@ import 'package:flutter/material.dart';
 
 import '../../drink_logs/widgets/drink_log_card.dart';
 
-class DiaryScreen extends StatelessWidget {
+class DiaryScreen extends StatefulWidget {
   static const routeName = '/diary';
   const DiaryScreen({super.key});
+
+  @override
+  State<DiaryScreen> createState() => _DiaryScreenState();
+}
+
+class _DiaryScreenState extends State<DiaryScreen> {
+  String _selectedFilter = 'All';
 
   @override
   Widget build(BuildContext context) {
@@ -27,20 +34,35 @@ class DiaryScreen extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             }
 
-            final logs = snapshot.hasData
+            final allLogs = snapshot.hasData
                 ? snapshot.data!.docs
                     .map((doc) => DrinkLogModel.fromFirestore(doc))
                     .toList()
                 : <DrinkLogModel>[];
+
+            final logs = allLogs.where((log) {
+              if (_selectedFilter == 'All') return true;
+              if (_selectedFilter == 'Logs') return log.logKind == LogKind.log;
+              if (_selectedFilter == 'Reviews')
+                return log.logKind == LogKind.review;
+              return true;
+            }).toList();
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const _Header(),
                 const SizedBox(height: 12),
-                _StatsRow(logs: logs),
+                _StatsRow(logs: allLogs),
                 const SizedBox(height: 16),
-                const _FiltersRow(),
+                _FiltersRow(
+                  selectedFilter: _selectedFilter,
+                  onFilterChanged: (filter) {
+                    setState(() {
+                      _selectedFilter = filter;
+                    });
+                  },
+                ),
                 const SizedBox(height: 8),
                 Expanded(
                   child: _DiaryList(logs: logs),
@@ -190,17 +212,39 @@ class _StatCard extends StatelessWidget {
 /* ----------------------------- FILTERS ----------------------------- */
 
 class _FiltersRow extends StatelessWidget {
-  const _FiltersRow();
+  final String selectedFilter;
+  final ValueChanged<String> onFilterChanged;
+
+  const _FiltersRow({
+    required this.selectedFilter,
+    required this.onFilterChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
-        children: const [
-          _FilterChip(label: 'All', selected: true),
-          Spacer(),
-          Icon(Icons.grid_view, color: Colors.white),
+        children: [
+          _FilterChip(
+            label: 'All',
+            selected: selectedFilter == 'All',
+            onTap: () => onFilterChanged('All'),
+          ),
+          const SizedBox(width: 8),
+          _FilterChip(
+            label: 'Logs',
+            selected: selectedFilter == 'Logs',
+            onTap: () => onFilterChanged('Logs'),
+          ),
+          const SizedBox(width: 8),
+          _FilterChip(
+            label: 'Reviews',
+            selected: selectedFilter == 'Reviews',
+            onTap: () => onFilterChanged('Reviews'),
+          ),
+          const Spacer(),
+          const Icon(Icons.grid_view, color: Colors.white),
         ],
       ),
     );
@@ -210,26 +254,32 @@ class _FiltersRow extends StatelessWidget {
 class _FilterChip extends StatelessWidget {
   final String label;
   final bool selected;
+  final VoidCallback onTap;
 
   const _FilterChip({
     required this.label,
     this.selected = false,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: selected ? Colors.amber : Colors.transparent,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: selected ? Colors.black : Colors.white,
-          fontWeight: FontWeight.w500,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? Colors.amber : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border:
+              Border.all(color: selected ? Colors.amber : Colors.grey.shade700),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? Colors.black : Colors.white,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
     );

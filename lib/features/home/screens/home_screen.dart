@@ -33,6 +33,12 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() => _currentIndex = index);
         },
         type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.black,
+        elevation: 0,
+        selectedItemColor: Colors.amber,
+        unselectedItemColor: Colors.grey.shade600,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.menu_book),
