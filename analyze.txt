@@ -1,0 +1,5 @@
+﻿Analyzing alcohol_detail_screen.dart...                         
+
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\alcohol\screens\alcohol_detail_screen.dart:214:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\alcohol\screens\alcohol_detail_screen.dart:332:53 - deprecated_member_use
+

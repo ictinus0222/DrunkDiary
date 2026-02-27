@@ -98,7 +98,7 @@ class AlcoholActivityWidget extends StatelessWidget {
 
                 return ListTile(
                   title: Text(
-                    "Rated ${log.rating!.toStringAsFixed(1)} ★",
+                    "Rated ${log.rating.toStringAsFixed(1)} ★",
                   ),
                   subtitle: log.note != null && log.note!.isNotEmpty
                       ? Text(

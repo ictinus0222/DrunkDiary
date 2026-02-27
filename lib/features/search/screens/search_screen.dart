@@ -138,7 +138,7 @@ class _SearchScreenState extends State<SearchScreen> {
     return ListTile(
       leading: CircleAvatar(
         backgroundImage: // TODO: add thumbnail
-            NetworkImage(alcohol.imageUrl!),
+            NetworkImage(alcohol.imageUrl),
         child: null,
       ),
       title: Text(alcohol.name),
