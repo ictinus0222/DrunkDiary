@@ -2,18 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../../drink_logs/repositories/drink_log_repository.dart';
 import '../../drink_logs/widgets/create_review_bottom_sheet.dart';
 import '../../drink_logs/widgets/edit_review_screen.dart';
 import '../models/alcohol_model.dart';
 import '../../drink_logs/models/drink_model_dto.dart';
 import '../../drink_logs/widgets/create_log_bottom_sheet.dart';
 import '../../drink_logs/widgets/drink_log_card.dart';
-import '../widgets/public_log_tile.dart';
 
 class AlcoholDetailScreen extends StatelessWidget {
-  final DrinkLogRepository _drinkLogRepository = DrinkLogRepository();
-
   final AlcoholModel alcohol;
 
   AlcoholDetailScreen({
@@ -35,19 +31,24 @@ class AlcoholDetailScreen extends StatelessWidget {
             snapshot.docs.map(DrinkLogModel.fromFirestore).toList());
   }
 
-  Future<(int, double)> _fetchGlobalStats() async {
+  Future<(int, double)> _fetchPersonalStats() async {
+    final user = FirebaseAuth.instance.currentUser!;
     final snapshot = await FirebaseFirestore.instance
         .collection('drink_logs')
+        .where('userId', isEqualTo: user.uid)
         .where('alcoholId', isEqualTo: alcohol.id)
-        .where('visibility', isEqualTo: 'public')
         .get();
 
     final docs = snapshot.docs;
     if (docs.isEmpty) return (0, 0.0);
 
-    final ratings =
-        docs.map((doc) => (doc['rating'] as num).toDouble()).toList();
-    final avgRating = ratings.reduce((a, b) => a + b) / ratings.length;
+    final ratingDocs = docs.where((d) => d['logKind'] == 'review').toList();
+    double avgRating = 0.0;
+    if (ratingDocs.isNotEmpty) {
+      final ratings =
+          ratingDocs.map((doc) => (doc['rating'] as num).toDouble()).toList();
+      avgRating = ratings.reduce((a, b) => a + b) / ratings.length;
+    }
 
     return (docs.length, avgRating);
   }
@@ -147,7 +148,7 @@ class AlcoholDetailScreen extends StatelessWidget {
               const SizedBox(height: 24),
               _ProductInfo(alcohol: alcohol),
               FutureBuilder<(int, double)>(
-                future: _fetchGlobalStats(),
+                future: _fetchPersonalStats(),
                 builder: (context, statsSnapshot) {
                   final (logCount, avgRating) = statsSnapshot.data ?? (0, 0.0);
                   return _WineStats(logCount: logCount, avgRating: avgRating);
@@ -169,47 +170,6 @@ class AlcoholDetailScreen extends StatelessWidget {
                 const SizedBox(height: 8),
                 ...logs.map((log) => DrinkLogCard(log: log)),
               ],
-              const SizedBox(height: 32),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'Community',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold),
-                ),
-              ),
-              const SizedBox(height: 8),
-              FutureBuilder<List<DrinkLogModel>>(
-                future: _drinkLogRepository.fetchReviewsForAlcohol(alcohol.id),
-                builder: (context, communitySnapshot) {
-                  if (communitySnapshot.connectionState ==
-                      ConnectionState.waiting) {
-                    return const Padding(
-                      padding: EdgeInsets.all(32),
-                      child: Center(
-                          child:
-                              CircularProgressIndicator(color: Colors.amber)),
-                    );
-                  }
-                  final reviews = communitySnapshot.data ?? [];
-                  if (reviews.isEmpty) {
-                    return Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text(
-                        'No reviews yet. Be the first to review this drink.',
-                        style: TextStyle(color: Colors.grey.shade500),
-                      ),
-                    );
-                  }
-                  return Column(
-                    children: reviews
-                        .map((review) => PublicLogTile(log: review))
-                        .toList(),
-                  );
-                },
-              ),
             ],
           );
         },

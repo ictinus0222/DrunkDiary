@@ -14,25 +14,20 @@ class CreateLogBottomSheet extends StatefulWidget {
   const CreateLogBottomSheet({super.key, required this.alcohol});
 
   @override
-  State<CreateLogBottomSheet> createState() =>
-      _CreateLogBottomSheetState();
+  State<CreateLogBottomSheet> createState() => _CreateLogBottomSheetState();
 }
 
-class _CreateLogBottomSheetState
-    extends State<CreateLogBottomSheet> {
+class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
   bool? liked; // 👍 true | 👎 false | null
   bool showNoteField = false;
 
-  final TextEditingController noteController =
-  TextEditingController();
+  final TextEditingController noteController = TextEditingController();
 
   bool isSaving = false;
   bool isUploadingPhoto = false;
 
   File? selectedPhoto;
   final ImagePicker _picker = ImagePicker();
-
-  List<TaggedUser> taggedUsers = [];
 
   // =====================
   // PHOTO PICKER
@@ -59,8 +54,7 @@ class _CreateLogBottomSheetState
                   maxHeight: 1350,
                 );
                 if (picked != null) {
-                  setState(() =>
-                  selectedPhoto = File(picked.path));
+                  setState(() => selectedPhoto = File(picked.path));
                 }
               },
             ),
@@ -76,8 +70,7 @@ class _CreateLogBottomSheetState
                   maxHeight: 1350,
                 );
                 if (picked != null) {
-                  setState(() =>
-                  selectedPhoto = File(picked.path));
+                  setState(() => selectedPhoto = File(picked.path));
                 }
               },
             ),
@@ -110,17 +103,14 @@ class _CreateLogBottomSheetState
         userPhotoUrl: userDoc['photoUrl'],
         alcoholName: widget.alcohol.name,
         alcoholType: widget.alcohol.type,
-        rating: liked == true ? 1 : liked == false ? 0 : 0,
-        note: noteController.text.isNotEmpty
-            ? noteController.text
-            : null,
+        rating: liked == true
+            ? 1
+            : liked == false
+                ? 0
+                : 0,
+        note: noteController.text.isNotEmpty ? noteController.text : null,
         logKind: LogKind.log,
         createdAt: DateTime.now(),
-        isShared: taggedUsers.isNotEmpty,
-        createdByUserId:
-        taggedUsers.isNotEmpty ? user.uid : null,
-        taggedUserIds:
-        taggedUsers.map((u) => u.userId).toList(),
       );
 
       final logRef = await FirebaseFirestore.instance
@@ -146,9 +136,9 @@ class _CreateLogBottomSheetState
   }
 
   Future<void> _uploadPhoto(
-      DocumentReference logRef,
-      String userId,
-      ) async {
+    DocumentReference logRef,
+    String userId,
+  ) async {
     try {
       setState(() => isUploadingPhoto = true);
 
@@ -171,45 +161,6 @@ class _CreateLogBottomSheetState
         setState(() => isUploadingPhoto = false);
       }
     }
-  }
-
-  // =====================
-  // TAG PEOPLE
-  // =====================
-  void _openTagPeopleSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (_) => const _TagPeopleBottomSheet(),
-    ).then((result) {
-      if (result is List<TaggedUser>) {
-        setState(() => taggedUsers = result);
-      }
-    });
-  }
-
-  Widget _buildUserChip(TaggedUser user) {
-    return Chip(
-      avatar: user.photoUrl != null
-          ? CircleAvatar(
-        backgroundImage:
-        NetworkImage(user.photoUrl!),
-      )
-          : const CircleAvatar(
-        child: Icon(Icons.person, size: 14),
-      ),
-      label: Text(user.username),
-      deleteIcon: const Icon(Icons.close, size: 18),
-      onDeleted: () {
-        setState(() {
-          taggedUsers
-              .removeWhere((u) => u.userId == user.userId);
-        });
-      },
-    );
   }
 
   // =====================
@@ -236,8 +187,7 @@ class _CreateLogBottomSheetState
             const SizedBox(height: 6),
             const Text(
               'A quick moment — only you can see this.',
-              style:
-              TextStyle(fontSize: 12, color: Colors.grey),
+              style: TextStyle(fontSize: 12, color: Colors.grey),
             ),
 
             const SizedBox(height: 16),
@@ -254,12 +204,10 @@ class _CreateLogBottomSheetState
                   child: OutlinedButton.icon(
                     icon: Icon(
                       Icons.thumb_up,
-                      color:
-                      liked == true ? Colors.green : null,
+                      color: liked == true ? Colors.green : null,
                     ),
                     label: const Text('Like'),
-                    onPressed: () =>
-                        setState(() => liked = true),
+                    onPressed: () => setState(() => liked = true),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -267,54 +215,13 @@ class _CreateLogBottomSheetState
                   child: OutlinedButton.icon(
                     icon: Icon(
                       Icons.thumb_down,
-                      color:
-                      liked == false ? Colors.red : null,
+                      color: liked == false ? Colors.red : null,
                     ),
                     label: const Text('Dislike'),
-                    onPressed: () =>
-                        setState(() => liked = false),
+                    onPressed: () => setState(() => liked = false),
                   ),
                 ),
               ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // 👥 TAG PEOPLE
-            const Text(
-              'With',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: () => _openTagPeopleSheet(context),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade900,
-                  borderRadius: BorderRadius.circular(12),
-                  border:
-                  Border.all(color: Colors.grey.shade700),
-                ),
-                child: taggedUsers.isEmpty
-                    ? Row(
-                  children: const [
-                    Icon(Icons.person_add_alt_1_outlined,
-                        size: 18),
-                    SizedBox(width: 8),
-                    Text('Tag people'),
-                  ],
-                )
-                    : Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: taggedUsers
-                      .map(_buildUserChip)
-                      .toList(),
-                ),
-              ),
             ),
 
             const SizedBox(height: 16),
@@ -323,8 +230,7 @@ class _CreateLogBottomSheetState
             TextButton.icon(
               icon: const Icon(Icons.edit_note),
               label: const Text('Add a note'),
-              onPressed: () =>
-                  setState(() => showNoteField = !showNoteField),
+              onPressed: () => setState(() => showNoteField = !showNoteField),
             ),
 
             if (showNoteField) ...[
@@ -333,8 +239,7 @@ class _CreateLogBottomSheetState
                 controller: noteController,
                 maxLines: 3,
                 decoration: InputDecoration(
-                  hintText:
-                  'What made this moment memorable?',
+                  hintText: 'What made this moment memorable?',
                   filled: true,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -360,22 +265,19 @@ class _CreateLogBottomSheetState
                 decoration: BoxDecoration(
                   color: Colors.grey.shade900,
                   borderRadius: BorderRadius.circular(12),
-                  border:
-                  Border.all(color: Colors.grey.shade700),
+                  border: Border.all(color: Colors.grey.shade700),
                 ),
                 child: selectedPhoto == null
                     ? const Center(
-                  child:
-                  Icon(Icons.camera_alt_outlined),
-                )
+                        child: Icon(Icons.camera_alt_outlined),
+                      )
                     : ClipRRect(
-                  borderRadius:
-                  BorderRadius.circular(12),
-                  child: Image.file(
-                    selectedPhoto!,
-                    fit: BoxFit.cover,
-                  ),
-                ),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.file(
+                          selectedPhoto!,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
               ),
             ),
 
@@ -387,176 +289,15 @@ class _CreateLogBottomSheetState
                 onPressed: isSaving ? null : saveLog,
                 child: isSaving
                     ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child:
-                  CircularProgressIndicator(
-                      strokeWidth: 2),
-                )
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
                     : const Text('Save log'),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// =====================
-// TAGGED USER MODEL
-// =====================
-class TaggedUser {
-  final String userId;
-  final String username;
-  final String? photoUrl;
-
-  TaggedUser({
-    required this.userId,
-    required this.username,
-    this.photoUrl,
-  });
-}
-
-// =====================
-// TAG PEOPLE SHEET
-// =====================
-class _TagPeopleBottomSheet extends StatefulWidget {
-  const _TagPeopleBottomSheet();
-
-  @override
-  State<_TagPeopleBottomSheet> createState() =>
-      _TagPeopleBottomSheetState();
-}
-
-class _TagPeopleBottomSheetState
-    extends State<_TagPeopleBottomSheet> {
-  final TextEditingController searchController =
-  TextEditingController();
-
-  final List<TaggedUser> selectedUsers = [];
-  final List<TaggedUser> searchResults = [];
-  bool isSearching = false;
-
-  Future<void> _searchUsers(String query) async {
-    if (query.trim().isEmpty) {
-      setState(() => searchResults.clear());
-      return;
-    }
-
-    setState(() => isSearching = true);
-
-    final snapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .where('username', isGreaterThanOrEqualTo: query)
-        .where('username',
-        isLessThanOrEqualTo: '$query\uf8ff')
-        .limit(10)
-        .get();
-
-    final results = snapshot.docs.map((doc) {
-      final data = doc.data();
-      return TaggedUser(
-        userId: doc.id,
-        username: data['username'] ?? 'Unknown',
-        photoUrl: data['photoUrl'],
-      );
-    }).toList();
-
-    setState(() {
-      searchResults
-        ..clear()
-        ..addAll(results);
-      isSearching = false;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        16,
-        16,
-        MediaQuery.of(context).viewInsets.bottom + 16,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            'Tag people',
-            style:
-            TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-          ),
-
-          const SizedBox(height: 12),
-
-          TextField(
-            controller: searchController,
-            onChanged: _searchUsers,
-            decoration: InputDecoration(
-              hintText: 'Search by username',
-              prefixIcon: const Icon(Icons.search),
-              filled: true,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          if (isSearching)
-            const CircularProgressIndicator()
-          else
-            ListView.builder(
-              shrinkWrap: true,
-              itemCount: searchResults.length,
-              itemBuilder: (context, index) {
-                final user = searchResults[index];
-                final isSelected = selectedUsers
-                    .any((u) => u.userId == user.userId);
-
-                return ListTile(
-                  leading: user.photoUrl != null
-                      ? CircleAvatar(
-                    backgroundImage:
-                    NetworkImage(user.photoUrl!),
-                  )
-                      : const CircleAvatar(
-                    child: Icon(Icons.person),
-                  ),
-                  title: Text(user.username),
-                  trailing: isSelected
-                      ? const Icon(Icons.check,
-                      color: Colors.green)
-                      : null,
-                  onTap: () {
-                    setState(() {
-                      if (isSelected) {
-                        selectedUsers.removeWhere(
-                                (u) => u.userId == user.userId);
-                      } else {
-                        selectedUsers.add(user);
-                      }
-                    });
-                  },
-                );
-              },
-            ),
-
-          const SizedBox(height: 24),
-
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () =>
-                  Navigator.pop(context, selectedUsers),
-              child: const Text('Done'),
-            ),
-          ),
-        ],
       ),
     );
   }

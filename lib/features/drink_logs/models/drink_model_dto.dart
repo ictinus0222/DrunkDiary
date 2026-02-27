@@ -25,11 +25,6 @@ class DrinkLogModel {
   final String? photoUrl;
   final DateTime? photoUploadedAt;
 
-  final bool isShared;
-  final String? createdByUserId;
-  final List<String> taggedUserIds;
-  final String? sourceLogId;
-
   DrinkLogModel({
     required this.id,
     required this.userId,
@@ -45,10 +40,6 @@ class DrinkLogModel {
     this.consumedAt,
     this.photoUrl,
     this.photoUploadedAt,
-    this.isShared = false,
-    this.createdByUserId,
-    this.taggedUserIds = const [],
-    this.sourceLogId,
   });
 
   factory DrinkLogModel.fromFirestore(DocumentSnapshot doc) {
@@ -76,12 +67,6 @@ class DrinkLogModel {
       consumedAt: (data['consumedAt'] as Timestamp?)?.toDate(),
       photoUrl: data['photoUrl'] as String?,
       photoUploadedAt: (data['photoUploadedAt'] as Timestamp?)?.toDate(),
-      isShared: data['isShared'] == true,
-      createdByUserId: data['createdByUserId'] as String?,
-      taggedUserIds:
-          (data['taggedUserIds'] as List?)?.whereType<String>().toList() ??
-              const [],
-      sourceLogId: data['sourceLogId'] as String?,
     );
   }
 
@@ -100,10 +85,6 @@ class DrinkLogModel {
       'consumedAt': consumedAt != null ? Timestamp.fromDate(consumedAt!) : null,
       'photoUrl': photoUrl,
       'photoUploadedAt': photoUploadedAt,
-      if (isShared) 'isShared': true,
-      if (createdByUserId != null) 'createdByUserId': createdByUserId,
-      if (taggedUserIds.isNotEmpty) 'taggedUserIds': taggedUserIds,
-      if (sourceLogId != null) 'sourceLogId': sourceLogId,
     };
   }
 
@@ -114,10 +95,6 @@ class DrinkLogModel {
     double? rating,
     String? note,
     String? visibility,
-    bool? isShared,
-    String? createdByUserId,
-    List<String>? taggedUserIds,
-    String? sourceLogId,
   }) {
     return DrinkLogModel(
       id: id,
@@ -134,10 +111,6 @@ class DrinkLogModel {
       consumedAt: consumedAt,
       photoUrl: photoUrl,
       photoUploadedAt: photoUploadedAt,
-      isShared: isShared ?? this.isShared,
-      createdByUserId: createdByUserId ?? this.createdByUserId,
-      taggedUserIds: taggedUserIds ?? this.taggedUserIds,
-      sourceLogId: sourceLogId ?? this.sourceLogId,
     );
   }
 }

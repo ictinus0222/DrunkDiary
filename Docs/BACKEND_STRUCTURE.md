@@ -14,7 +14,6 @@ Source of Truth: `lib/features/profile/models/user_model.dart`
 *   `ageVerified`: Boolean (Default: false)
 *   `createdAt`: Timestamp (Mapped to DateTime)
 *   `bio`: String? (Nullable)
-*   `isProfilePublic`: Boolean (Default: false)
 *   `username`: String (Default: '')
 
 ### Collection: `usernames`
@@ -49,10 +48,7 @@ Source of Truth: `lib/features/drink_logs/models/drink_model_dto.dart`
 *   `consumedAt`: Timestamp? (Nullable, Mapped to DateTime)
 *   `photoUrl`: String? (Nullable)
 *   `photoUploadedAt`: Timestamp? (Nullable, Mapped to DateTime)
-*   `isShared`: Boolean (Default: false)
 *   `createdByUserId`: String? (Nullable)
-*   `taggedUserIds`: Array of Strings (Default: [])
-*   `sourceLogId`: String? (Nullable)
 
 **Indexes (Only If Defined):**
 No explicit secondary indexes defined in the repository (Firestore handles single-field indexing automatically; no composite index configurations like `firestore.indexes.json` are present).
@@ -60,14 +56,12 @@ No explicit secondary indexes defined in the repository (Firestore handles singl
 **Relationships:**
 *   `drink_logs.userId` references `users.id` (Implied foreign key, enforced loosely by client code mapping).
 *   `drink_logs.alcoholId` references `alcohols.id` (Implied foreign key, enforced loosely by client code mapping).
-*   `drink_logs.taggedUserIds` contains references to `users.id` elements.
 *   *Note: Because this is NoSQL, these are soft references; there are no DB-level foreign key constraints preventing orphaned records upon deletion.*
 
 ## 3. Entity Relationship Description
 *   A **User** can create many **Drink Logs**.
 *   An **Alcohol** can have many **Drink Logs** associated with it.
 *   A **User** owns exactly one unique **Username** identifier.
-*   A **Drink Log** can tag many **Users**.
 
 ## 4. API Endpoints (Route-Verified Only)
 No explicit API server routes exist in this repository. All data fetching operates via direct Firestore RPC calls triggered within Flutter `StreamBuilder` and `FutureBuilder` widgets.

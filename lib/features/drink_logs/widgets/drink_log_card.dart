@@ -43,8 +43,6 @@ class DrinkLogCard extends StatelessWidget {
                   _caption(),
                   const SizedBox(height: 14),
                   _chipsRow(),
-                  const SizedBox(height: 14),
-                  _sharedRow(),
                 ],
               ),
             ),
@@ -94,10 +92,8 @@ class DrinkLogCard extends StatelessWidget {
         Row(
           children: List.generate(
             5,
-                (index) => Icon(
-              index < log.rating.round()
-                  ? Icons.star
-                  : Icons.star_border,
+            (index) => Icon(
+              index < log.rating.round() ? Icons.star : Icons.star_border,
               color: Colors.amber,
               size: 16,
             ),
@@ -128,8 +124,18 @@ class DrinkLogCard extends StatelessWidget {
 
   String _monthName(int month) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
     ];
     return months[month - 1];
   }
@@ -179,29 +185,6 @@ class DrinkLogCard extends StatelessWidget {
           color: Colors.white,
         ),
       ),
-    );
-  }
-
-  // ----------------------------
-  // SHARED USERS
-  // ----------------------------
-  Widget _sharedRow() {
-    if (!log.isShared || log.taggedUserIds.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Row(
-      children: [
-        const Icon(Icons.person_outline, size: 16, color: Colors.grey),
-        const SizedBox(width: 6),
-        Text(
-          'With ${log.taggedUserIds.length} people',
-          style: TextStyle(
-            fontSize: 13,
-            color: Colors.grey.shade400,
-          ),
-        ),
-      ],
     );
   }
 }

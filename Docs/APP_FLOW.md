@@ -38,15 +38,14 @@
     * Message: SnackBar displays "Something went wrong. Please try again."
 
 ### Flow: Search and View Item
-* **Goal:** Discover and view an alcohol item or a public user profile.
+* **Goal:** Discover and view an alcohol item.
 * **Entry Point:** `SearchScreen` (Tab index 1).
 * **Happy Path:**
   1. `SearchScreen`: User types query in `TextField`.
-  2. System Action: Fetches matching documents from `alcohols` and `users` collections.
-  3. UI Elements: Renders `ListTile` arrays under "Alcohols" and "People" headers.
+  2. System Action: Fetches matching documents from `alcohols` collection.
+  3. UI Elements: Renders `ListTile` arrays under "Alcohols" header.
   4. User Action: Taps an alcohol `ListTile`.
-  5. Resulting State: `Navigator.push(AlcoholDetailScreen)`. 
-     * Alternatively, tapping a user `ListTile` -> `Navigator.push(PublicProfileScreen)`.
+  5. Resulting State: `Navigator.push(AlcoholDetailScreen)`.
 
 ### Flow: Log a Drink / Write a Review
 * **Goal:** Record an interaction with an alcohol.
@@ -54,7 +53,7 @@
 * **Happy Path:**
   1. `AlcoholDetailScreen`: User taps "LOG" (or "REVIEW").
   2. System Action: triggers `showModalBottomSheet(CreateLogBottomSheet)` (or `CreateReviewBottomSheet`).
-  3. UI Elements: User interacts with Thumb-up/down (or Slider), Note text field, Photo picker, and Tag People UI.
+  3. UI Elements: User interacts with Thumb-up/down (or Slider), Note text field, and Photo picker.
   4. User Action: Taps "Save log" (or "Publish review").
   5. System Action: Uploads photo (if selected) to Firebase Storage, then writes/updates document in `drink_logs`. 
   6. Resulting State: `Navigator.pop(context)` closes the bottom sheet.
@@ -78,7 +77,6 @@ AuthGate
     │   │   ├── CreateLogBottomSheet (Modal)
     │   │   ├── CreateReviewBottomSheet (Modal)
     │   │   └── ReviewEditorScreen
-    │   └── PublicProfileScreen
     ├── Tab 2: DiaryTimelineScreen
     ├── Tab 3: ShelfScreen
     │   └── AlcoholDetailScreen
@@ -113,13 +111,13 @@ AuthGate
 * **Screen:** `SearchScreen`
   * **Route:** `/search`
   * **Access:** Authenticated
-  * **Purpose:** Queries Firestore for users and drinks.
+  * **Purpose:** Queries Firestore for drinks.
   * **State Variants:** Empty ("Start typing to search" / "No results found"), Loading (CircularProgressIndicator).
-  * **Actions Available:** Tap Alcohol -> `AlcoholDetailScreen`, Tap Person -> `PublicProfileScreen`.
+  * **Actions Available:** Tap Alcohol -> `AlcoholDetailScreen`.
 * **Screen:** `AlcoholDetailScreen`
   * **Route:** `/alcoholDetail`
   * **Access:** Authenticated
-  * **Purpose:** Shows details, logs stream, and community reviews for a specific alcohol. Contains action buttons to trigger Logging/Reviewing.
+  * **Purpose:** Shows details and personal logs stream for a specific alcohol. Contains action buttons to trigger Logging/Reviewing.
 * **Screen:** `ShelfScreen`
   * **Route:** `/shelf`
   * **Access:** Authenticated

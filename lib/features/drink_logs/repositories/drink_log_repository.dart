@@ -10,8 +10,8 @@ class DrinkLogRepository {
   // (public by definition)
   // ============================
   Future<List<DrinkLogModel>> fetchReviewsForAlcohol(
-      String alcoholId,
-      ) async {
+    String alcoholId,
+  ) async {
     final snapshot = await _firestore
         .collection('drink_logs')
         .where('alcoholId', isEqualTo: alcoholId)
@@ -20,17 +20,15 @@ class DrinkLogRepository {
         .limit(10)
         .get();
 
-    return snapshot.docs
-        .map(DrinkLogModel.fromFirestore)
-        .toList();
+    return snapshot.docs.map(DrinkLogModel.fromFirestore).toList();
   }
 
   // ============================
   // 👤 USER REVIEWS (PUBLIC PROFILE)
   // ============================
   Future<List<DrinkLogModel>> fetchReviewsForUser(
-      String userId,
-      ) async {
+    String userId,
+  ) async {
     final snapshot = await _firestore
         .collection('drink_logs')
         .where('userId', isEqualTo: userId)
@@ -38,17 +36,15 @@ class DrinkLogRepository {
         .orderBy('createdAt', descending: true)
         .get();
 
-    return snapshot.docs
-        .map(DrinkLogModel.fromFirestore)
-        .toList();
+    return snapshot.docs.map(DrinkLogModel.fromFirestore).toList();
   }
 
   // ============================
   // 📝 USER LOGS (PRIVATE TIMELINE)
   // ============================
   Future<List<DrinkLogModel>> fetchLogsForUser(
-      String userId,
-      ) async {
+    String userId,
+  ) async {
     final snapshot = await _firestore
         .collection('drink_logs')
         .where('userId', isEqualTo: userId)
@@ -56,60 +52,15 @@ class DrinkLogRepository {
         .orderBy('createdAt', descending: true)
         .get();
 
-    return snapshot.docs
-        .map(DrinkLogModel.fromFirestore)
-        .toList();
+    return snapshot.docs.map(DrinkLogModel.fromFirestore).toList();
   }
 
   // ============================
   // ➕ CREATE SINGLE LOG / REVIEW
   // ============================
   Future<void> createDrinkLog(
-      DrinkLogModel log,
-      ) async {
-    await _firestore
-        .collection('drink_logs')
-        .add(log.toMap());
-  }
-
-  // ============================
-  // 👥 CREATE SHARED LOGS (LOG ONLY)
-  // ============================
-  Future<void> createSharedLogs({
-    required DrinkLogModel baseLog,
-    required List<String> taggedUserIds,
-  }) async {
-    assert(
-    baseLog.logKind == LogKind.log,
-    'Shared logs are only allowed for logKind=log',
-    );
-
-    // 1️⃣ Create host log
-    final hostRef = await _firestore
-        .collection('drink_logs')
-        .add(
-      baseLog.copyWith(
-        isShared: true,
-        createdByUserId: baseLog.userId,
-        taggedUserIds: taggedUserIds,
-      ).toMap(),
-    );
-
-    final sourceLogId = hostRef.id;
-
-    // 2️⃣ Create one log per tagged user
-    for (final taggedUserId in taggedUserIds) {
-      final sharedLog = baseLog.copyWith(
-        userId: taggedUserId,
-        isShared: true,
-        createdByUserId: baseLog.userId,
-        taggedUserIds: taggedUserIds,
-        sourceLogId: sourceLogId,
-      );
-
-      await _firestore
-          .collection('drink_logs')
-          .add(sharedLog.toMap());
-    }
+    DrinkLogModel log,
+  ) async {
+    await _firestore.collection('drink_logs').add(log.toMap());
   }
 }

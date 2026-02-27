@@ -1,11 +1,8 @@
-import 'package:drunk_diary/features/profile/screens/public_profile_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../../alcohol/models/alcohol_model.dart';
 import '../../alcohol/repositories/alcohol_repository.dart';
 import '../../alcohol/screens/alcohol_detail_screen.dart';
-import '../../profile/models/user_model.dart';
-import '../../profile/repositories/profile_repository.dart';
 import '../models/search_result.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -19,7 +16,6 @@ class _SearchScreenState extends State<SearchScreen> {
   final _controller = TextEditingController();
 
   final _alcoholRepo = AlcoholRepository();
-  final _profileRepo = ProfileRepository();
 
   String query = '';
 
@@ -37,7 +33,7 @@ class _SearchScreenState extends State<SearchScreen> {
             child: TextField(
               controller: _controller,
               decoration: const InputDecoration(
-                hintText: 'Search alcohols or users',
+                hintText: 'Search alcohols',
                 prefixIcon: Icon(Icons.search),
               ),
               onChanged: (value) {
@@ -80,19 +76,11 @@ class _SearchScreenState extends State<SearchScreen> {
   Future<List<SearchResultModel>> _search(String query) async {
     final alcohols = await _alcoholRepo.searchAlcohols(query);
 
-    final users = await _profileRepo.searchPublicUsers(query);
-
     return [
       ...alcohols.map(
         (alcohol) => SearchResultModel(
           type: SearchResultType.alcohol,
           data: alcohol,
-        ),
-      ),
-      ...users.map(
-        (profile) => SearchResultModel(
-          type: SearchResultType.profile,
-          data: profile,
         ),
       ),
     ];
@@ -102,17 +90,11 @@ class _SearchScreenState extends State<SearchScreen> {
   List<Widget> _buildResults(List<SearchResultModel> results) {
     final alcoholResults =
         results.where((i) => i.type == SearchResultType.alcohol);
-    final userResults =
-        results.where((i) => i.type == SearchResultType.profile);
 
     return [
       if (alcoholResults.isNotEmpty) ...[
         _sectionHeader('Alcohols'),
         ...alcoholResults.map(_buildAlcoholTile),
-      ],
-      if (userResults.isNotEmpty) ...[
-        _sectionHeader('People'),
-        ...userResults.map(_buildUserTile),
       ],
     ];
   }
@@ -148,29 +130,6 @@ class _SearchScreenState extends State<SearchScreen> {
           context,
           MaterialPageRoute(
             builder: (_) => AlcoholDetailScreen(alcohol: alcohol),
-          ),
-        );
-      },
-    );
-  }
-
-  // _buildUserTile()
-  Widget _buildUserTile(SearchResultModel result) {
-    final user = result.data as UserModel;
-
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundImage:
-            user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
-        child: user.photoUrl == null ? const Icon(Icons.person) : null,
-      ),
-      title: Text(user.displayName),
-      subtitle: Text('@${user.username}'),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => PublicProfileScreen(username: user.username),
           ),
         );
       },

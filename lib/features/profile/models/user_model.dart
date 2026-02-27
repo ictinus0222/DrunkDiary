@@ -8,7 +8,6 @@ class UserModel {
   final DateTime createdAt;
   // Profile
   final String? bio;
-  final bool isProfilePublic;
   final String username;
 
   UserModel({
@@ -19,7 +18,6 @@ class UserModel {
     required this.createdAt,
     // Profile
     this.bio,
-    required this.isProfilePublic,
     required this.username,
   });
 
@@ -31,10 +29,10 @@ class UserModel {
       displayName: userData['displayName'] ?? '',
       photoUrl: userData['photoUrl'],
       ageVerified: userData['ageVerified'] ?? false,
-      createdAt: (userData['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdAt:
+          (userData['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       // Profile
       bio: userData['bio'],
-      isProfilePublic: userData['isProfilePublic'] ?? false,
       username: userData['username'] ?? '',
     );
   }
@@ -47,7 +45,6 @@ class UserModel {
       'createdAt': Timestamp.fromDate(createdAt),
       // Profile
       'bio': bio,
-      'isProfilePublic': isProfilePublic,
       'username': username,
     };
   }

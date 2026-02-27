@@ -6,26 +6,25 @@ Version: 1.0.0+1
 Last Updated: 2026-02-27
 Owner: Not explicitly identified in the repository metadata.
 
-DrunkDiary is a Flutter-based mobile application that allows legal-age users to privately log or publicly review the alcoholic beverages they consume. It securely authenticates users via Google, ensures they are 18+, and acts as a digital diary and tracking shelf for their drinking journey. The app provides a timeline of past drinks, aggregates statistics (like favorite drinks and average ratings) in a "Shelf" view, and enables discovery of other users and beverages via a centralized search architecture.
+DrunkDiary is a Flutter-based mobile application that allows legal-age users to log or review the alcoholic beverages they consume for personal tracking. It securely authenticates users via Google, ensures they are 18+, and acts as a digital diary and tracking shelf for their drinking journey. The app provides a timeline of past drinks, aggregates statistics (like favorite drinks and average ratings) in a "Shelf" view, and enables discovery of beverages via a centralized search architecture.
 
 ## 2. Problem Statement
-Based on implemented functionality:
-The application solves the problem of tracking and remembering one's experiences with different alcoholic beverages. The core user workflow enables users to log specific moments associated with drinks (privately noting the context, taking photos, and tagging friends) alongside a public-facing system where they can formally review and rate alcohols to contribute to a community consensus.
+The application solves the problem of tracking and remembering one's experiences with different alcoholic beverages. The core user workflow enables users to log specific moments associated with drinks (noting the context and taking photos) alongside a system where they can review and rate alcohols for their personal records.
 
 ## 3. Goals & Objectives (Current State Only)
 - Authenticate users securely into the ecosystem and enforce a strict age gate (18+).
 - Allow users to quickly capture a "Drink Log" (capturing a thumbs up/down, photo, tags, and context).
-- Allow users to write formal "Reviews" for alcohols on a 0-5 scale.
+- Allow users to write personal "Reviews" for alcohols on a 0-5 scale.
 - Aggregate user logs into a personal "Shelf" that showcases their history and average ratings.
-- Enable discovery of alcohols and other users via an integrated search mechanism.
+- Enable discovery of alcohols via an integrated search mechanism.
 
 ## 4. Success Metrics (Inferred from Code)
 No explicit success metrics or analytics tracking logic (e.g., Mixpanel, Google Analytics events) are implemented in the current codebase.
 
 ## 5. Target Users & Personas (Inferred)
 Based on the onboarding flow and feature structure, the target users are individuals of legal drinking age (18+).
-- **The Social Drinker:** Inferred from features allowing users to tag others, take photos, and choose contexts like "House parties" or "Bars / clubs".
-- **The Tasting Enthusiast:** Inferred from the separate public "Review" flow, which asks for detailed taste profiles and provides a 0-5 star slider to evaluate specific alcohols.
+- **The Personal Tracker:** Inferred from features allowing users to take photos and choose contexts like "House parties" or "Bars / clubs".
+- **The Tasting Enthusiast:** Inferred from the separate personal "Review" flow, which asks for detailed taste profiles and provides a 0-5 star slider to evaluate specific alcohols.
 
 ## 6. Features & Requirements
 
@@ -38,11 +37,11 @@ Based on the onboarding flow and feature structure, the target users are individ
 - **Private Drink Logging**
   - **Description:** Allows users to log an alcohol privately.
   - **User Story:** As a user, I want to log what I briefly drank with friends.
-  - **Acceptance Criteria:** User can select Like/Dislike, write a note, attach a photo (from camera/gallery), and tag users. Data saves to Firestore with `logKind: LogKind.log`.
+  - **Acceptance Criteria:** User can select Like/Dislike, write a note, and attach a photo (from camera/gallery). Data saves to Firestore with `logKind: LogKind.log`.
   - **Edge Cases:** Missing photo or note resolves to null.
-- **Public Drink Reviewing**
-  - **Description:** Allows users to formally rate and review an alcohol.
-  - **User Story:** As a user, I want to publicly review an alcohol so others can see my rating.
+- **Personal Drink Reviewing**
+  - **Description:** Allows users to formally rate and review an alcohol for personal use.
+  - **User Story:** As a user, I want to review an alcohol so I can see my rating later.
   - **Acceptance Criteria:** User uses a 0-5 slider, provides text, and an optional photo. Saves with `logKind: LogKind.review`. Uses a deterministic ID (`{userId}_{alcoholId}`) to prevent duplicates.
   - **Edge Cases:** Attempting to review the same drink twice overwrites the existing review.
 - **User Timeline**
@@ -57,15 +56,13 @@ Based on the onboarding flow and feature structure, the target users are individ
 
 ### P1 (Implemented but Secondary Features)
 - **Search & Discovery**
-  - **Description:** Queries Firestore to find users and drinks.
-  - **User Story:** As a user, I can search for "@username" or a specific "Whisky".
-  - **Acceptance Criteria:** Queries `alcohols` and `users` collections and displays segregated lists for "Alcohols" and "People".
+  - **Description:** Queries Firestore to find drinks.
+  - **User Story:** As a user, I can search for a specific "Whisky" or other alcohol.
+  - **Acceptance Criteria:** Queries `alcohols` collection and displays a list of "Alcohols".
 - **Alcohol Details**
-  - **Description:** Displays alcohol information, community reviews, and global stats.
-  - **User Story:** As a user, I can view details of a drink and see its average community rating.
-  - **Acceptance Criteria:** Calculates global average by fetching public reviews. Also exposes the "LOG" and "REVIEW" action buttons.
-- **User Profiles**
-  - **Description:** Displays user stats and logs, differentiating between own profile and public profiles.
+  - **Description:** Displays alcohol information and personal stats.
+  - **User Story:** As a user, I can view details of a drink and see my rating.
+  - **Acceptance Criteria:** Displays alcohol information. Exposes the "LOG" and "REVIEW" action buttons.
 
 ### P2 (Minor or Utility Features Already Present)
 - **Diary Timeline:** A specialized timeline view querying `drink_logs` specifically for `logType: 'diary'`.
@@ -87,7 +84,7 @@ The following are NOT implemented in the codebase:
   - **Error States:** If DOB makes user <18, blocks progress. If username is taken, transaction fails and displays "Username already taken".
 - **Scenario 2: Searching and Logging a Drink**
   - **Context:** User is at a bar and wants to log a drink.
-  - **Step-by-step:** Go to Search Tab -> Type drink name -> Tap Alcohol -> Tap "LOG" -> Tap "Like" thumb -> Tap "Tag people" and search for a friend -> Save log.
+  - **Step-by-step:** Go to Search Tab -> Type drink name -> Tap Alcohol -> Tap "LOG" -> Tap "Like" thumb -> Save log.
   - **System Behavior:** Bottom sheet closes, log is pushed to `drink_logs` collection, and timeline immediately refreshes via StreamBuilder.
 
 ## 9. Dependencies & Constraints
