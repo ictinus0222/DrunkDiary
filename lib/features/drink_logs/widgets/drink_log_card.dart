@@ -125,7 +125,7 @@ class DrinkLogCard extends StatelessWidget {
   // ----------------------------
   Widget _metaRow() {
     return Text(
-      '${_formattedDate()} • Public',
+      _formattedDate(),
       style: TextStyle(
         fontSize: 13,
         color: Colors.grey.shade400,

@@ -100,6 +100,7 @@ class DrinkLogModel {
     bool? isLiked,
     String? note,
     String? visibility,
+    LogKind? logKind,
   }) {
     return DrinkLogModel(
       id: id,
@@ -112,7 +113,7 @@ class DrinkLogModel {
       rating: rating ?? this.rating,
       isLiked: isLiked ?? this.isLiked,
       note: note ?? this.note,
-      logKind: logKind,
+      logKind: logKind ?? this.logKind,
       createdAt: createdAt,
       consumedAt: consumedAt,
       photoUrl: photoUrl,

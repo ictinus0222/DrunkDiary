@@ -129,7 +129,7 @@ class ProfileContent extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              'Public Shelf',
+              'My Collection',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,

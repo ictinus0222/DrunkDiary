@@ -199,10 +199,6 @@ class _FiltersRow extends StatelessWidget {
       child: Row(
         children: const [
           _FilterChip(label: 'All', selected: true),
-          SizedBox(width: 8),
-          _FilterChip(label: 'Public'),
-          SizedBox(width: 8),
-          _FilterChip(label: 'Private'),
           Spacer(),
           Icon(Icons.grid_view, color: Colors.white),
         ],

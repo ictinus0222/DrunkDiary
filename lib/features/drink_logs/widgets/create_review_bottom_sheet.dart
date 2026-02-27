@@ -216,7 +216,7 @@ class _CreateReviewBottomSheetState extends State<CreateReviewBottomSheet> {
 
             const SizedBox(height: 6),
             Text(
-              'Your public opinion — visible to everyone.',
+              'Rate and record for your diary.',
               style: TextStyle(fontSize: 14, color: Colors.grey.shade400),
             ),
 
@@ -322,7 +322,7 @@ class _CreateReviewBottomSheetState extends State<CreateReviewBottomSheet> {
                             strokeWidth: 2, color: Colors.black),
                       )
                     : const Text(
-                        'Publish review',
+                        'Save review',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
