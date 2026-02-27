@@ -123,7 +123,7 @@ AuthGate
 * **Screen:** `ShelfScreen`
   * **Route:** `/shelf`
   * **Access:** Authenticated
-  * **Purpose:** Aggregates, counts, and averages the user's logs grouped by alcohol.
+  * **Purpose:** Aggregates, counts, and averages the user's logs grouped by alcohol. Includes sorting functionality via a bottom sheet allowing users to reorder their items (A-Z, High Rating, Most Consumed).
   * **State Variants:** Loading (CircularProgressIndicator), Empty ("Your shelf is empty").
 * **Screen:** `ProfileScreen`
   * **Route:** `/profile` (if any)

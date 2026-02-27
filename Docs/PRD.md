@@ -52,7 +52,7 @@ Based on the onboarding flow and feature structure, the target users are individ
 - **The Shelf**
   - **Description:** Aggregates all user logs and groups them by `alcoholId`.
   - **User Story:** As a user, I want to see every unique alcohol I have tried and my average rating for it.
-  - **Acceptance Criteria:** Fetches the user's logs, groups by ID, retrieves the associated `AlcoholModel`, and computes average rating and total consumption count per alcohol.
+  - **Acceptance Criteria:** Fetches the user's logs, groups by ID, retrieves the associated `AlcoholModel`, and computes average rating and total consumption count per alcohol. Displays the unique alcohols in a styled grid ("Shelf"). Includes a sort/filter button that opens a bottom sheet allowing users to sort their shelf (e.g., A-Z, High Rating, Most Consumed).
 
 ### P1 (Implemented but Secondary Features)
 - **Search & Discovery**

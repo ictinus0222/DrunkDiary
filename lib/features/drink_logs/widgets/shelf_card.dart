@@ -16,6 +16,9 @@ class ShelfCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Using star for items that have a rating > 0, otherwise heart
+    final bool hasRating = avgRating > 0;
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -24,79 +27,54 @@ class ShelfCard extends StatelessWidget {
             builder: (_) => AlcoholDetailScreen(alcohol: alcohol),
           ),
         );
-
       },
-
-
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 🍾 Image takes flexible space
-            Expanded(
-              child: Image.network(
-                alcohol.imageUrl,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                errorBuilder: (_, __, ___) => const Center(
-                  child: Icon(Icons.local_bar, size: 40),
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.bottomCenter,
+        children: [
+          // The Box/Image
+          Container(
+            decoration: BoxDecoration(boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.6),
+                blurRadius: 15,
+                offset: const Offset(0, 10),
+              )
+            ]),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: AspectRatio(
+                aspectRatio: 0.75,
+                child: Image.network(
+                  alcohol.imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: Colors.grey.shade900,
+                    child: const Center(
+                      child:
+                          Icon(Icons.local_bar, size: 40, color: Colors.grey),
+                    ),
+                  ),
                 ),
               ),
             ),
+          ),
 
-            // 📄 Text gets fixed space
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    alcohol.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    alcohol.type,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.star, size: 14, color: Colors.amber),
-                          const SizedBox(width: 4),
-                          Text(avgRating.toStringAsFixed(1),
-                              style: const TextStyle(fontSize: 12)),
-                        ],
-                      ),
-                      Text(
-                        "$logCount logs",
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+          // The floating badge
+          Positioned(
+            top: -8,
+            right: -8,
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey.shade900,
               ),
+              padding: const EdgeInsets.all(4),
+              child: Icon(hasRating ? Icons.star : Icons.favorite,
+                  color: Colors.amber, size: 12),
             ),
-          ],
-        )
-
+          )
+        ],
       ),
     );
   }
