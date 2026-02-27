@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../drink_logs/widgets/create_review_bottom_sheet.dart';
-import '../../drink_logs/widgets/edit_review_screen.dart';
+import '../../drink_logs/widgets/edit_review_bottom_sheet.dart';
 import '../models/alcohol_model.dart';
 import '../../drink_logs/models/drink_model_dto.dart';
 import '../../drink_logs/widgets/create_log_bottom_sheet.dart';
@@ -91,13 +91,14 @@ class AlcoholDetailScreen extends StatelessWidget {
 
     if (query.docs.isNotEmpty) {
       final review = DrinkLogModel.fromFirestore(query.docs.first);
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ReviewEditorScreen(
-            alcohol: alcohol,
-            existingReview: review,
-          ),
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        useSafeArea: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => EditReviewBottomSheet(
+          alcohol: alcohol,
+          existingReview: review,
         ),
       );
     } else {

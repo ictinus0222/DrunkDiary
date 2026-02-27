@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/drink_model_dto.dart';
 import '../../alcohol/models/alcohol_model.dart';
+import '../../drink_logs/widgets/edit_review_bottom_sheet.dart';
 
 class LogDetailBottomSheet extends StatefulWidget {
   final DrinkLogModel log;
@@ -307,6 +308,42 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
                         ],
 
                         const SizedBox(height: 24),
+
+                        // Edit Button (if review)
+                        if (isReview && _alcohol != null)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.amber,
+                                  foregroundColor: Colors.black,
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)),
+                                ),
+                                onPressed: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    useSafeArea: true,
+                                    backgroundColor: Colors.transparent,
+                                    builder: (_) => EditReviewBottomSheet(
+                                      alcohol: _alcohol!,
+                                      existingReview: _log,
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.edit, size: 20),
+                                label: const Text('Edit Review',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16)),
+                              ),
+                            ),
+                          ),
 
                         // Delete Button
                         SizedBox(

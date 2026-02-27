@@ -51,7 +51,7 @@
 
 ### Flow: Log a Drink / Write a Review
 * **Goal:** Record an interaction with an alcohol.
-* **Entry Point:** `AlcoholDetailScreen`.
+* **Entry Point:** `AlcoholDetailScreen` or Profile Screen.
 * **Happy Path:**
   1. `AlcoholDetailScreen`: User taps "LOG" (or "REVIEW").
   2. System Action: triggers `showModalBottomSheet(CreateLogBottomSheet)` (or `CreateReviewBottomSheet`).
@@ -63,7 +63,7 @@
   * Trigger: Firebase write failure.
     * Message: SnackBar displays "Could not save log" (or "Could not publish review").
 * **Edge Cases:**
-  * For reviews: Uses a deterministic document ID (`{userId}_{alcoholId}`) to overwrite existing reviews rather than creating duplicates. If a review exists, clicking "EDIT REVIEW" uses `Navigator.push(ReviewEditorScreen)` instead of a bottom sheet.
+  * For reviews: Uses a deterministic document ID (`{userId}_{alcoholId}`) to overwrite existing reviews rather than creating duplicates. If a review exists, "EDIT REVIEW" opens the review editor with existing data populated.
 
 ## 3. Navigation Map (Actual Structure Only)
 
