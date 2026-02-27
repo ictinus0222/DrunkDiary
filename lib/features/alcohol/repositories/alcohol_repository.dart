@@ -17,8 +17,11 @@ class AlcoholRepository {
         .limit(20)
         .get();
 
-    return snapshot.docs
-        .map((doc) => AlcoholModel.fromFirestore(doc))
-        .toList();
+    return snapshot.docs.map((doc) => AlcoholModel.fromFirestore(doc)).toList();
+  }
+
+  Future<List<AlcoholModel>> getAllAlcohols() async {
+    final snapshot = await _firestore.collection('alcohols').get();
+    return snapshot.docs.map((doc) => AlcoholModel.fromFirestore(doc)).toList();
   }
 }

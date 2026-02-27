@@ -56,9 +56,12 @@ Based on the onboarding flow and feature structure, the target users are individ
 
 ### P1 (Implemented but Secondary Features)
 - **Search & Discovery**
-  - **Description:** Queries Firestore to find drinks.
-  - **User Story:** As a user, I can search for a specific "Whisky" or other alcohol.
-  - **Acceptance Criteria:** Queries `alcohols` collection and displays a list of "Alcohols".
+  - **Description:** Offers a "Discover" feed of all available alcohols with sorting/filtering capabilities and text-based search.
+  - **User Story:** As a user, I can browse a random discover feed of alcohols, filter them by type, sort them by rating or review count, or explicitly search for an alcohol's name. I can also see if I've previously logged an alcohol directly from the list.
+  - **Acceptance Criteria:** 
+    - Default state queries all `alcohols` in random order.
+    - Items are displayed as rich cards showing image, type, global rating, and a checkmark if logged/reviewed by the user.
+    - Search bar includes a filter button, which opens a bottom sheet allowing sorting (A-Z, High-Low Rating, Most Reviewed) and type filtering (e.g. Whisky, Rum, Vodka).
 - **Alcohol Details**
   - **Description:** Displays alcohol information, personal logs, and global community stats.
   - **User Story:** As a user, I can view details of a drink, see my personal logs, and view community statistics like total global logs, global average rating, and a global like ratio.

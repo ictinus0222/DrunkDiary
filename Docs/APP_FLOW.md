@@ -41,11 +41,13 @@
 * **Goal:** Discover and view an alcohol item.
 * **Entry Point:** `SearchScreen` (Tab index 1).
 * **Happy Path:**
-  1. `SearchScreen`: User types query in `TextField`.
-  2. System Action: Fetches matching documents from `alcohols` collection.
-  3. UI Elements: Renders `ListTile` arrays under "Alcohols" header.
-  4. User Action: Taps an alcohol `ListTile`.
-  5. Resulting State: `Navigator.push(AlcoholDetailScreen)`.
+  1. `SearchScreen`: Opens on a "Discover" view displaying all database alcohols as rich cards.
+  2. User Action (Optional): Taps the filter icon to open the `FilterBottomSheet` to select Sort Order and Alcohol Type.
+  3. User Action (Optional): Types a query in `TextField`.
+  4. System Action: Fetches matching documents from `alcohols` collection applying sort, filter, and text criteria, while checking the user's `drink_logs` for indicators.
+  5. UI Elements: Renders matched cards showing global ratings and user logging status.
+  6. User Action: Taps an alcohol card.
+  7. Resulting State: `Navigator.push(AlcoholDetailScreen)`.
 
 ### Flow: Log a Drink / Write a Review
 * **Goal:** Record an interaction with an alcohol.
