@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../alcohol/models/alcohol_model.dart';
-import '../models/drink_entry.dart';
 import '../models/drink_model_dto.dart' as dto;
 
 class ReviewEditorScreen extends StatefulWidget {
@@ -19,8 +18,7 @@ class ReviewEditorScreen extends StatefulWidget {
   bool get isEdit => existingReview != null;
 
   @override
-  State<ReviewEditorScreen> createState() =>
-      _ReviewEditorScreenState();
+  State<ReviewEditorScreen> createState() => _ReviewEditorScreenState();
 }
 
 class _ReviewEditorScreenState extends State<ReviewEditorScreen> {
@@ -29,7 +27,8 @@ class _ReviewEditorScreenState extends State<ReviewEditorScreen> {
 
   // 🔁 Replace with your real auth source
   String get currentUserId => FirebaseAuth.instance.currentUser!.uid;
-  String get currentUsername => FirebaseAuth.instance.currentUser?.displayName ?? 'Anonymous';
+  String get currentUsername =>
+      FirebaseAuth.instance.currentUser?.displayName ?? 'Anonymous';
 
   @override
   void initState() {
@@ -69,9 +68,8 @@ class _ReviewEditorScreenState extends State<ReviewEditorScreen> {
       'updatedAt': Timestamp.now(),
     };
 
-    final docRef = FirebaseFirestore.instance
-        .collection('drink_logs')
-        .doc(reviewDocId);
+    final docRef =
+        FirebaseFirestore.instance.collection('drink_logs').doc(reviewDocId);
 
     if (widget.isEdit) {
       await docRef.update(data);
@@ -84,7 +82,6 @@ class _ReviewEditorScreenState extends State<ReviewEditorScreen> {
 
     if (mounted) Navigator.pop(context);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +104,7 @@ class _ReviewEditorScreenState extends State<ReviewEditorScreen> {
                   value: _rating,
                   items: List.generate(
                     6,
-                        (i) => DropdownMenuItem(
+                    (i) => DropdownMenuItem(
                       value: i.toDouble(),
                       child: Text(i.toString()),
                     ),

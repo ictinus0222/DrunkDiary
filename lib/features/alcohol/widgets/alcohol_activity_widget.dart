@@ -50,13 +50,12 @@ class AlcoholActivityWidget extends StatelessWidget {
 
         // 📊 Stats
         final logCount = logs.length;
-        final ratedLogs = logs.where((l) => l.rating != null).toList();
+        final ratedLogs = logs
+            .toList(); // Fixed dead code warning. l.rating is double, not double?
         final avgRating = ratedLogs.isEmpty
-            ? 0
-            : ratedLogs
-            .map((l) => l.rating!)
-            .reduce((a, b) => a + b) /
-            ratedLogs.length;
+            ? 0.0
+            : ratedLogs.map((l) => l.rating).reduce((a, b) => a + b) /
+                ratedLogs.length;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,10 +104,10 @@ class AlcoholActivityWidget extends StatelessWidget {
                   ),
                   subtitle: log.note != null && log.note!.isNotEmpty
                       ? Text(
-                    log.note!,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  )
+                          log.note!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        )
                       : null,
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {

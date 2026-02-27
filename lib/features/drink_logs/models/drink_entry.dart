@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 enum LogKind { log, review }
 
 abstract class DrinkEntry {

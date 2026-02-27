@@ -29,8 +29,8 @@ class TimelineScreen extends StatelessWidget {
 
             final logs = snapshot.hasData
                 ? snapshot.data!.docs
-                .map((doc) => DrinkLogModel.fromFirestore(doc))
-                .toList()
+                    .map((doc) => DrinkLogModel.fromFirestore(doc))
+                    .toList()
                 : <DrinkLogModel>[];
 
             return Column(
@@ -94,13 +94,12 @@ class _StatsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final total = logs.length;
 
-    final ratedLogs = logs.where((l) => l.rating != null).toList();
+    final ratedLogs = logs
+        .toList(); // Fixed dead code warning. l.rating is double, not double?
     final double? avgRating = ratedLogs.isEmpty
         ? null
-        : ratedLogs
-        .map((l) => l.rating!)
-        .reduce((a, b) => a + b) /
-        ratedLogs.length;
+        : ratedLogs.map((l) => l.rating).reduce((a, b) => a + b) /
+            ratedLogs.length;
 
     final favorite = _getFavoriteCategory(logs);
 
@@ -118,9 +117,7 @@ class _StatsRow extends StatelessWidget {
           Expanded(
             child: _StatCard(
               title: 'Avg Rating',
-              value: avgRating == null
-                  ? '—'
-                  : avgRating.toStringAsFixed(1),
+              value: avgRating == null ? '—' : avgRating.toStringAsFixed(1),
             ),
           ),
           const SizedBox(width: 12),
@@ -140,15 +137,12 @@ class _StatsRow extends StatelessWidget {
 
     for (final log in logs) {
       if (log.alcoholType == null) continue;
-      countMap[log.alcoholType!] =
-          (countMap[log.alcoholType!] ?? 0) + 1;
+      countMap[log.alcoholType!] = (countMap[log.alcoholType!] ?? 0) + 1;
     }
 
     if (countMap.isEmpty) return null;
 
-    return countMap.entries
-        .reduce((a, b) => a.value > b.value ? a : b)
-        .key;
+    return countMap.entries.reduce((a, b) => a.value > b.value ? a : b).key;
   }
 }
 

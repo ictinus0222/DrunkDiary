@@ -35,9 +35,8 @@ class AlcoholDetailScreen extends StatelessWidget {
         // Firestore docs -> DrinkLogModel
         // UI only gets clean Dart objects
         .map(
-          (snapshot) =>
-          snapshot.docs.map(DrinkLogModel.fromFirestore).toList(),
-    );
+          (snapshot) => snapshot.docs.map(DrinkLogModel.fromFirestore).toList(),
+        );
   }
 
   Future<(int, double)> _fetchGlobalStats() async {
@@ -51,12 +50,10 @@ class AlcoholDetailScreen extends StatelessWidget {
 
     if (docs.isEmpty) return (0, 0.0);
 
-    final ratings = docs
-        .map((doc) => (doc['rating'] as num).toDouble())
-        .toList();
+    final ratings =
+        docs.map((doc) => (doc['rating'] as num).toDouble()).toList();
 
-    final avgRating =
-        ratings.reduce((a, b) => a + b) / ratings.length;
+    final avgRating = ratings.reduce((a, b) => a + b) / ratings.length;
 
     return (docs.length, avgRating);
   }
@@ -118,33 +115,24 @@ class AlcoholDetailScreen extends StatelessWidget {
     return query.docs.isNotEmpty;
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(alcohol.name)),
-      body: StreamBuilder<List<DrinkLogModel>>( // Handles live refresh after logging
+      body: StreamBuilder<List<DrinkLogModel>>(
+        // Handles live refresh after logging
         stream: _logsStream(),
         builder: (context, snapshot) {
-          final logs = snapshot.data ?? []; // if data hasn't arrived yet, empty list
+          final logs =
+              snapshot.data ?? []; // if data hasn't arrived yet, empty list
 
-          final logCount = logs.length; // number of times a drink is logged
-
-          final double avgRating = logs.isEmpty
-              ? 0
-              : logs
-              .map((l) => l.rating)
-              .reduce((a, b) => a + b) /
-              logs.length.toDouble();
+          // `logCount` and `avgRating` were removed here. Let AlcoholActivityWidget handle stats natively.
 
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
               _AlcoholHeader(alcohol: alcohol),
-
               const SizedBox(height: 16),
-
               FutureBuilder<(int, double)>(
                 future: _fetchGlobalStats(),
                 builder: (context, snapshot) {
@@ -163,26 +151,19 @@ class AlcoholDetailScreen extends StatelessWidget {
                   );
                 },
               ),
-
-
               const SizedBox(height: 16),
-
               const Text(
                 'Your logs',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-
               const SizedBox(height: 8),
-
               ...logs.map((log) => DrinkLogCard(log: log)),
-
               const SizedBox(height: 24),
               Text(
                 'Community',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
-
               FutureBuilder<List<DrinkLogModel>>(
                 future: _drinkLogRepository.fetchReviewsForAlcohol(alcohol.id),
                 builder: (context, snapshot) {
@@ -212,9 +193,6 @@ class AlcoholDetailScreen extends StatelessWidget {
                   );
                 },
               ),
-
-
-
             ],
           );
         },
@@ -262,13 +240,10 @@ class AlcoholDetailScreen extends StatelessWidget {
                   },
                 ),
               ),
-
-
             ],
           ),
         ),
       ),
-
     );
   }
 }
@@ -292,21 +267,21 @@ class _AlcoholHeader extends StatelessWidget {
             aspectRatio: 1 / 1,
             child: alcohol.imageUrl.isNotEmpty
                 ? Image.network(
-              alcohol.imageUrl,
-              fit: BoxFit.cover,
-              loadingBuilder: (context, child, progress) {
-                if (progress == null) return child;
-                return Container(
-                  color: Colors.grey.shade200,
-                  child: const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              },
-              errorBuilder: (context, error, stackTrace) {
-                return _imagePlaceholder();
-              },
-            )
+                    alcohol.imageUrl,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return Container(
+                        color: Colors.grey.shade200,
+                        child: const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return _imagePlaceholder();
+                    },
+                  )
                 : _imagePlaceholder(),
           ),
         ),
@@ -347,9 +322,9 @@ class _AlcoholHeader extends StatelessWidget {
         ],
       ],
     );
-
   }
 }
+
 class _AlcoholStats extends StatelessWidget {
   final int logCount;
   final double avgRating;
@@ -418,9 +393,7 @@ class _StatItem extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-
         const SizedBox(height: 4),
-
         Text(
           label,
           style: const TextStyle(
@@ -432,6 +405,7 @@ class _StatItem extends StatelessWidget {
     );
   }
 }
+
 Widget _imagePlaceholder() {
   return Container(
     color: Colors.grey.shade200,
@@ -444,5 +418,3 @@ Widget _imagePlaceholder() {
     ),
   );
 }
-
-
