@@ -62,6 +62,17 @@ Source of Truth: `lib/features/wishlist/models/wishlist_item_model.dart`
 *   `note`: String? (Nullable — optional personal note, e.g., "heard about this at Jake's party")
 *   `addedAt`: Timestamp (When the item was added)
 
+### Collection: `user_alcohol_meta`
+Source of Truth: `lib/features/alcohol/screens/alcohol_detail_screen.dart` (Implementation)
+*   Document ID: `${userId}_${alcoholId}`
+- `personalNote`: String (The user's private definition of this bottle)
+- `updatedAt`: Timestamp
+
+### Collection: `configs`
+Source of Truth: `lib/core/flags/feature_flags.dart`
+* Document ID: `app_flags`
+- `personal_meaning_enabled`: Boolean (Toggles the user-editable notes section)
+
 **Indexes (Only If Defined):**
 No explicit secondary indexes defined in the repository (Firestore handles single-field indexing automatically; no composite index configurations like `firestore.indexes.json` are present).
 
@@ -83,6 +94,8 @@ No explicit API server routes exist in this repository. All data fetching operat
 *   **SDK Usage:** `FirebaseAuth.instance` is accessed globally.
 *   **Guards:** `AuthGate` acts as a primary client-side router, actively guarding the `/home` route behind a non-null `FirebaseAuth.instance.authStateChanges()` stream AND verifying that `onboardingCompleted` is true in the `users` Firestore document.
 *   **Session cookies / JWT:** Managed internally by the Firebase Auth SDK. Token expiry and refresh logic are not manually handled in the codebase.
+*   **Permission Logic:** Restricted Firestore write access implemented in Security Rules for specific collections:
+    *   `match /configs/{document}` write access restricted to specific verified email tokens (`akhilsharma.ptk22@gmail.com` or `sharmakhil1704@gmail.com`).
 *   Hashing strength not explicitly visible in code (managed by Google/Firebase).
 
 ## 6. Data Validation Rules (Code-Verified Only)

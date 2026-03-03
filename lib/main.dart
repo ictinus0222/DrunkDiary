@@ -11,7 +11,9 @@ import 'core/auth/auth_gate.dart';
 import 'core/firebase/firebase_options.dart';
 import 'features/profile/screens/profile_screen.dart';
 import 'features/search/screens/search_screen.dart';
+import 'features/admin/screens/admin_settings_screen.dart';
 import 'splash/splash_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 // imports
 
 void main() async {
@@ -22,7 +24,11 @@ void main() async {
     // connect flutter app to Firebase backend
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const DrunkDiaryApp()); // launch the app
+  runApp(
+    const ProviderScope(
+      child: DrunkDiaryApp(),
+    ),
+  ); // launch the app
 }
 
 class DrunkDiaryApp extends StatelessWidget {
@@ -49,6 +55,7 @@ class DrunkDiaryApp extends StatelessWidget {
         AppRoutes.profile: (context) => ProfileScreen(), // ☑️
         AppRoutes.shelf: (context) => ShelfScreen(),
         AppRoutes.search: (context) => SearchScreen(), // ☑️
+        AppRoutes.adminSettings: (context) => const AdminSettingsScreen(),
       },
 
       theme: AppThemes.darkTheme,

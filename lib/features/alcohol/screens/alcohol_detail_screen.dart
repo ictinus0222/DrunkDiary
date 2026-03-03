@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/flags/feature_flags.dart';
 import '../../wishlist/widgets/wishlist_action_button.dart';
 import '../../drink_logs/widgets/create_review_bottom_sheet.dart';
 import '../../drink_logs/widgets/edit_review_bottom_sheet.dart';
@@ -39,28 +41,27 @@ class AlcoholDetailScreen extends StatelessWidget {
         .where('alcoholId', isEqualTo: alcohol.id)
         .snapshots()
         .map((snapshot) {
-      final docs = snapshot.docs;
-      if (docs.isEmpty) return (0, 0.0, 0, 0);
+      final items = snapshot.docs.map(DrinkLogModel.fromFirestore).toList();
+      if (items.isEmpty) return (0, 0.0, 0, 0);
 
-      final ratingDocs = docs.where((d) => d['logKind'] == 'review').toList();
+      final ratingDocs =
+          items.where((d) => d.logKind == LogKind.review).toList();
       double avgRating = 0.0;
       if (ratingDocs.isNotEmpty) {
-        final ratings = ratingDocs
-            .map((doc) => (doc.data()['rating'] as num?)?.toDouble() ?? 0.0)
-            .toList();
+        final ratings = ratingDocs.map((doc) => doc.rating ?? 0.0).toList();
         avgRating = ratings.reduce((a, b) => a + b) / ratings.length;
       }
 
-      final personalLogs = docs.where((d) => d['userId'] == user.uid).toList();
+      final personalLogs = items
+          .where((d) => d.userId == user.uid && d.logKind == LogKind.log)
+          .toList();
 
       int likes = 0;
       int dislikes = 0;
-      final generalLogs = docs.where((d) => d['logKind'] == 'log').toList();
-      for (var doc in generalLogs) {
-        final data = doc.data() as Map<String, dynamic>? ?? {};
-        final bool? isLiked = data.containsKey('isLiked')
-            ? data['isLiked'] as bool?
-            : ((data['rating'] as num?)?.toDouble() ?? 0.0) >= 1.0;
+      final generalLogs = items.where((d) => d.logKind == LogKind.log).toList();
+      for (var log in generalLogs) {
+        final bool? isLiked =
+            log.isLiked ?? (log.rating != null ? log.rating! >= 1.0 : null);
 
         if (isLiked == true) {
           likes++;
@@ -74,7 +75,7 @@ class AlcoholDetailScreen extends StatelessWidget {
         likeRatio = (likes * 100 / (likes + dislikes)).round();
       }
 
-      return (docs.length, avgRating, personalLogs.length, likeRatio);
+      return (generalLogs.length, avgRating, personalLogs.length, likeRatio);
     });
   }
 
@@ -174,7 +175,18 @@ class AlcoholDetailScreen extends StatelessWidget {
                       likeRatio: likeRatio);
                 },
               ),
-              _AboutSection(alcohol: alcohol),
+              Consumer(
+                builder: (context, ref, child) {
+                  final flagsAsync = ref.watch(featureFlagsProvider);
+                  return flagsAsync.when(
+                    data: (flags) => flags.personalMeaningEnabled
+                        ? _PersonalMeaningSection(alcohol: alcohol)
+                        : _AboutSection(alcohol: alcohol),
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => _AboutSection(alcohol: alcohol),
+                  );
+                },
+              ),
               if (logs.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 const Padding(
@@ -439,6 +451,182 @@ class _StatCol extends StatelessWidget {
   }
 }
 
+class _PersonalMeaningSection extends StatefulWidget {
+  final AlcoholModel alcohol;
+  const _PersonalMeaningSection({required this.alcohol});
+
+  @override
+  State<_PersonalMeaningSection> createState() =>
+      _PersonalMeaningSectionState();
+}
+
+class _PersonalMeaningSectionState extends State<_PersonalMeaningSection> {
+  final TextEditingController _controller = TextEditingController();
+  bool _isEditing = false;
+  bool _isSaving = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveNote() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    setState(() => _isSaving = true);
+    try {
+      await FirebaseFirestore.instance
+          .collection('user_alcohol_meta')
+          .doc('${user.uid}_${widget.alcohol.id}')
+          .set({
+        'personalNote': _controller.text.trim(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+      setState(() => _isEditing = false);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to save note')),
+      );
+    } finally {
+      setState(() => _isSaving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return const SizedBox.shrink();
+
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('user_alcohol_meta')
+          .doc('${user.uid}_${widget.alcohol.id}')
+          .snapshots(),
+      builder: (context, snapshot) {
+        final data = snapshot.data?.data() as Map<String, dynamic>?;
+        final note = data?['personalNote'] as String? ?? '';
+
+        if (!_isEditing && !_controller.text.isNotEmpty && note.isNotEmpty) {
+          _controller.text = note;
+        }
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'What this means to you',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (!_isEditing)
+                    IconButton(
+                      icon: Icon(note.isEmpty ? Icons.add : Icons.edit,
+                          color: Colors.amber, size: 20),
+                      onPressed: () => setState(() => _isEditing = true),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              if (_isEditing)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    TextField(
+                      controller: _controller,
+                      autofocus: true,
+                      maxLines: null,
+                      style:
+                          const TextStyle(color: Colors.white70, fontSize: 14),
+                      decoration: InputDecoration(
+                        hintText: 'Define what this bottle is for you...',
+                        hintStyle: TextStyle(color: Colors.grey.shade600),
+                        filled: true,
+                        fillColor: Colors.grey.shade900,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: _isSaving
+                              ? null
+                              : () => setState(() => _isEditing = false),
+                          child: const Text('Cancel',
+                              style: TextStyle(color: Colors.grey)),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: _isSaving ? null : _saveNote,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.amber,
+                            foregroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                          ),
+                          child: _isSaving
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2, color: Colors.black),
+                                )
+                              : const Text('Save'),
+                        ),
+                      ],
+                    ),
+                  ],
+                )
+              else if (note.isNotEmpty)
+                Text(
+                  note,
+                  style: TextStyle(
+                    color: Colors.grey.shade400,
+                    fontSize: 14,
+                    height: 1.5,
+                    fontStyle: FontStyle.italic,
+                  ),
+                )
+              else
+                GestureDetector(
+                  onTap: () => setState(() => _isEditing = true),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade800),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Define what this bottle means to you...',
+                      style:
+                          TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 24),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _AboutSection extends StatelessWidget {
   final AlcoholModel alcohol;
 
@@ -468,6 +656,13 @@ class _AboutSection extends StatelessWidget {
       ),
     );
   }
+}
+
+// Extension to DashBorder support for the placeholder
+class DashStyle {
+  final double length;
+  final double gap;
+  const DashStyle(this.length, this.gap);
 }
 
 class _BottomActionBar extends StatelessWidget {

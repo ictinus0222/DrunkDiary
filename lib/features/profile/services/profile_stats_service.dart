@@ -19,7 +19,8 @@ class ProfileStatsService {
       QuerySnapshot snapshot) async {
     final docs = snapshot.docs;
 
-    final totalLogs = docs.length;
+    final items = docs.map(DrinkLogModel.fromFirestore).toList();
+    final totalLogs = items.where((log) => log.logKind == LogKind.log).length;
     final Set<String> uniqueAlcohols = {};
     double ratingSum = 0.0;
     int ratingCount = 0;
@@ -31,8 +32,7 @@ class ProfileStatsService {
     final List<DrinkLogModel> recentLogs = [];
     final List<String> recentAlcoholIds = [];
 
-    for (final doc in docs) {
-      final log = DrinkLogModel.fromFirestore(doc);
+    for (final log in items) {
       if (recentLogs.length < 5) {
         recentLogs.add(log);
       }

@@ -2,7 +2,7 @@
 
 ## 1. Stack Overview
 
-Last Updated: 2026-02-27
+Last Updated: 2026-03-03
 
 Architecture Type:
 Mobile Client / Serverless Backend (Flutter application communicating directly with Firebase services).
@@ -20,7 +20,7 @@ Reason: Core UI toolkit for cross-platform app development. Reason not explicitl
 Library: flutter_riverpod
 Version: ^3.0.3
 Source File Evidence: `pubspec.yaml`
-Reason: State management. Reason not explicitly documented in repository.
+Reason: Primary state management used for UI updates and global configuration management (e.g., Feature Flags).
 
 Library: image_picker
 Version: ^1.2.1

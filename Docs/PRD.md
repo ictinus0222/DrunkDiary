@@ -13,10 +13,11 @@ The application solves the problem of tracking and remembering one's experiences
 
 ## 3. Goals & Objectives (Current State Only)
 - Authenticate users securely into the ecosystem and enforce a strict age gate (18+).
-- Allow users to quickly capture a "Drink Log" (capturing a thumbs up/down, photo, tags, and context).
-- Allow users to write personal "Reviews" for alcohols on a 0-5 scale.
+- Allow users to quickly capture a "Drink Log" (capturing a thumbs up/down, photo, tags, and context). These are the only entries counted as "Personal Logs".
+- Allow users to write personal "Reviews" for alcohols on a 0-5 scale. Reviews are formally distinct from logs and do not increment log counts.
 - Aggregate user logs into a personal "Shelf" that showcases their history and average ratings.
-- Enable discovery of alcohols via an integrated search mechanism.
+- Enable discovery of alcohols via an integrated search mechanism (emphasized as the central app action).
+- Manage global app features via a feature flag system to enable A/B testing and controlled rollouts.
 
 ## 4. Success Metrics (Inferred from Code)
 No explicit success metrics or analytics tracking logic (e.g., Mixpanel, Google Analytics events) are implemented in the current codebase.
@@ -25,6 +26,7 @@ No explicit success metrics or analytics tracking logic (e.g., Mixpanel, Google 
 Based on the onboarding flow and feature structure, the target users are individuals of legal drinking age (18+).
 - **The Personal Tracker:** Inferred from features allowing users to take photos and choose contexts like "House parties" or "Bars / clubs".
 - **The Tasting Enthusiast:** Inferred from the separate personal "Review" flow, which asks for detailed taste profiles and provides a 0-5 star slider to evaluate specific alcohols.
+- **The Admin / Moderator:** Specific identified administrative accounts (`akhilsharma.ptk22@gmail.com`, `sharmakhil1704@gmail.com`) with access to global configuration toggles.
 
 ## 6. Features & Requirements
 
@@ -77,9 +79,13 @@ Based on the onboarding flow and feature structure, the target users are individ
     - Items are displayed as rich cards showing image, type, global rating, and a checkmark if logged/reviewed by the user.
     - Search bar includes a filter button, which opens a bottom sheet allowing sorting (A-Z, High-Low Rating, Most Reviewed) and type filtering (e.g. Whisky, Rum, Vodka).
 - **Alcohol Details**
-  - **Description:** Displays alcohol information, personal logs, and global community stats.
-  - **User Story:** As a user, I can view details of a drink, see my personal logs, and view community statistics like total global logs, global average rating, and a global like ratio.
-  - **Acceptance Criteria:** Queries all logs for the specified alcohol to calculate global total logs, personal total logs, average community rating, and the global like-to-dislike ratio. Exposes logging actions.
+  - **Description:** Displays alcohol information, personal logs, and global community stats. Replaces static "About" descriptions with a user-defined "Personal Meaning" section.
+  - **User Story:** As a user, I can view details of a drink, define what the bottle specifically means to me (storing a private personal note), see my personal logs (excluding reviews), and view community statistics like total global logs, global average rating, and a global like ratio.
+  - **Acceptance Criteria:** Queries all logs for the specified alcohol to calculate global total logs, personal total logs (logKind: log only), average community rating, and the global like-to-dislike ratio. Provides an editable "Personal Meaning" field stored in `user_alcohol_meta`.
+- **Feature Flags & Admin Settings (A/B Testing)**
+  - **Description:** A system for controlling visibility of new features globally or per segment.
+  - **User Story:** As an admin, I want to toggle features (like the Personal Meaning section) on or off for all users from within the app so I can test experimental features.
+  - **Acceptance Criteria:** Real-time state management via Riverpod. Authentication-restricted entry point in Profile. Persists values in Firestore `configs` collection.
 
 ### P2 (Minor or Utility Features Already Present)
 

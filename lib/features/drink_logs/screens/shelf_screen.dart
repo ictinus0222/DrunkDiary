@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../widgets/shelf_card.dart';
 import '../../../core/widgets/app_empty_state.dart';
-import '../../../core/navigation/tab_change_notification.dart';
+import 'package:drunk_diary/core/navigation/tab_change_notification.dart';
 
 class ShelfScreen extends StatefulWidget {
   static const routeName = '/shelf';
@@ -82,7 +82,11 @@ class _ShelfScreenState extends State<ShelfScreen> {
 
       alcohols.add(AlcoholModel.fromFirestore(alcoholDoc));
 
-      counts[alcoholId] = logs.length;
+      final standardLogs = logs
+          .where(
+              (l) => (l.data() as Map<String, dynamic>?)?['logKind'] == 'log')
+          .toList();
+      counts[alcoholId] = standardLogs.length;
 
       // Calculate Ratings
       final reviewLogs = logs
@@ -277,7 +281,7 @@ class _ShelfScreenState extends State<ShelfScreen> {
                         onAddTap: () {
                           if (allShelfAlcohols.isEmpty) {
                             // Dispatch notification to jump to Search tab
-                            const TabChangeNotification(1).dispatch(context);
+                            const TabChangeNotification(2).dispatch(context);
                           } else {
                             setState(() {
                               searchQuery = '';

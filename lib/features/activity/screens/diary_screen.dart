@@ -7,7 +7,7 @@ import '../../drink_logs/widgets/drink_log_card.dart';
 import '../../drink_logs/widgets/log_detail_bottom_sheet.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../../../core/widgets/app_empty_state.dart';
-import '../../../core/navigation/tab_change_notification.dart';
+import 'package:drunk_diary/core/navigation/tab_change_notification.dart';
 
 enum DiaryLayout { timeline, gallery }
 
@@ -131,7 +131,7 @@ class _StatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final total = logs.length;
+    final total = logs.where((l) => l.logKind == LogKind.log).length;
 
     final reviewLogs = logs
         .where((l) => l.logKind == LogKind.review && l.rating != null)
@@ -341,7 +341,7 @@ class _DiaryList extends StatelessWidget {
         subtitle: 'Capture your first drink memory\nand see it here.',
         buttonText: 'Log a Drink',
         onAddTap: () {
-          const TabChangeNotification(1).dispatch(context);
+          const TabChangeNotification(2).dispatch(context);
         },
       );
     }

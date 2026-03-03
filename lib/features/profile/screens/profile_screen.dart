@@ -29,7 +29,22 @@ class ProfileScreen extends StatelessWidget {
             ),
             child: IconButton(
               icon: const Icon(Icons.settings, color: Colors.grey),
-              onPressed: () {},
+              onPressed: () {
+                final user = FirebaseAuth.instance.currentUser;
+                final adminEmails = [
+                  'akhilsharma.ptk22@gmail.com',
+                  'sharmakhil1704@gmail.com',
+                ];
+
+                if (user != null && adminEmails.contains(user.email)) {
+                  Navigator.pushNamed(context, '/adminSettings');
+                } else {
+                  // Show generic settings or do nothing
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Settings coming soon!')),
+                  );
+                }
+              },
             ),
           ),
         ],

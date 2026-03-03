@@ -119,16 +119,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _openAddSheet,
-        backgroundColor: Colors.amber,
-        foregroundColor: Colors.black,
-        icon: const Icon(Icons.bookmark_add),
-        label: const Text(
-          'Add Drink',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-      ),
       body: StreamBuilder<List<WishlistItemModel>>(
         stream: _wishlistRepo.streamWishlist(_userId),
         builder: (context, snapshot) {

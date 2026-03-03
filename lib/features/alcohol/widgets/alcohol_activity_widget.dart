@@ -49,7 +49,7 @@ class AlcoholActivityWidget extends StatelessWidget {
         }
 
         // 📊 Stats
-        final logCount = logs.length;
+        final logCount = logs.where((l) => l.logKind == LogKind.log).length;
         final reviewLogs = logs
             .where((l) => l.logKind == LogKind.review && l.rating != null)
             .toList();

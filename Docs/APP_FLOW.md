@@ -7,6 +7,7 @@
 * **Missing Elements (Not Implemented):**
   * No deep linking logic identified in codebase.
   * No push notification entry flows identified.
+  * Admin-only access points restricted to specific authenticated emails via UI-level checks.
 
 ## 2. Core User Flows (Implemented Only)
 
@@ -74,16 +75,17 @@ AuthGate
 ├── OnboardingScreen
 └── HomeScreen (BottomNavigationBar)
     ├── Tab 0: DiaryScreen
-    ├── Tab 1: SearchScreen
+    ├── Tab 1: WishlistScreen
+    │   └── AlcoholDetailScreen (via tapping a wishlist item)
+    ├── Tab 2: Discover (SearchScreen - Emphasized Icon)
     │   ├── AlcoholDetailScreen
     │   │   ├── CreateLogBottomSheet (Modal)
     │   │   ├── CreateReviewBottomSheet (Modal)
-    │   │   └── ReviewEditorScreen
-    ├── Tab 2: WishlistScreen
-    │   └── AlcoholDetailScreen (via tapping a wishlist item)
+    │   │   └── EditReviewBottomSheet (Modal)
     ├── Tab 3: ShelfScreen
     │   └── AlcoholDetailScreen
     └── Tab 4: ProfileScreen
+        └── AdminSettingsScreen (Restricted Entry via Settings Icon)
 ```
 
 ## 4. Screen Inventory (Code-Verified)
@@ -121,7 +123,7 @@ AuthGate
 * **Screen:** `AlcoholDetailScreen`
   * **Route:** `/alcoholDetail`
   * **Access:** Authenticated
-  * **Purpose:** Shows details and personal logs stream for a specific alcohol. Displays a "Community Stats" section showing total community logs, personal logs, community average rating, and a global like ratio. Contains action buttons to trigger Logging/Reviewing.
+  * **Purpose:** Shows details and personal logs stream for a specific alcohol. Displays a "Community Stats" section showing total community logs, personal logs (filtered to logs only), community average rating, and a global like ratio. Replaces the static 'About' section with a user-editable 'Personal Meaning' field stored per user. Contains action buttons to trigger Logging/Reviewing.
 * **Screen:** `ShelfScreen`
   * **Route:** `/shelf`
   * **Access:** Authenticated
@@ -137,6 +139,11 @@ AuthGate
   * **Route:** `/profile` (if any)
   * **Access:** Authenticated
   * **Purpose:** Displays the user's personal profile including basic info (avatar, username), dynamic statistics (Drinks Tried, Favorite Type, Top Rated), a horizontal "Public Shelf" showcasing recently logged alcohols, and a "Recent Activity" vertical feed of individual drink logs. Contains a settings action in the app bar.
+  * **Admin Logic:** Settings icon checks for `akhilsharma.ptk22@gmail.com` or `sharmakhil1704@gmail.com` to trigger navigation to `AdminSettingsScreen`.
+* **Screen:** `AdminSettingsScreen`
+  * **Route:** `/adminSettings`
+  * **Access:** Restricted (Authorized Admin Emails Only)
+  * **Purpose:** Real-time toggle control for feature flags (e.g., "Personal Meaning Section"). Uses Riverpod to update global state persisted in Firestore.
 
 ## 5. Decision Points (Derived from Conditionals)
 

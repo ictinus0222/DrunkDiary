@@ -5,8 +5,8 @@ DrunkDiary is a Flutter-based mobile application that allows legal-age users to 
 ## 🚀 Overview
 <!-- SYNC_OVERVIEW_START -->
 - Authenticate users securely into the ecosystem and enforce a strict age gate (18+).
-- Allow users to quickly capture a "Drink Log" (capturing a thumbs up/down, photo, tags, and context).
-- Allow users to write personal "Reviews" for alcohols on a 0-5 scale.
+- Allow users to quickly capture a "Drink Log" (capturing a thumbs up/down, photo, tags, and context). These are the only entries counted as "Personal Logs".
+- Allow users to write personal "Reviews" for alcohols on a 0-5 scale. Reviews are formally distinct from logs and do not increment log counts.
 - Aggregate user logs into a personal "Shelf" that showcases their history and average ratings.
 <!-- SYNC_OVERVIEW_END -->
 
@@ -29,16 +29,17 @@ AuthGate
 ├── OnboardingScreen
 └── HomeScreen (BottomNavigationBar)
     ├── Tab 0: DiaryScreen
-    ├── Tab 1: SearchScreen
+    ├── Tab 1: WishlistScreen
+    │   └── AlcoholDetailScreen (via tapping a wishlist item)
+    ├── Tab 2: Discover (SearchScreen - Emphasized Icon)
     │   ├── AlcoholDetailScreen
     │   │   ├── CreateLogBottomSheet (Modal)
     │   │   ├── CreateReviewBottomSheet (Modal)
-    │   │   └── ReviewEditorScreen
-    ├── Tab 2: WishlistScreen
-    │   └── AlcoholDetailScreen (via tapping a wishlist item)
+    │   │   └── EditReviewBottomSheet (Modal)
     ├── Tab 3: ShelfScreen
     │   └── AlcoholDetailScreen
     └── Tab 4: ProfileScreen
+        └── AdminSettingsScreen (Restricted Entry via Settings Icon)
 ```
 <!-- SYNC_FLOW_END -->
 
@@ -50,6 +51,8 @@ DrunkDiary uses a **Serverless (BaaS)** architecture based on Firebase:
 - **`alcohols`**
 - **`drink_logs`**
 - **`wishlists`**
+- **`user_alcohol_meta`**
+- **`configs`**
 <!-- SYNC_ARCH_END -->
 
 ## 🎨 Design System

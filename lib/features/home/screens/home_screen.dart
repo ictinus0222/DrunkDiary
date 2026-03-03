@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/navigation/tab_change_notification.dart';
+import 'package:drunk_diary/core/navigation/tab_change_notification.dart';
 
 import '../../activity/screens/diary_screen.dart';
 import '../../drink_logs/screens/shelf_screen.dart';
@@ -20,8 +20,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _screens = const [
     DiaryScreen(), // Tab 0: Diary
-    SearchScreen(), // Tab 1: Discover
-    WishlistScreen(), // Tab 2: Wishlist
+    WishlistScreen(), // Tab 1: Wishlist
+    SearchScreen(), // Tab 2: Discover
     ShelfScreen(), // Tab 3: Shelf
     ProfileScreen(), // Tab 4: Profile
   ];
@@ -51,26 +51,53 @@ class _HomeScreenState extends State<HomeScreen> {
         unselectedItemColor: Colors.grey.shade600,
         showSelectedLabels: true,
         showUnselectedLabels: true,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.menu_book),
+        selectedFontSize: 12,
+        unselectedFontSize: 12,
+        items: [
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.menu_book_outlined),
+            activeIcon: Icon(Icons.menu_book),
             label: 'Diary',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Discover',
-          ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.bookmark_border),
             activeIcon: Icon(Icons.bookmark),
             label: 'Wishlist',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.local_bar),
+            icon: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: _currentIndex == 2
+                    ? Colors.amber
+                    : Colors.amber.withOpacity(0.1),
+                shape: BoxShape.circle,
+                boxShadow: _currentIndex == 2
+                    ? [
+                        BoxShadow(
+                          color: Colors.amber.withOpacity(0.4),
+                          blurRadius: 15,
+                          spreadRadius: 2,
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Icon(
+                Icons.search,
+                color: _currentIndex == 2 ? Colors.black : Colors.amber,
+                size: 28,
+              ),
+            ),
+            label: '',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.local_bar_outlined),
+            activeIcon: Icon(Icons.local_bar),
             label: 'Shelf',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person),
             label: 'Profile',
           ),
         ],
