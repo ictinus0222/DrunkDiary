@@ -79,9 +79,11 @@ AuthGate
     │   │   ├── CreateLogBottomSheet (Modal)
     │   │   ├── CreateReviewBottomSheet (Modal)
     │   │   └── ReviewEditorScreen
-    ├── Tab 2: ShelfScreen
+    ├── Tab 2: WishlistScreen
+    │   └── AlcoholDetailScreen (via tapping a wishlist item)
+    ├── Tab 3: ShelfScreen
     │   └── AlcoholDetailScreen
-    └── Tab 3: ProfileScreen
+    └── Tab 4: ProfileScreen
 ```
 
 ## 4. Screen Inventory (Code-Verified)
@@ -125,6 +127,12 @@ AuthGate
   * **Access:** Authenticated
   * **Purpose:** Aggregates, counts, and averages the user's logs grouped by alcohol. Includes sorting functionality via a bottom sheet allowing users to reorder their items (A-Z, High Rating, Most Consumed).
   * **State Variants:** Loading (CircularProgressIndicator), Empty ("Your shelf is empty").
+* **Screen:** `WishlistScreen`
+  * **Route:** `/wishlist`
+  * **Access:** Authenticated
+  * **Purpose:** Displays the user's personal wishlist of alcohols they want to try. Cross-references `drink_logs` to show a "Tried!" badge on already-logged items.
+  * **State Variants:** Loading (CircularProgressIndicator), Empty ("Your wishlist is empty — discover something to add!").
+  * **Actions Available:** FAB opens `AddToWishlistSheet` (search + note), swipe-to-dismiss removes item, tap item → `AlcoholDetailScreen`.
 * **Screen:** `ProfileScreen`
   * **Route:** `/profile` (if any)
   * **Access:** Authenticated

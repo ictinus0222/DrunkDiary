@@ -3,7 +3,7 @@
 ## 1. Product Overview
 Project Title: DrunkDiary
 Version: 1.0.0+1
-Last Updated: 2026-02-27
+Last Updated: 2026-03-03
 Owner: Not explicitly identified in the repository metadata.
 
 DrunkDiary is a Flutter-based mobile application that allows legal-age users to log or review the alcoholic beverages they consume for personal tracking. It securely authenticates users via Google, ensures they are 18+, and acts as a digital diary and tracking shelf for their drinking journey. The app provides a timeline of past drinks, aggregates statistics (like favorite drinks and average ratings) in a "Shelf" view, and enables discovery of beverages via a centralized search architecture.
@@ -59,6 +59,16 @@ Based on the onboarding flow and feature structure, the target users are individ
   - **Acceptance Criteria:** Fetches the user's logs, groups by ID, retrieves the associated `AlcoholModel`, and computes average rating and total consumption count per alcohol. Displays the unique alcohols in a styled grid ("Shelf"). Includes a sort/filter button that opens a bottom sheet allowing users to sort their shelf (e.g., A-Z, High Rating, Most Consumed).
 
 ### P1 (Implemented but Secondary Features)
+- **Wishlist (Bucket List)**
+  - **Description:** A personal wish list for saving alcohols the user wants to try in the future.
+  - **User Story:** As a user, I want to save an alcohol I've heard about so I can find and try it later.
+  - **Acceptance Criteria:**
+    - User can search for an alcohol from the `alcohols` database and add it to their wishlist.
+    - Each wishlist item shows the alcohol's name, type, image, and an optional personal note.
+    - User can remove items from the wishlist.
+    - Wishlist is private and scoped to the authenticated user only.
+    - Items already logged/reviewed by the user show a visual "Tried!" indicator.
+  - **Edge Cases:** Duplicate wishlist entries for the same alcohol are prevented.
 - **Search & Discovery**
   - **Description:** Offers a "Discover" feed of all available alcohols with sorting/filtering capabilities and text-based search.
   - **User Story:** As a user, I can browse a random discover feed of alcohols, filter them by type, sort them by rating or review count, or explicitly search for an alcohol's name. I can also see if I've previously logged an alcohol directly from the list.

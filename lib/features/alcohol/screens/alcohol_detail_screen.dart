@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../wishlist/widgets/wishlist_action_button.dart';
 import '../../drink_logs/widgets/create_review_bottom_sheet.dart';
 import '../../drink_logs/widgets/edit_review_bottom_sheet.dart';
 import '../models/alcohol_model.dart';
@@ -146,16 +147,7 @@ class AlcoholDetailScreen extends StatelessWidget {
           ),
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0, top: 4.0, bottom: 4.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.white.withOpacity(0.15),
-              child: IconButton(
-                icon: const Icon(Icons.share, color: Colors.white, size: 20),
-                onPressed: () {},
-              ),
-            ),
-          ),
+          WishlistActionButton(alcohol: alcohol),
         ],
       ),
       body: StreamBuilder<List<DrinkLogModel>>(

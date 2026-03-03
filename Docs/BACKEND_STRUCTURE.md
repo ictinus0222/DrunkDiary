@@ -51,6 +51,17 @@ Source of Truth: `lib/features/drink_logs/models/drink_model_dto.dart`
 *   `photoUploadedAt`: Timestamp? (Nullable, Mapped to DateTime)
 *   `createdByUserId`: String? (Nullable)
 
+### Collection: `wishlists`
+Source of Truth: `lib/features/wishlist/models/wishlist_item_model.dart`
+*   `id`: String (Document ID, auto-generated)
+*   `userId`: String (Owner of the wishlist item, references `users.id`)
+*   `alcoholId`: String (References `alcohols.id`)
+*   `alcoholName`: String (Denormalized from `alcohols` for display without extra reads)
+*   `alcoholType`: String (Denormalized from `alcohols`)
+*   `alcoholImageUrl`: String (Denormalized from `alcohols`)
+*   `note`: String? (Nullable — optional personal note, e.g., "heard about this at Jake's party")
+*   `addedAt`: Timestamp (When the item was added)
+
 **Indexes (Only If Defined):**
 No explicit secondary indexes defined in the repository (Firestore handles single-field indexing automatically; no composite index configurations like `firestore.indexes.json` are present).
 

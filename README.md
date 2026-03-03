@@ -34,9 +34,11 @@ AuthGate
     │   │   ├── CreateLogBottomSheet (Modal)
     │   │   ├── CreateReviewBottomSheet (Modal)
     │   │   └── ReviewEditorScreen
-    ├── Tab 2: ShelfScreen
+    ├── Tab 2: WishlistScreen
+    │   └── AlcoholDetailScreen (via tapping a wishlist item)
+    ├── Tab 3: ShelfScreen
     │   └── AlcoholDetailScreen
-    └── Tab 3: ProfileScreen
+    └── Tab 4: ProfileScreen
 ```
 <!-- SYNC_FLOW_END -->
 
@@ -47,6 +49,7 @@ DrunkDiary uses a **Serverless (BaaS)** architecture based on Firebase:
 - **`usernames`**
 - **`alcohols`**
 - **`drink_logs`**
+- **`wishlists`**
 <!-- SYNC_ARCH_END -->
 
 ## 🎨 Design System
