@@ -7,6 +7,7 @@ import '../../drink_logs/models/drink_model_dto.dart';
 import '../models/discover_item_model.dart';
 import '../widgets/discover_alcohol_card.dart';
 import '../widgets/filter_bottom_sheet.dart';
+import '../../../core/widgets/app_empty_state.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -225,15 +226,21 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                     Expanded(
                       child: _filteredAlcohols.isEmpty
-                          ? Center(
-                              child: Text(
-                                'No alcohols found.\nTry a different search or filter.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.grey.shade500,
-                                  fontSize: 16,
-                                ),
-                              ),
+                          ? AppEmptyState(
+                              icon: Icons.search_off_outlined,
+                              title: 'No results found',
+                              subtitle:
+                                  'Try searching for something else\nor clearing your filters.',
+                              buttonText: 'Clear Search',
+                              onAddTap: () {
+                                _controller.clear();
+                                setState(() {
+                                  _searchQuery = '';
+                                  _selectedType = null;
+                                  _selectedSort = DiscoverSortOption.random;
+                                });
+                                _applyFilters();
+                              },
                             )
                           : ListView.builder(
                               padding: const EdgeInsets.all(16),

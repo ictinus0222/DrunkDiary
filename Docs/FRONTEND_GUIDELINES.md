@@ -64,7 +64,13 @@ No explicit custom shadow scales or elevation configurations identified in the i
 
 ### State Indicators
 *   **Loading Spinner:** Relies on default `CircularProgressIndicator()`. Embedded inside buttons during async actions, sometimes passing `strokeWidth: 2`.
-*   **Empty States:** Basic centered text prompts (e.g., "Your shelf is empty 🍻", "Start typing to search").
+*   **Empty States:** A standardized `AppEmptyState` component used across all primary screens.
+    *   **Visual Structure:** Centered Column with a circular icon container (low-opacity amber background), a headline (`fontSize: 20`, bold), a descriptive subtext (`fontSize: 14`, grey), and an optional primary action button (amber).
+    *   **Icons:** 
+        *   Wishlist: `Icons.bookmark_border`
+        *   Shelf: `Icons.inventory_2_outlined`
+        *   Diary: `Icons.history_edu_outlined`
+        *   Search: `Icons.search_off_outlined`
 *   **Error States:** Raw text messages rendered conditionally in UI trees (e.g., `Text(_error!, style: const TextStyle(color: Colors.red))`).
 
 ## 5. Accessibility (Only If Implemented)

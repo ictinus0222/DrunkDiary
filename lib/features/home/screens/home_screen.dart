@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/navigation/tab_change_notification.dart';
 
 import '../../activity/screens/diary_screen.dart';
 import '../../drink_logs/screens/shelf_screen.dart';
@@ -28,7 +29,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: NotificationListener<TabChangeNotification>(
+        onNotification: (notification) {
+          setState(() => _currentIndex = notification.index);
+          return true; // Stop bubbling
+        },
+        child: IndexedStack(
+          index: _currentIndex,
+          children: _screens,
+        ),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {

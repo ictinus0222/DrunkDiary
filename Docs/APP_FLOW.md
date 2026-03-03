@@ -110,7 +110,7 @@ AuthGate
   * **Route:** `/diary`
   * **Access:** Authenticated
   * **Purpose:** Fetches user's `drink_logs` and displays them in a customizable diary view. Includes summary stats and a layout switcher.
-  * **State Variants:** Loading (CircularProgressIndicator), Empty ("Your first drink memory is waiting"), Layouts (Timeline vs. Gallery).
+  * **State Variants:** Loading (CircularProgressIndicator), Empty (Standardized `AppEmptyState` with action to log a drink), Layouts (Timeline vs. Gallery).
   * **Actions Available:** Switch between Timeline Layout (detailed list) and Gallery Layout (photo grid).
 * **Screen:** `SearchScreen`
   * **Route:** `/search`
@@ -126,12 +126,12 @@ AuthGate
   * **Route:** `/shelf`
   * **Access:** Authenticated
   * **Purpose:** Aggregates, counts, and averages the user's logs grouped by alcohol. Includes sorting functionality via a bottom sheet allowing users to reorder their items (A-Z, High Rating, Most Consumed).
-  * **State Variants:** Loading (CircularProgressIndicator), Empty ("Your shelf is empty").
+  * **State Variants:** Loading (CircularProgressIndicator), Empty (Standardized `AppEmptyState` with action to discover drinks).
 * **Screen:** `WishlistScreen`
   * **Route:** `/wishlist`
   * **Access:** Authenticated
   * **Purpose:** Displays the user's personal wishlist of alcohols they want to try. Cross-references `drink_logs` to show a "Tried!" badge on already-logged items.
-  * **State Variants:** Loading (CircularProgressIndicator), Empty ("Your wishlist is empty — discover something to add!").
+  * **State Variants:** Loading (CircularProgressIndicator), Empty (Standardized `AppEmptyState` with action to add from search).
   * **Actions Available:** FAB opens `AddToWishlistSheet` (search + note), swipe-to-dismiss removes item, tap item → `AlcoholDetailScreen`.
 * **Screen:** `ProfileScreen`
   * **Route:** `/profile` (if any)

@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 
 import '../../alcohol/models/alcohol_model.dart';
 import '../widgets/shelf_card.dart';
+import '../../../core/widgets/app_empty_state.dart';
+import '../../../core/navigation/tab_change_notification.dart';
 
 class ShelfScreen extends StatefulWidget {
   static const routeName = '/shelf';
@@ -261,9 +263,27 @@ class _ShelfScreenState extends State<ShelfScreen> {
               // Main Shelf View
               Expanded(
                 child: shelves.isEmpty
-                    ? const Center(
-                        child: Text("No bottles match your filters 🍻",
-                            style: TextStyle(color: Colors.white70)),
+                    ? AppEmptyState(
+                        icon: Icons.inventory_2_outlined,
+                        title: allShelfAlcohols.isEmpty
+                            ? 'Your shelf is empty'
+                            : 'No matches found',
+                        subtitle: allShelfAlcohols.isEmpty
+                            ? 'Log your first drink to start building\nyour personal collection.'
+                            : 'Try searching for something else\nor clearing your filters.',
+                        buttonText: allShelfAlcohols.isEmpty
+                            ? 'Discover Drinks'
+                            : 'Clear Search',
+                        onAddTap: () {
+                          if (allShelfAlcohols.isEmpty) {
+                            // Dispatch notification to jump to Search tab
+                            const TabChangeNotification(1).dispatch(context);
+                          } else {
+                            setState(() {
+                              searchQuery = '';
+                            });
+                          }
+                        },
                       )
                     : ListView.builder(
                         padding: const EdgeInsets.only(bottom: 60),

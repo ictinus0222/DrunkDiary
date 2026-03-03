@@ -8,6 +8,7 @@ import '../models/wishlist_item_model.dart';
 import '../repositories/wishlist_repository.dart';
 import '../widgets/add_to_wishlist_sheet.dart';
 import '../widgets/wishlist_item_card.dart';
+import '../../../core/widgets/app_empty_state.dart';
 
 class WishlistScreen extends StatefulWidget {
   static const routeName = '/wishlist';
@@ -150,7 +151,15 @@ class _WishlistScreenState extends State<WishlistScreen> {
           final items = snapshot.data ?? [];
 
           if (items.isEmpty) {
-            return _EmptyState(onAddTap: _openAddSheet);
+            return AppEmptyState(
+              icon: Icons.bookmark_border,
+              title: 'Your wishlist is empty',
+              subtitle:
+                  'Save drinks you\'ve heard about\nand want to try later.',
+              buttonText: 'Add Your First Drink',
+              buttonIcon: Icons.bookmark_add,
+              onAddTap: _openAddSheet,
+            );
           }
 
           return RefreshIndicator(
@@ -173,76 +182,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  final VoidCallback onAddTap;
-  const _EmptyState({required this.onAddTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(40),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.amber.withOpacity(0.1),
-                border:
-                    Border.all(color: Colors.amber.withOpacity(0.3), width: 2),
-              ),
-              child: const Icon(
-                Icons.bookmark_border,
-                color: Colors.amber,
-                size: 48,
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Your wishlist is empty',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Save drinks you\'ve heard about\nand want to try later.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.grey.shade500,
-                fontSize: 14,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton.icon(
-              onPressed: onAddTap,
-              icon: const Icon(Icons.bookmark_add, color: Colors.black),
-              label: const Text(
-                'Add Your First Drink',
-                style:
-                    TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.amber,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

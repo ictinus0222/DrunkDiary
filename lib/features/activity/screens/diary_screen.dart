@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import '../../drink_logs/widgets/drink_log_card.dart';
 import '../../drink_logs/widgets/log_detail_bottom_sheet.dart';
 import '../../alcohol/models/alcohol_model.dart';
+import '../../../core/widgets/app_empty_state.dart';
+import '../../../core/navigation/tab_change_notification.dart';
 
 enum DiaryLayout { timeline, gallery }
 
@@ -333,11 +335,14 @@ class _DiaryList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (logs.isEmpty) {
-      return const Center(
-        child: Text(
-          'Your first drink memory is waiting 🍻',
-          style: TextStyle(color: Colors.grey),
-        ),
+      return AppEmptyState(
+        icon: Icons.history_edu_outlined,
+        title: 'Your diary is empty',
+        subtitle: 'Capture your first drink memory\nand see it here.',
+        buttonText: 'Log a Drink',
+        onAddTap: () {
+          const TabChangeNotification(1).dispatch(context);
+        },
       );
     }
 
