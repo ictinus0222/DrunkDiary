@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/app_theme.dart';
 import '../models/drink_model_dto.dart';
 import 'log_detail_bottom_sheet.dart';
 
@@ -10,6 +11,8 @@ class DrinkLogCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+
     return GestureDetector(
       onTap: () {
         showModalBottomSheet(
@@ -25,12 +28,12 @@ class DrinkLogCard extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
           color: log.logKind == LogKind.review
-              ? Colors.grey.shade900
-              : const Color(0xFF121212),
+              ? customColors.cardBackground
+              : customColors.deepCardBackground,
           border: Border.all(
             color: log.logKind == LogKind.review
-                ? Colors.amber.withOpacity(0.3)
-                : Colors.grey.shade800,
+                ? customColors.borderLight
+                : customColors.borderDark,
             width: 1,
           ),
           borderRadius: BorderRadius.circular(20),
@@ -44,13 +47,13 @@ class DrinkLogCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _titleRow(),
+                  _titleRow(context),
                   const SizedBox(height: 6),
-                  _metaRow(),
+                  _metaRow(context),
                   const SizedBox(height: 14),
-                  _caption(),
+                  _caption(context),
                   const SizedBox(height: 14),
-                  _chipsRow(),
+                  _chipsRow(context),
                 ],
               ),
             ),
@@ -83,17 +86,19 @@ class DrinkLogCard extends StatelessWidget {
   // ----------------------------
   // TITLE + RATING
   // ----------------------------
-  Widget _titleRow() {
+  Widget _titleRow(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           child: Text(
             log.alcoholName,
-            style: const TextStyle(
-              fontSize: 18,
+            style: textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
-              color: Colors.white,
             ),
           ),
         ),
@@ -105,7 +110,7 @@ class DrinkLogCard extends StatelessWidget {
                 index < (log.rating?.round() ?? 0)
                     ? Icons.star
                     : Icons.star_border,
-                color: Colors.amber,
+                color: colorScheme.primary,
                 size: 16,
               ),
             ),
@@ -113,7 +118,7 @@ class DrinkLogCard extends StatelessWidget {
         else
           Icon(
             log.isLiked == true ? Icons.thumb_up : Icons.thumb_down,
-            color: log.isLiked == true ? Colors.green : Colors.red,
+            color: log.isLiked == true ? customColors.success : customColors.error,
             size: 20,
           ),
       ],
@@ -123,12 +128,14 @@ class DrinkLogCard extends StatelessWidget {
   // ----------------------------
   // DATE + VISIBILITY
   // ----------------------------
-  Widget _metaRow() {
+  Widget _metaRow(BuildContext context) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final textTheme = Theme.of(context).textTheme;
+
     return Text(
       _formattedDate(),
-      style: TextStyle(
-        fontSize: 13,
-        color: Colors.grey.shade400,
+      style: textTheme.bodySmall?.copyWith(
+        color: customColors.textMuted,
       ),
     );
   }
@@ -160,16 +167,18 @@ class DrinkLogCard extends StatelessWidget {
   // ----------------------------
   // CAPTION
   // ----------------------------
-  Widget _caption() {
+  Widget _caption(BuildContext context) {
     if (log.note == null || log.note!.isEmpty) {
       return const SizedBox.shrink();
     }
+    
+    final textTheme = Theme.of(context).textTheme;
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
 
     return Text(
       log.note!,
-      style: TextStyle(
-        fontSize: 14,
-        color: Colors.grey.shade300,
+      style: textTheme.bodyMedium?.copyWith(
+        color: customColors.textMuted,
       ),
     );
   }
@@ -177,29 +186,31 @@ class DrinkLogCard extends StatelessWidget {
   // ----------------------------
   // INFO CHIPS (model-safe)
   // ----------------------------
-  Widget _chipsRow() {
+  Widget _chipsRow(BuildContext context) {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: [
-        _chip(log.alcoholType),
-        _chip(log.logKind == LogKind.review ? 'Review' : 'Log'),
+        _chip(context, log.alcoholType),
+        _chip(context, log.logKind == LogKind.review ? 'Review' : 'Log'),
       ],
     );
   }
 
-  Widget _chip(String text) {
+  Widget _chip(BuildContext context, String text) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final textTheme = Theme.of(context).textTheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.grey.shade800,
+        color: customColors.borderDark,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         text,
-        style: const TextStyle(
-          fontSize: 12,
-          color: Colors.white,
+        style: textTheme.labelSmall?.copyWith(
+          color: Theme.of(context).colorScheme.onSurface,
         ),
       ),
     );

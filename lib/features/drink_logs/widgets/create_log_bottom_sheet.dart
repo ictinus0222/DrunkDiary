@@ -6,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../app/app_theme.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../models/drink_model_dto.dart';
 
@@ -33,8 +34,10 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
   // PHOTO PICKER
   // =====================
   Future<void> pickPhoto(BuildContext context) async {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
     showModalBottomSheet(
       context: context,
+      backgroundColor: customColors.deepCardBackground,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -43,8 +46,8 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: const Text('Take a photo'),
+              leading: Icon(Icons.camera_alt, color: Theme.of(context).colorScheme.onSurface),
+              title: Text('Take a photo', style: Theme.of(context).textTheme.bodyLarge),
               onTap: () async {
                 Navigator.pop(context);
                 final picked = await _picker.pickImage(
@@ -59,8 +62,8 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Choose from gallery'),
+              leading: Icon(Icons.photo_library, color: Theme.of(context).colorScheme.onSurface),
+              title: Text('Choose from gallery', style: Theme.of(context).textTheme.bodyLarge),
               onTap: () async {
                 Navigator.pop(context);
                 final picked = await _picker.pickImage(
@@ -122,8 +125,9 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not save log'),
+          SnackBar(
+            content: Text('Could not save log', style: TextStyle(color: Theme.of(context).colorScheme.onError)),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -165,10 +169,14 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
   // =====================
   @override
   Widget build(BuildContext context) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF141414), // Dark background matching theme
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: customColors.deepCardBackground,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.fromLTRB(
         24,
@@ -188,16 +196,14 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
                 height: 4,
                 margin: const EdgeInsets.only(bottom: 24),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade800,
+                  color: customColors.borderDark,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ),
             Text(
               'Log ${widget.alcohol.name}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 24,
+              style: textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -205,17 +211,17 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
             const SizedBox(height: 6),
             Text(
               'A quick moment — only you can see this.',
-              style: TextStyle(fontSize: 14, color: Colors.grey.shade400),
+              style: textTheme.bodyMedium?.copyWith(
+                color: customColors.textMuted,
+              ),
             ),
 
             const SizedBox(height: 24),
 
             // 👍 / 👎
-            const Text(
+            Text(
               'Your take',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
+              style: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -227,14 +233,14 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
                     icon: Icon(
                       Icons.thumb_up_alt_outlined,
                       color:
-                          liked == true ? Colors.green : Colors.grey.shade400,
+                          liked == true ? customColors.success : customColors.textMuted,
                       size: 20,
                     ),
                     label: Text(
                       'Like',
-                      style: TextStyle(
+                      style: textTheme.titleSmall?.copyWith(
                         color:
-                            liked == true ? Colors.green : Colors.grey.shade400,
+                            liked == true ? customColors.success : customColors.textMuted,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -242,14 +248,14 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       side: BorderSide(
                         color:
-                            liked == true ? Colors.green : Colors.grey.shade800,
+                            liked == true ? customColors.success : customColors.borderDark,
                         width: 1.5,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       backgroundColor: liked == true
-                          ? Colors.green.withOpacity(0.1)
+                          ? customColors.success.withOpacity(0.1)
                           : Colors.transparent,
                     ),
                     onPressed: () => setState(() => liked = true),
@@ -260,14 +266,14 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
                   child: OutlinedButton.icon(
                     icon: Icon(
                       Icons.thumb_down_alt_outlined,
-                      color: liked == false ? Colors.red : Colors.grey.shade400,
+                      color: liked == false ? customColors.error : customColors.textMuted,
                       size: 20,
                     ),
                     label: Text(
                       'Dislike',
-                      style: TextStyle(
+                      style: textTheme.titleSmall?.copyWith(
                         color:
-                            liked == false ? Colors.red : Colors.grey.shade400,
+                            liked == false ? customColors.error : customColors.textMuted,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -275,14 +281,14 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       side: BorderSide(
                         color:
-                            liked == false ? Colors.red : Colors.grey.shade800,
+                            liked == false ? customColors.error : customColors.borderDark,
                         width: 1.5,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       backgroundColor: liked == false
-                          ? Colors.red.withOpacity(0.1)
+                          ? customColors.error.withOpacity(0.1)
                           : Colors.transparent,
                     ),
                     onPressed: () => setState(() => liked = false),
@@ -304,14 +310,14 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
                   children: [
                     Icon(
                       showNoteField ? Icons.close : Icons.edit_note,
-                      color: Colors.amber,
+                      color: colorScheme.primary,
                       size: 20,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       showNoteField ? 'Remove note' : 'Add a note',
-                      style: const TextStyle(
-                        color: Colors.amber,
+                      style: textTheme.titleSmall?.copyWith(
+                        color: colorScheme.primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -325,24 +331,24 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
               TextField(
                 controller: noteController,
                 maxLines: 3,
-                style: const TextStyle(color: Colors.white),
+                style: textTheme.bodyMedium,
                 decoration: InputDecoration(
                   hintText: 'What made this moment memorable?',
-                  hintStyle: TextStyle(color: Colors.grey.shade600),
+                  hintStyle: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
                   filled: true,
-                  fillColor: const Color(0xFF1E1E1E),
+                  fillColor: customColors.cardBackground,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade800),
+                    borderSide: BorderSide(color: customColors.borderDark),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide:
-                        const BorderSide(color: Colors.amber, width: 1.5),
+                        BorderSide(color: colorScheme.primary, width: 1.5),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade800),
+                    borderSide: BorderSide(color: customColors.borderDark),
                   ),
                 ),
               ),
@@ -351,11 +357,9 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
             const SizedBox(height: 24),
 
             // PHOTO
-            const Text(
+            Text(
               'Add a photo',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
+              style: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -366,9 +370,9 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
                 height: 160,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E1E1E),
+                  color: customColors.cardBackground,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade800),
+                  border: Border.all(color: customColors.borderDark),
                   image: selectedPhoto != null
                       ? DecorationImage(
                           image: FileImage(selectedPhoto!),
@@ -381,12 +385,12 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.camera_alt_outlined,
-                              size: 32, color: Colors.grey.shade500),
+                              size: 32, color: customColors.textMuted),
                           const SizedBox(height: 8),
                           Text(
                             'Tap to upload',
-                            style: TextStyle(
-                                color: Colors.grey.shade500, fontSize: 13),
+                            style: textTheme.bodySmall?.copyWith(
+                                color: customColors.textMuted),
                           ),
                         ],
                       )
@@ -401,26 +405,26 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
               child: ElevatedButton(
                 onPressed: isSaving ? null : saveLog,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amber,
-                  foregroundColor: Colors.black,
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  disabledBackgroundColor: Colors.amber.withOpacity(0.5),
+                  disabledBackgroundColor: colorScheme.primary.withOpacity(0.5),
                 ),
                 child: isSaving
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.black),
+                            strokeWidth: 2, color: colorScheme.onPrimary),
                       )
-                    : const Text(
+                    : Text(
                         'Save log',
-                        style: TextStyle(
+                        style: textTheme.titleMedium?.copyWith(
+                          color: colorScheme.onPrimary,
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
                         ),
                       ),
               ),

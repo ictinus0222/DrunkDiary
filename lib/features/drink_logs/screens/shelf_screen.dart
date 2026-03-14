@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../app/app_theme.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../widgets/shelf_card.dart';
 import '../../../core/widgets/app_empty_state.dart';
@@ -28,14 +29,6 @@ class _ShelfScreenState extends State<ShelfScreen> {
   // For Filtering & Sorting
   String searchQuery = '';
   String selectedSort = 'Recent'; // 'Recent', 'Rating', 'Name', 'ABV%'
-
-  // For the glowing shelves
-  final List<Color> glowColors = [
-    Colors.amber,
-    Colors.pinkAccent,
-    Colors.blueAccent,
-    Colors.greenAccent,
-  ];
 
   @override
   void initState() {
@@ -166,27 +159,41 @@ class _ShelfScreenState extends State<ShelfScreen> {
     return result;
   }
 
-  Widget _sortChip(String title) {
+  Widget _sortChip(BuildContext context, String title) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final colorScheme = Theme.of(context).colorScheme;
     final isSelected = selectedSort == title;
     return GestureDetector(
         onTap: () => setState(() => selectedSort = title),
         child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: isSelected ? Colors.amber : Colors.transparent,
+              color: isSelected ? colorScheme.primary : Colors.transparent,
               border: Border.all(
-                  color: isSelected ? Colors.amber : Colors.grey.shade600),
+                  color: isSelected ? colorScheme.primary : customColors.borderDark),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(title,
                 style: TextStyle(
-                    color: isSelected ? Colors.black : Colors.white70,
+                    color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface.withOpacity(0.7),
                     fontWeight:
                         isSelected ? FontWeight.bold : FontWeight.w500))));
   }
 
   @override
   Widget build(BuildContext context) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    // For the glowing shelves
+    final List<Color> glowColors = [
+      colorScheme.primary, // amber
+      Colors.pinkAccent,
+      Colors.blueAccent,
+      Colors.greenAccent,
+    ];
+
     final displayList = filteredAndSortedAlcohols;
 
     // Chunk list by 3
@@ -196,45 +203,42 @@ class _ShelfScreenState extends State<ShelfScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.black, // Darkest theme matching design
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              children: const [
+              children: [
                 Text("My Shelf ",
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
-                Icon(Icons.auto_awesome, color: Colors.amber, size: 20),
+                    style: textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold)),
+                Icon(Icons.auto_awesome, color: colorScheme.primary, size: 20),
               ],
             ),
             const SizedBox(height: 4),
             Text("${allShelfAlcohols.length} bottles in collection",
-                style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade500,
-                    fontWeight: FontWeight.normal)),
+                style: textTheme.bodyMedium?.copyWith(
+                    color: customColors.textMuted)),
           ],
         ),
         toolbarHeight: 80,
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator(color: colorScheme.primary))
           : Column(children: [
               // Top Search & Sorts
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: TextField(
-                    style: const TextStyle(color: Colors.white),
+                    style: textTheme.bodyMedium,
                     decoration: InputDecoration(
                         hintText: "Search your collection...",
-                        hintStyle: TextStyle(color: Colors.grey.shade600),
+                        hintStyle: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
                         prefixIcon:
-                            Icon(Icons.search, color: Colors.grey.shade500),
+                            Icon(Icons.search, color: customColors.textMuted),
                         filled: true,
-                        fillColor: Colors.grey.shade900,
+                        fillColor: customColors.cardBackground,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -253,13 +257,13 @@ class _ShelfScreenState extends State<ShelfScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(children: [
-                    _sortChip('Recent'),
+                    _sortChip(context, 'Recent'),
                     const SizedBox(width: 8),
-                    _sortChip('Rating'),
+                    _sortChip(context, 'Rating'),
                     const SizedBox(width: 8),
-                    _sortChip('Name'),
+                    _sortChip(context, 'Name'),
                     const SizedBox(width: 8),
-                    _sortChip('ABV%'),
+                    _sortChip(context, 'ABV%'),
                   ])),
 
               const SizedBox(height: 16),
@@ -331,12 +335,12 @@ class _ShelfScreenState extends State<ShelfScreen> {
                               margin:
                                   const EdgeInsets.symmetric(horizontal: 24),
                               decoration: BoxDecoration(
-                                  color: Colors.grey.shade800,
+                                  color: customColors.borderDark,
                                   borderRadius: BorderRadius.circular(4),
                                   boxShadow: [
                                     // Top faint shelf edge
                                     BoxShadow(
-                                      color: Colors.white.withOpacity(0.1),
+                                      color: colorScheme.onSurface.withOpacity(0.1),
                                       blurRadius: 1,
                                       offset: const Offset(0, -1),
                                     ),
@@ -359,8 +363,8 @@ class _ShelfScreenState extends State<ShelfScreen> {
                                       begin: Alignment.topCenter,
                                       end: Alignment.bottomCenter,
                                       colors: [
-                                        Colors.grey.shade600,
-                                        Colors.grey.shade900
+                                        customColors.cardBackground,
+                                        customColors.deepCardBackground
                                       ])),
                             ),
 

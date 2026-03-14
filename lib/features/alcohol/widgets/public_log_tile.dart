@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/app_theme.dart';
 import '../../drink_logs/models/drink_model_dto.dart';
 
 class PublicLogTile extends StatelessWidget {
@@ -9,6 +10,9 @@ class PublicLogTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6),
       child: Padding(
@@ -24,7 +28,7 @@ class PublicLogTile extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 14,
-                      backgroundColor: Colors.grey.shade300,
+                      backgroundColor: Theme.of(context).extension<AppCustomColors>()!.borderLight,
                       backgroundImage: log.userPhotoUrl != null
                           ? NetworkImage(log.userPhotoUrl!)
                           : null,
@@ -33,10 +37,9 @@ class PublicLogTile extends StatelessWidget {
                               log.username.isNotEmpty
                                   ? log.username[0].toUpperCase()
                                   : '?',
-                              style: const TextStyle(
+                              style: textTheme.labelSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                                color: Colors.black,
+                                color: colorScheme.onSurface,
                               ),
                             )
                           : null,
@@ -44,14 +47,14 @@ class PublicLogTile extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       log.username,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+                      style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                     ),
                   ],
                 ),
                 if (log.logKind == LogKind.review)
-                  Text('⭐ ${(log.rating ?? 0.0).toStringAsFixed(1)}')
+                  Text('⭐ ${(log.rating ?? 0.0).toStringAsFixed(1)}', style: textTheme.bodyMedium)
                 else
-                  Text(log.isLiked == true ? '👍' : '👎'),
+                  Text(log.isLiked == true ? '👍' : '👎', style: textTheme.bodyMedium),
               ],
             ),
 
@@ -61,6 +64,7 @@ class PublicLogTile extends StatelessWidget {
                 log.note!,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
+                style: textTheme.bodyMedium,
               ),
             ],
           ],

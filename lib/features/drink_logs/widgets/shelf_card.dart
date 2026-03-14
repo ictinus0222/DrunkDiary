@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../app/app_theme.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../../alcohol/screens/alcohol_detail_screen.dart';
 
@@ -16,6 +18,9 @@ class ShelfCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final colorScheme = Theme.of(context).colorScheme;
+
     // Using star for items that have a rating > 0, otherwise heart
     final bool hasRating = avgRating > 0;
 
@@ -36,7 +41,7 @@ class ShelfCard extends StatelessWidget {
           Container(
             decoration: BoxDecoration(boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.6),
+                color: colorScheme.shadow.withOpacity(0.6),
                 blurRadius: 15,
                 offset: const Offset(0, 10),
               )
@@ -49,10 +54,10 @@ class ShelfCard extends StatelessWidget {
                   alcohol.imageUrl,
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
-                    color: Colors.grey.shade900,
-                    child: const Center(
+                    color: customColors.cardBackground,
+                    child: Center(
                       child:
-                          Icon(Icons.local_bar, size: 40, color: Colors.grey),
+                          Icon(Icons.local_bar, size: 40, color: customColors.textMuted),
                     ),
                   ),
                 ),
@@ -67,11 +72,11 @@ class ShelfCard extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.grey.shade900,
+                color: customColors.cardBackground,
               ),
               padding: const EdgeInsets.all(4),
               child: Icon(hasRating ? Icons.star : Icons.favorite,
-                  color: Colors.amber, size: 12),
+                  color: colorScheme.primary, size: 12),
             ),
           )
         ],

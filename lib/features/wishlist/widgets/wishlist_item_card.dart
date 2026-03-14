@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../../../app/app_theme.dart';
 import '../models/wishlist_item_model.dart';
 
 class WishlistItemCard extends StatelessWidget {
@@ -19,6 +20,10 @@ class WishlistItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Dismissible(
       key: Key(item.id),
       direction: DismissDirection.endToStart,
@@ -27,10 +32,10 @@ class WishlistItemCard extends StatelessWidget {
         padding: const EdgeInsets.only(right: 24),
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
-          color: Colors.red.shade900,
+          color: customColors.error.withOpacity(0.8),
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Icon(Icons.delete_outline, color: Colors.white, size: 28),
+        child: Icon(Icons.delete_outline, color: colorScheme.onError, size: 28),
       ),
       onDismissed: (_) => onRemove(),
       child: GestureDetector(
@@ -38,12 +43,12 @@ class WishlistItemCard extends StatelessWidget {
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1A1A),
+            color: customColors.cardBackground,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isTried
-                  ? Colors.amber.withOpacity(0.5)
-                  : Colors.grey.shade800,
+                  ? colorScheme.primary.withOpacity(0.5)
+                  : customColors.borderDark,
               width: isTried ? 1.5 : 1,
             ),
           ),
@@ -63,17 +68,17 @@ class WishlistItemCard extends StatelessWidget {
                           imageUrl: item.alcoholImageUrl,
                           fit: BoxFit.contain,
                           placeholder: (_, __) => Container(
-                            color: Colors.white10,
-                            child: const Center(
+                            color: colorScheme.onSurface.withOpacity(0.1),
+                            child: Center(
                               child: CircularProgressIndicator(
-                                color: Colors.amber,
+                                color: colorScheme.primary,
                                 strokeWidth: 2,
                               ),
                             ),
                           ),
-                          errorWidget: (_, __, ___) => _imagePlaceholder(),
+                          errorWidget: (_, __, ___) => _imagePlaceholder(context),
                         )
-                      : _imagePlaceholder(),
+                      : _imagePlaceholder(context),
                 ),
               ),
               const SizedBox(width: 12),
@@ -90,9 +95,7 @@ class WishlistItemCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               item.alcoholName,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
+                              style: textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                               maxLines: 1,
@@ -105,16 +108,15 @@ class WishlistItemCard extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
-                                color: Colors.amber.withOpacity(0.15),
+                                color: colorScheme.primary.withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                    color: Colors.amber.withOpacity(0.6)),
+                                    color: colorScheme.primary.withOpacity(0.6)),
                               ),
-                              child: const Text(
+                              child: Text(
                                 'Tried! 🥃',
-                                style: TextStyle(
-                                    color: Colors.amber,
-                                    fontSize: 11,
+                                style: textTheme.labelSmall?.copyWith(
+                                    color: colorScheme.primary,
                                     fontWeight: FontWeight.w600),
                               ),
                             ),
@@ -126,13 +128,13 @@ class WishlistItemCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade800,
+                          color: customColors.borderDark,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           item.alcoholType,
-                          style: TextStyle(
-                              color: Colors.grey.shade400, fontSize: 12),
+                          style: textTheme.bodySmall?.copyWith(
+                              color: customColors.textMuted),
                         ),
                       ),
                       if (item.note != null && item.note!.isNotEmpty) ...[
@@ -140,14 +142,13 @@ class WishlistItemCard extends StatelessWidget {
                         Row(
                           children: [
                             Icon(Icons.sticky_note_2_outlined,
-                                size: 13, color: Colors.grey.shade500),
+                                size: 13, color: customColors.textMuted),
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
                                 item.note!,
-                                style: TextStyle(
-                                  color: Colors.grey.shade500,
-                                  fontSize: 12,
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: customColors.textMuted,
                                   fontStyle: FontStyle.italic,
                                 ),
                                 maxLines: 1,
@@ -164,7 +165,7 @@ class WishlistItemCard extends StatelessWidget {
               // Delete button
               IconButton(
                 icon: Icon(Icons.delete_outline,
-                    color: Colors.grey.shade600, size: 20),
+                    color: customColors.textMuted, size: 20),
                 onPressed: () => _confirmDelete(context),
               ),
             ],
@@ -174,38 +175,42 @@ class WishlistItemCard extends StatelessWidget {
     );
   }
 
-  Widget _imagePlaceholder() {
+  Widget _imagePlaceholder(BuildContext context) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      color: Colors.white10,
-      child: const Center(
-        child: Icon(Icons.local_bar, size: 32, color: Colors.grey),
+      color: colorScheme.onSurface.withOpacity(0.1),
+      child: Center(
+        child: Icon(Icons.local_bar, size: 32, color: customColors.textMuted),
       ),
     );
   }
 
   void _confirmDelete(BuildContext context) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final textTheme = Theme.of(context).textTheme;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
-        title: const Text('Remove from Wishlist',
-            style: TextStyle(color: Colors.white)),
+        backgroundColor: customColors.cardBackground,
+        title: Text('Remove from Wishlist',
+            style: textTheme.titleLarge),
         content: Text(
           'Remove "${item.alcoholName}" from your wishlist?',
-          style: TextStyle(color: Colors.grey.shade400),
+          style: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child:
-                Text('Cancel', style: TextStyle(color: Colors.grey.shade400)),
+                Text('Cancel', style: textTheme.labelLarge?.copyWith(color: customColors.textMuted)),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
               onRemove();
             },
-            child: const Text('Remove', style: TextStyle(color: Colors.red)),
+            child: Text('Remove', style: textTheme.labelLarge?.copyWith(color: customColors.error)),
           ),
         ],
       ),

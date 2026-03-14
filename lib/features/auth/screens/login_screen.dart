@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/google_auth_service.dart'; // adjust path
+import '../../../app/app_theme.dart';
 
 class LoginScreen extends StatefulWidget {  // StatefulWidget to manage _isLoading and _error state
   static const routeName = '/login';
@@ -37,25 +38,29 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
+            Text(
               'Welcome to DrunkDiary 🍻',
-              style: TextStyle(
-                fontSize: 24,
+              style: textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: colorScheme.onSurface,
               ),
             ),
 
             const SizedBox(height: 8),
 
-            const Text(
+            Text(
               'Log drinks. Remember nights.',
-              style: TextStyle(color: Colors.grey),
+              style: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
             ),
 
             const SizedBox(height: 32),
@@ -63,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
             if (_error != null) ...[
               Text(
                 _error!,
-                style: const TextStyle(color: Colors.red),
+                style: textTheme.bodyMedium?.copyWith(color: colorScheme.error),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
@@ -74,32 +79,31 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 50,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
+                  backgroundColor: colorScheme.onSurface,
+                  foregroundColor: colorScheme.surface,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 onPressed: _isLoading ? null : _handleGoogleSignIn,
                 child: _isLoading
-                    ? const CircularProgressIndicator()
+                    ? CircularProgressIndicator(color: colorScheme.surface)
                     : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
                     Icon(Icons.g_mobiledata, size: 28),
                     SizedBox(width: 8),
-                    Text('Continue with Google'),
+                    Text('Continue with Google', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   ],
                 ),
               ),
 
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'We don’t post anything without your permission.',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
+              style: textTheme.bodySmall?.copyWith(
+                color: customColors.textMuted,
               ),
               textAlign: TextAlign.center,
             ),

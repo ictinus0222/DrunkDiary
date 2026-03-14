@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import '../../../app/app_theme.dart';
 import '../models/stats_model.dart';
 import '../models/user_model.dart';
 
@@ -29,12 +30,12 @@ class ProfileContent extends StatelessWidget {
           const SizedBox(height: 32),
 
           // Public Shelf Section
-          _buildPublicShelf(),
+          _buildPublicShelf(context),
 
           const SizedBox(height: 32),
 
           // Recent Activity Section
-          _buildRecentActivity(),
+          _buildRecentActivity(context),
 
           if (footer.isNotEmpty) ...[
             const SizedBox(height: 16),
@@ -46,10 +47,14 @@ class ProfileContent extends StatelessWidget {
   }
 
   Widget _buildProfileCard(BuildContext context) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xff1C1C1E),
+        color: customColors.cardBackground,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -58,12 +63,12 @@ class ProfileContent extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 32,
-                backgroundColor: Colors.amber,
+                backgroundColor: colorScheme.primary,
                 backgroundImage: userModel.photoUrl != null
                     ? NetworkImage(userModel.photoUrl!)
                     : null,
                 child: userModel.photoUrl == null
-                    ? const Icon(Icons.person, size: 32, color: Colors.black)
+                    ? Icon(Icons.person, size: 32, color: colorScheme.onPrimary)
                     : null,
               ),
               const SizedBox(width: 16),
@@ -73,17 +78,16 @@ class ProfileContent extends StatelessWidget {
                   children: [
                     Text(
                       userModel.displayName,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      style: textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: colorScheme.onSurface,
                           ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'My Personal Shelf',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade500,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: customColors.textMuted,
                       ),
                     ),
                   ],
@@ -121,26 +125,27 @@ class ProfileContent extends StatelessWidget {
     );
   }
 
-  Widget _buildPublicShelf() {
+  Widget _buildPublicShelf(BuildContext context) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final textTheme = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'My Collection',
-              style: TextStyle(
-                fontSize: 20,
+              style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             Text(
               '${userStats.recentAlcohols.length} entries',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade500,
+              style: textTheme.bodyMedium?.copyWith(
+                color: customColors.textMuted,
               ),
             ),
           ],
@@ -152,7 +157,7 @@ class ProfileContent extends StatelessWidget {
             child: Center(
               child: Text(
                 "Shelf is empty",
-                style: TextStyle(color: Colors.grey.shade600),
+                style: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
               ),
             ),
           )
@@ -168,7 +173,7 @@ class ProfileContent extends StatelessWidget {
                 return Container(
                   width: 100,
                   decoration: BoxDecoration(
-                    color: const Color(0xff1C1C1E),
+                    color: customColors.cardBackground,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   clipBehavior: Clip.antiAlias,
@@ -176,13 +181,13 @@ class ProfileContent extends StatelessWidget {
                       ? CachedNetworkImage(
                           imageUrl: alcohol.imageUrl,
                           fit: BoxFit.cover,
-                          errorWidget: (context, url, error) => const Icon(
+                          errorWidget: (context, url, error) => Icon(
                             Icons.broken_image,
-                            color: Colors.grey,
+                            color: customColors.textMuted,
                           ),
                         )
-                      : const Icon(Icons.wine_bar,
-                          color: Colors.grey, size: 40),
+                      : Icon(Icons.wine_bar,
+                          color: customColors.textMuted, size: 40),
                 );
               },
             ),
@@ -191,16 +196,19 @@ class ProfileContent extends StatelessWidget {
     );
   }
 
-  Widget _buildRecentActivity() {
+  Widget _buildRecentActivity(BuildContext context) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Recent Activity',
-          style: TextStyle(
-            fontSize: 20,
+          style: textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 16),
@@ -210,7 +218,7 @@ class ProfileContent extends StatelessWidget {
             child: Center(
               child: Text(
                 "No recent activity",
-                style: TextStyle(color: Colors.grey.shade600),
+                style: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
               ),
             ),
           )
@@ -225,7 +233,7 @@ class ProfileContent extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xff1C1C1E),
+                  color: customColors.cardBackground,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
@@ -234,7 +242,7 @@ class ProfileContent extends StatelessWidget {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: Colors.black,
+                        color: customColors.deepCardBackground,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       clipBehavior: Clip.antiAlias,
@@ -242,12 +250,12 @@ class ProfileContent extends StatelessWidget {
                           ? CachedNetworkImage(
                               imageUrl: log.photoUrl!,
                               fit: BoxFit.cover,
-                              errorWidget: (context, url, error) => const Icon(
+                              errorWidget: (context, url, error) => Icon(
                                 Icons.broken_image,
-                                color: Colors.grey,
+                                color: customColors.textMuted,
                               ),
                             )
-                          : const Icon(Icons.wine_bar, color: Colors.amber),
+                          : Icon(Icons.wine_bar, color: colorScheme.primary),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -256,10 +264,9 @@ class ProfileContent extends StatelessWidget {
                         children: [
                           Text(
                             log.alcoholName,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: textTheme.titleMedium?.copyWith(
+                              color: colorScheme.onSurface,
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -267,9 +274,8 @@ class ProfileContent extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             log.alcoholType,
-                            style: TextStyle(
-                              color: Colors.grey.shade500,
-                              fontSize: 14,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: customColors.textMuted,
                             ),
                           ),
                         ],
@@ -278,14 +284,13 @@ class ProfileContent extends StatelessWidget {
                     if (log.rating != null)
                       Row(
                         children: [
-                          const Icon(Icons.star, color: Colors.amber, size: 18),
+                          Icon(Icons.star, color: colorScheme.primary, size: 18),
                           const SizedBox(width: 4),
                           Text(
                             log.rating!.toStringAsFixed(1).replaceAll('.0', ''),
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: textTheme.titleMedium?.copyWith(
+                              color: colorScheme.onSurface,
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
                             ),
                           ),
                         ],
@@ -293,7 +298,7 @@ class ProfileContent extends StatelessWidget {
                     else if (log.isLiked != null)
                       Icon(
                         log.isLiked! ? Icons.thumb_up : Icons.thumb_down,
-                        color: log.isLiked! ? Colors.green : Colors.red,
+                        color: log.isLiked! ? customColors.success : customColors.error,
                         size: 18,
                       )
                   ],
@@ -319,18 +324,21 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Expanded(
       child: Column(
         children: [
-          Icon(icon, color: Colors.amber, size: 28),
+          Icon(icon, color: colorScheme.primary, size: 28),
           const SizedBox(height: 8),
           Text(
             value,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
+            style: textTheme.titleMedium?.copyWith(
+              color: colorScheme.onSurface,
               fontWeight: FontWeight.bold,
-              fontSize: 16,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -339,9 +347,8 @@ class _StatItem extends StatelessWidget {
           Text(
             label,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.grey.shade500,
-              fontSize: 12,
+            style: textTheme.bodySmall?.copyWith(
+              color: customColors.textMuted,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

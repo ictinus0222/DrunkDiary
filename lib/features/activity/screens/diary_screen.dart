@@ -8,6 +8,7 @@ import '../../drink_logs/widgets/log_detail_bottom_sheet.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../../../core/widgets/app_empty_state.dart';
 import 'package:drunk_diary/core/navigation/tab_change_notification.dart';
+import '../../../app/app_theme.dart';
 
 enum DiaryLayout { timeline, gallery }
 
@@ -28,7 +29,6 @@ class _DiaryScreenState extends State<DiaryScreen> {
     final userId = FirebaseAuth.instance.currentUser!.uid;
 
     return Scaffold(
-      backgroundColor: Colors.black,
       body: SafeArea(
         child: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
@@ -196,10 +196,12 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.grey.shade900,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -207,8 +209,8 @@ class _StatCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              color: Colors.grey,
+            style: TextStyle(
+              color: customColors.textMuted,
               fontSize: 12,
             ),
           ),
@@ -299,6 +301,7 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -307,7 +310,7 @@ class _FilterChip extends StatelessWidget {
           color: selected ? Colors.amber : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           border:
-              Border.all(color: selected ? Colors.amber : Colors.grey.shade700),
+              Border.all(color: selected ? Colors.amber : customColors.borderDark),
         ),
         child: Text(
           label,
@@ -378,6 +381,7 @@ class _GalleryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
     return GestureDetector(
       onTap: () {
         // reuse same detail view as card
@@ -393,7 +397,7 @@ class _GalleryItem extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: Colors.grey.shade900,
+          color: Theme.of(context).colorScheme.surface,
         ),
         clipBehavior: Clip.antiAlias,
         child: Stack(
@@ -417,14 +421,14 @@ class _GalleryItem extends StatelessWidget {
                             alcohol.imageUrl,
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) => Container(
-                              color: Colors.grey.shade800,
+                              color: customColors.borderDark,
                               child: const Icon(Icons.local_bar,
                                   color: Colors.white24),
                             ),
                           );
                         }
                         return Container(
-                          color: Colors.grey.shade800,
+                          color: customColors.borderDark,
                           child:
                               const Center(child: CircularProgressIndicator()),
                         );

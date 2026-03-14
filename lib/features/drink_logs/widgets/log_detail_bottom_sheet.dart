@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../app/app_theme.dart';
 import '../models/drink_model_dto.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../../drink_logs/widgets/edit_review_bottom_sheet.dart';
@@ -51,6 +52,7 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
   }
 
   Future<void> _deleteLog() async {
+    final colorScheme = Theme.of(context).colorScheme;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -59,11 +61,11 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel', style: TextStyle(color: Colors.white)),
+            child: Text('Cancel', style: TextStyle(color: colorScheme.onSurface)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text('Delete', style: TextStyle(color: colorScheme.error)),
           ),
         ],
       ),
@@ -83,7 +85,10 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
       if (mounted) {
         setState(() => isDeleting = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete log: $e')),
+          SnackBar(
+            content: Text('Failed to delete log: $e', style: TextStyle(color: Theme.of(context).colorScheme.onError)),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
         );
       }
     }
@@ -91,13 +96,17 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     final bool isReview = _log.logKind == LogKind.review;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF161618),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: customColors.deepCardBackground,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Stack(
         children: [
@@ -112,7 +121,7 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    Colors.amber.withOpacity(0.18),
+                    colorScheme.primary.withOpacity(0.18),
                     Colors.transparent,
                   ],
                   radius: 0.6,
@@ -140,8 +149,8 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
                             color: Colors.black.withOpacity(0.4),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.close,
-                              size: 18, color: Colors.white70),
+                          child: Icon(Icons.close,
+                              size: 18, color: colorScheme.onSurface.withOpacity(0.7)),
                         ),
                       ),
                     ],
@@ -175,9 +184,7 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
                         // Title
                         Text(
                           _log.alcoholName,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 26,
+                          style: textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -193,14 +200,13 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
                                         index < (_log.rating?.round() ?? 0)
                                             ? Icons.star
                                             : Icons.star_border,
-                                        color: Colors.amber,
+                                        color: colorScheme.primary,
                                         size: 22,
                                       )),
                               const SizedBox(width: 10),
                               Text(
                                 '${(_log.rating ?? 0.0).toStringAsFixed(1)} / 5',
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 16),
+                                style: textTheme.titleMedium,
                               ),
                             ],
                           )
@@ -212,15 +218,13 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
                                     ? Icons.thumb_up
                                     : Icons.thumb_down,
                                 color:
-                                    _log.isLiked! ? Colors.green : Colors.red,
+                                    _log.isLiked! ? customColors.success : customColors.error,
                                 size: 22,
                               ),
                               const SizedBox(width: 10),
                               Text(
                                 _log.isLiked! ? 'Liked' : 'Didn\'t like',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
+                                style: textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -234,13 +238,15 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
                           children: [
                             Expanded(
                                 child: _buildGridCard(
+                                    context,
                                     Icons.wine_bar,
                                     'Category',
                                     _log.alcoholType,
-                                    Colors.amber)),
+                                    colorScheme.primary)),
                             const SizedBox(width: 12),
                             Expanded(
                                 child: _buildGridCard(
+                                    context,
                                     Icons.local_fire_department,
                                     'ABV',
                                     _isLoadingAlcohol
@@ -248,7 +254,7 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
                                         : (_alcohol?.abv != null
                                             ? '${_alcohol!.abv}%'
                                             : '--'),
-                                    Colors.amber)),
+                                    colorScheme.primary)),
                           ],
                         ),
                         const SizedBox(height: 12),
@@ -256,18 +262,20 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
                           children: [
                             Expanded(
                                 child: _buildGridCard(
+                                    context,
                                     Icons.calendar_today_outlined,
                                     'Date',
                                     DateFormat('MMMM d, yyyy')
                                         .format(_log.createdAt),
-                                    Colors.amber)),
+                                    colorScheme.primary)),
                             const SizedBox(width: 12),
                             Expanded(
                                 child: _buildGridCard(
+                                    context,
                                     Icons.access_time,
                                     'Time',
                                     DateFormat('h:mm a').format(_log.createdAt),
-                                    Colors.amber)),
+                                    colorScheme.primary)),
                           ],
                         ),
 
@@ -278,17 +286,16 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
                             padding: const EdgeInsets.all(16),
                             width: double.infinity,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1E1E1E),
+                              color: customColors.cardBackground,
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
+                                Text(
                                   'NOTES',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 12,
+                                  style: textTheme.labelSmall?.copyWith(
+                                    color: customColors.textMuted,
                                     letterSpacing: 1.2,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -296,9 +303,7 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
                                 const SizedBox(height: 8),
                                 Text(
                                   _log.note!,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 15,
+                                  style: textTheme.bodyMedium?.copyWith(
                                     height: 1.4,
                                   ),
                                 ),
@@ -317,8 +322,8 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
                               width: double.infinity,
                               child: ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.amber,
-                                  foregroundColor: Colors.black,
+                                  backgroundColor: colorScheme.primary,
+                                  foregroundColor: colorScheme.onPrimary,
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 16),
                                   shape: RoundedRectangleBorder(
@@ -337,10 +342,10 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
                                   );
                                 },
                                 icon: const Icon(Icons.edit, size: 20),
-                                label: const Text('Edit Review',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16)),
+                                label: Text('Edit Review',
+                                    style: textTheme.titleMedium?.copyWith(
+                                        color: colorScheme.onPrimary,
+                                        fontWeight: FontWeight.bold)),
                               ),
                             ),
                           ),
@@ -350,23 +355,23 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
                           width: double.infinity,
                           child: TextButton(
                             style: TextButton.styleFrom(
-                              foregroundColor: Colors.red,
+                              foregroundColor: colorScheme.error,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12)),
-                              backgroundColor: Colors.red.withOpacity(0.05),
+                              backgroundColor: colorScheme.error.withOpacity(0.05),
                             ),
                             onPressed: isDeleting ? null : _deleteLog,
                             child: isDeleting
-                                ? const SizedBox(
+                                ? SizedBox(
                                     width: 20,
                                     height: 20,
                                     child: CircularProgressIndicator(
-                                        color: Colors.red, strokeWidth: 2))
-                                : const Text('Delete Entry',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16)),
+                                        color: colorScheme.error, strokeWidth: 2))
+                                : Text('Delete Entry',
+                                    style: textTheme.titleMedium?.copyWith(
+                                        color: colorScheme.error,
+                                        fontWeight: FontWeight.bold)),
                           ),
                         ),
                       ],
@@ -382,11 +387,13 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
   }
 
   Widget _buildGridCard(
-      IconData icon, String title, String value, Color iconColor) {
+      BuildContext context, IconData icon, String title, String value, Color iconColor) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final textTheme = Theme.of(context).textTheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1E1E),
+        color: customColors.cardBackground,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -398,17 +405,15 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
               const SizedBox(width: 6),
               Text(
                 title,
-                style: const TextStyle(color: Colors.grey, fontSize: 13),
+                style: textTheme.bodySmall?.copyWith(color: customColors.textMuted),
               ),
             ],
           ),
           const SizedBox(height: 8),
           Text(
             value,
-            style: const TextStyle(
-              color: Colors.white,
+            style: textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
-              fontSize: 15,
             ),
           ),
         ],

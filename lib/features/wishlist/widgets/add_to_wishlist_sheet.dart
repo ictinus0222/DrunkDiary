@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../app/app_theme.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../../alcohol/repositories/alcohol_repository.dart';
 import '../repositories/wishlist_repository.dart';
@@ -88,9 +89,9 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
           SnackBar(
             content: Text(
               '${_selectedAlcohol!.name} added to your wishlist!',
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
             ),
-            backgroundColor: Colors.grey.shade900,
+            backgroundColor: Theme.of(context).extension<AppCustomColors>()?.deepCardBackground,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -110,11 +111,14 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF121212),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: customColors.deepCardBackground,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.fromLTRB(20, 16, 20, 16 + bottomInset),
       child: Column(
@@ -128,39 +132,36 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
               height: 4,
               margin: const EdgeInsets.only(bottom: 20),
               decoration: BoxDecoration(
-                color: Colors.grey.shade700,
+                color: customColors.borderDark,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
           ),
-          const Text(
+          Text(
             'Add to Wishlist',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 22,
+            style: textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             'Search for a drink you\'ve heard of and want to try.',
-            style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+            style: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
           ),
           const SizedBox(height: 20),
 
           // Search field
           TextField(
             controller: _searchController,
-            style: const TextStyle(color: Colors.white),
+            style: textTheme.bodyMedium,
             autofocus: true,
             decoration: InputDecoration(
               hintText: 'Search alcohols...',
-              hintStyle: TextStyle(color: Colors.grey.shade600),
-              prefixIcon: const Icon(Icons.search, color: Colors.grey),
+              hintStyle: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
+              prefixIcon: Icon(Icons.search, color: customColors.textMuted),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
-                      icon:
-                          const Icon(Icons.close, color: Colors.grey, size: 18),
+                      icon: Icon(Icons.close, color: customColors.textMuted, size: 18),
                       onPressed: () {
                         _searchController.clear();
                         setState(() {
@@ -171,7 +172,7 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
                     )
                   : null,
               filled: true,
-              fillColor: Colors.grey.shade900,
+              fillColor: customColors.cardBackground,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
@@ -185,11 +186,11 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
 
           // Search results
           if (_isSearching)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
               child: Center(
                 child: CircularProgressIndicator(
-                    color: Colors.amber, strokeWidth: 2),
+                    color: colorScheme.primary, strokeWidth: 2),
               ),
             )
           else if (_searchResults.isNotEmpty)
@@ -197,9 +198,9 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
               margin: const EdgeInsets.only(top: 8),
               constraints: const BoxConstraints(maxHeight: 200),
               decoration: BoxDecoration(
-                color: const Color(0xFF1E1E1E),
+                color: customColors.cardBackground,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade800),
+                border: Border.all(color: customColors.borderDark),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
@@ -207,7 +208,7 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
                   shrinkWrap: true,
                   itemCount: _searchResults.length,
                   separatorBuilder: (_, __) =>
-                      Divider(color: Colors.grey.shade800, height: 1),
+                      Divider(color: customColors.borderDark, height: 1),
                   itemBuilder: (context, index) {
                     final alcohol = _searchResults[index];
                     return ListTile(
@@ -218,27 +219,42 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
                         child: Container(
                           width: 40,
                           height: 44,
-                          color: Colors.white10,
                           child: alcohol.imageUrl.isNotEmpty
                               ? Image.network(alcohol.imageUrl,
                                   fit: BoxFit.contain,
-                                  errorBuilder: (_, __, ___) => const Icon(
+                                  errorBuilder: (_, __, ___) => Icon(
                                       Icons.local_bar,
-                                      color: Colors.grey))
-                              : const Icon(Icons.local_bar, color: Colors.grey),
+                                      color: customColors.textMuted),
+                                  // The placeholder property is added here
+                                  loadingBuilder: (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Container(
+                                      color: colorScheme.onSurface.withOpacity(0.1),
+                                      child: Center(
+                                        child: CircularProgressIndicator(
+                                          value: loadingProgress.expectedTotalBytes != null
+                                              ? loadingProgress.cumulativeBytesLoaded /
+                                                  loadingProgress.expectedTotalBytes!
+                                              : null,
+                                          strokeWidth: 2,
+                                          color: customColors.textMuted,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                )
+                              : Icon(Icons.local_bar, color: customColors.textMuted),
+                          color: colorScheme.onSurface.withOpacity(0.1), // This line was moved/modified
                         ),
                       ),
                       title: Text(
                         alcohol.name,
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600),
+                        style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600, fontSize: 15),
                       ),
                       subtitle: Text(
                         '${alcohol.type} · ${alcohol.brand}',
-                        style: TextStyle(
-                            color: Colors.grey.shade500, fontSize: 12),
+                        style: textTheme.bodySmall?.copyWith(color: customColors.textMuted),
                       ),
                       onTap: () => _selectAlcohol(alcohol),
                     );
@@ -251,21 +267,20 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
               margin: const EdgeInsets.only(top: 8),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
-                color: Colors.amber.withOpacity(0.1),
+                color: colorScheme.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.amber.withOpacity(0.4)),
+                border: Border.all(color: colorScheme.primary.withOpacity(0.4)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.check_circle, color: Colors.amber, size: 18),
+                  Icon(Icons.check_circle, color: colorScheme.primary, size: 18),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       '${_selectedAlcohol!.name} · ${_selectedAlcohol!.type}',
-                      style: const TextStyle(
-                          color: Colors.amber,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14),
+                      style: textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.primary,
+                          fontWeight: FontWeight.w600),
                     ),
                   ),
                 ],
@@ -277,16 +292,16 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
           // Note field
           TextField(
             controller: _noteController,
-            style: const TextStyle(color: Colors.white),
+            style: textTheme.bodyMedium,
             maxLines: 2,
             decoration: InputDecoration(
               hintText:
                   'Add a note (optional)... e.g. "Heard this at Jake\'s party"',
-              hintStyle: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-              prefixIcon: const Icon(Icons.sticky_note_2_outlined,
-                  color: Colors.grey, size: 20),
+              hintStyle: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
+              prefixIcon: Icon(Icons.sticky_note_2_outlined,
+                  color: customColors.textMuted, size: 20),
               filled: true,
-              fillColor: Colors.grey.shade900,
+              fillColor: customColors.cardBackground,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
@@ -298,7 +313,7 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
             const SizedBox(height: 10),
             Text(
               _error,
-              style: const TextStyle(color: Colors.redAccent, fontSize: 13),
+              style: textTheme.bodyMedium?.copyWith(color: colorScheme.error),
             ),
           ],
 
@@ -310,22 +325,21 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
             child: ElevatedButton.icon(
               onPressed: _isSaving ? null : _save,
               icon: _isSaving
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 18,
                       height: 18,
                       child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.black))
-                  : const Icon(Icons.bookmark_add, color: Colors.black),
+                          strokeWidth: 2, color: colorScheme.onPrimary))
+                  : Icon(Icons.bookmark_add, color: colorScheme.onPrimary),
               label: Text(
                 _isSaving ? 'Adding...' : 'Add to Wishlist',
-                style: const TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16),
+                style: textTheme.titleMedium?.copyWith(
+                    color: colorScheme.onPrimary,
+                    fontWeight: FontWeight.bold),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.amber,
-                disabledBackgroundColor: Colors.amber.withOpacity(0.5),
+                backgroundColor: colorScheme.primary,
+                disabledBackgroundColor: colorScheme.primary.withOpacity(0.5),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),

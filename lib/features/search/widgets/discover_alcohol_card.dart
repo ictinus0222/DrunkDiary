@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/app_theme.dart';
 import '../../alcohol/screens/alcohol_detail_screen.dart';
 import '../models/discover_item_model.dart';
 
@@ -10,6 +11,10 @@ class DiscoverAlcoholCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -23,7 +28,7 @@ class DiscoverAlcoholCard extends StatelessWidget {
         height: 120,
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
-          color: Colors.grey.shade900,
+          color: customColors.cardBackground,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -32,9 +37,9 @@ class DiscoverAlcoholCard extends StatelessWidget {
             // Image Wrapper
             Container(
               width: 110,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
+              decoration: BoxDecoration(
+                color: colorScheme.onSurface, // White usually for images
+                borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(16),
                   bottomLeft: Radius.circular(16),
                 ),
@@ -51,8 +56,8 @@ class DiscoverAlcoholCard extends StatelessWidget {
                           item.alcohol.imageUrl,
                           fit: BoxFit.contain,
                         )
-                      : const Icon(Icons.local_bar,
-                          color: Colors.grey, size: 40),
+                      : Icon(Icons.local_bar,
+                          color: customColors.textMuted, size: 40),
                 ),
               ),
             ),
@@ -72,9 +77,8 @@ class DiscoverAlcoholCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             item.alcohol.brand,
-                            style: TextStyle(
-                              color: Colors.grey.shade400,
-                              fontSize: 12,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: customColors.textMuted,
                               fontWeight: FontWeight.w600,
                             ),
                             maxLines: 1,
@@ -85,16 +89,15 @@ class DiscoverAlcoholCard extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.amber.shade900.withOpacity(0.3),
+                            color: colorScheme.primary.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                                color: Colors.amber.withOpacity(0.5)),
+                                color: colorScheme.primary.withOpacity(0.5)),
                           ),
                           child: Text(
                             item.alcohol.type,
-                            style: const TextStyle(
-                              color: Colors.amber,
-                              fontSize: 10,
+                            style: textTheme.labelSmall?.copyWith(
+                              color: colorScheme.primary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -106,9 +109,8 @@ class DiscoverAlcoholCard extends StatelessWidget {
                     // Name
                     Text(
                       item.alcohol.name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
+                      style: textTheme.titleMedium?.copyWith(
+                        color: colorScheme.onSurface,
                         fontWeight: FontWeight.bold,
                       ),
                       maxLines: 2,
@@ -118,41 +120,38 @@ class DiscoverAlcoholCard extends StatelessWidget {
                     // Rating & Indicator
                     Row(
                       children: [
-                        const Icon(Icons.star, color: Colors.amber, size: 16),
+                        Icon(Icons.star, color: colorScheme.primary, size: 16),
                         const SizedBox(width: 4),
                         Text(
                           item.reviewCount > 0
                               ? item.globalRating.toStringAsFixed(1)
                               : 'New',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurface,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         if (item.reviewCount > 0)
                           Text(
                             ' (${item.reviewCount})',
-                            style: TextStyle(
-                              color: Colors.grey.shade500,
-                              fontSize: 12,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: customColors.textMuted,
                             ),
                           ),
                         const Spacer(),
                         if (item.hasUserReviewed || item.hasUserLogged)
                           Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.check_circle,
-                                color: Colors.green,
+                                color: customColors.success,
                                 size: 18,
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 item.hasUserReviewed ? 'Reviewed' : 'Logged',
-                                style: const TextStyle(
-                                  color: Colors.green,
-                                  fontSize: 11,
+                                style: textTheme.labelSmall?.copyWith(
+                                  color: customColors.success,
                                   fontWeight: FontWeight.bold,
                                 ),
                               )

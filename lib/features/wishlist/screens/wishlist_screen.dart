@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../app/app_theme.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../../alcohol/screens/alcohol_detail_screen.dart';
 import '../models/wishlist_item_model.dart';
@@ -73,10 +74,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Could not remove item.',
-                style: TextStyle(color: Colors.white)),
-            backgroundColor: Colors.red,
+                style: TextStyle(color: Theme.of(context).colorScheme.onError)),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -105,16 +106,15 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        elevation: 0,
-        title: const Text(
+        title: Text(
           'Wishlist',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 24,
+          style: textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -124,8 +124,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting ||
               !_triedLoaded) {
-            return const Center(
-              child: CircularProgressIndicator(color: Colors.amber),
+            return Center(
+              child: CircularProgressIndicator(color: colorScheme.primary),
             );
           }
 
@@ -133,7 +133,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
             return Center(
               child: Text(
                 'Something went wrong.',
-                style: TextStyle(color: Colors.grey.shade500),
+                style: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
               ),
             );
           }
@@ -153,8 +153,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
           }
 
           return RefreshIndicator(
-            color: Colors.amber,
-            backgroundColor: const Color(0xFF1A1A1A),
+            color: colorScheme.primary,
+            backgroundColor: customColors.cardBackground,
             onRefresh: _loadTriedIds,
             child: ListView.builder(
               padding: const EdgeInsets.only(top: 8, bottom: 100),

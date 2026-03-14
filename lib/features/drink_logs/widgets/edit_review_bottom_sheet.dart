@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import '../../../app/app_theme.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../models/drink_model_dto.dart';
 
@@ -60,7 +61,10 @@ class _EditReviewBottomSheetState extends State<EditReviewBottomSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not update review')),
+          SnackBar(
+            content: Text('Could not update review', style: TextStyle(color: Theme.of(context).colorScheme.onError)),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
         );
       }
     } finally {
@@ -70,10 +74,14 @@ class _EditReviewBottomSheetState extends State<EditReviewBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF141414), // Dark background matching theme
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: customColors.deepCardBackground,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.fromLTRB(
         24,
@@ -93,7 +101,7 @@ class _EditReviewBottomSheetState extends State<EditReviewBottomSheet> {
                 height: 4,
                 margin: const EdgeInsets.only(bottom: 24),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade800,
+                  color: customColors.borderDark,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -101,9 +109,7 @@ class _EditReviewBottomSheetState extends State<EditReviewBottomSheet> {
             // TITLE
             Text(
               'Edit review for ${widget.alcohol.name}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 24,
+              style: textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -111,35 +117,32 @@ class _EditReviewBottomSheetState extends State<EditReviewBottomSheet> {
             const SizedBox(height: 6),
             Text(
               'Update your rating and thoughts.',
-              style: TextStyle(fontSize: 14, color: Colors.grey.shade400),
+              style: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
             ),
 
             const SizedBox(height: 24),
 
             // ⭐ RATING
-            const Text(
+            Text(
               'Your rating',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
+              style: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               '${rating.toStringAsFixed(1)} / 5',
-              style: const TextStyle(
-                color: Colors.amber,
-                fontSize: 18,
+              style: textTheme.titleLarge?.copyWith(
+                color: colorScheme.primary,
                 fontWeight: FontWeight.bold,
               ),
             ),
             SliderTheme(
               data: SliderTheme.of(context).copyWith(
-                activeTrackColor: Colors.amber,
-                inactiveTrackColor: Colors.grey.shade800,
-                thumbColor: Colors.amber,
-                overlayColor: Colors.amber.withOpacity(0.2),
+                activeTrackColor: colorScheme.primary,
+                inactiveTrackColor: customColors.borderDark,
+                thumbColor: colorScheme.primary,
+                overlayColor: colorScheme.primary.withOpacity(0.2),
               ),
               child: Slider(
                 value: rating,
@@ -157,11 +160,9 @@ class _EditReviewBottomSheetState extends State<EditReviewBottomSheet> {
             const SizedBox(height: 16),
 
             // 📝 REVIEW NOTE
-            const Text(
+            Text(
               'Your thoughts',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
+              style: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -169,24 +170,24 @@ class _EditReviewBottomSheetState extends State<EditReviewBottomSheet> {
             TextField(
               controller: reviewController,
               maxLines: 4,
-              style: const TextStyle(color: Colors.white),
+              style: textTheme.bodyMedium,
               textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(
                 hintText: 'What did you like or dislike about it?',
-                hintStyle: TextStyle(color: Colors.grey.shade600),
+                hintStyle: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
                 filled: true,
-                fillColor: const Color(0xFF1E1E1E),
+                fillColor: customColors.cardBackground,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade800),
+                  borderSide: BorderSide(color: customColors.borderDark),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Colors.amber, width: 1.5),
+                  borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade800),
+                  borderSide: BorderSide(color: customColors.borderDark),
                 ),
               ),
             ),
@@ -199,26 +200,26 @@ class _EditReviewBottomSheetState extends State<EditReviewBottomSheet> {
               child: ElevatedButton(
                 onPressed: isSaving ? null : saveReview,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amber,
-                  foregroundColor: Colors.black,
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  disabledBackgroundColor: Colors.amber.withOpacity(0.5),
+                  disabledBackgroundColor: colorScheme.primary.withOpacity(0.5),
                 ),
                 child: isSaving
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.black),
+                            strokeWidth: 2, color: colorScheme.onPrimary),
                       )
-                    : const Text(
+                    : Text(
                         'Update review',
-                        style: TextStyle(
+                        style: textTheme.titleMedium?.copyWith(
+                          color: colorScheme.onPrimary,
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
                         ),
                       ),
               ),

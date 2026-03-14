@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import '../../app/app_theme.dart';
 
 class AppEmptyState extends StatelessWidget {
   const AppEmptyState({
@@ -20,6 +21,10 @@ class AppEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final textTheme = Theme.of(context).textTheme;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
@@ -31,21 +36,21 @@ class AppEmptyState extends StatelessWidget {
               height: 100,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.amber.withOpacity(0.1),
-                border: Border.all(color: Colors.amber.withOpacity(0.3), width: 2),
+                color: colorScheme.primary.withOpacity(0.1),
+                border:
+                    Border.all(color: colorScheme.primary.withOpacity(0.3), width: 2),
               ),
               child: Icon(
                 icon,
-                color: Colors.amber,
+                color: colorScheme.primary,
                 size: 48,
               ),
             ),
             const SizedBox(height: 24),
             Text(
               title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
+              style: textTheme.titleLarge?.copyWith(
+                color: colorScheme.onSurface,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -53,9 +58,8 @@ class AppEmptyState extends StatelessWidget {
             Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.grey.shade500,
-                fontSize: 14,
+              style: textTheme.bodyMedium?.copyWith(
+                color: customColors.textMuted,
                 height: 1.5,
               ),
             ),
@@ -63,17 +67,18 @@ class AppEmptyState extends StatelessWidget {
               const SizedBox(height: 32),
               ElevatedButton.icon(
                 onPressed: onAddTap,
-                icon: Icon(buttonIcon ?? Icons.add, color: Colors.black),
+                icon: Icon(buttonIcon ?? Icons.add, color: colorScheme.onPrimary),
                 label: Text(
                   buttonText!,
-                  style: const TextStyle(
-                    color: Colors.black,
+                  style: textTheme.titleMedium?.copyWith(
+                    color: colorScheme.onPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amber,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  backgroundColor: colorScheme.primary,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -86,4 +91,3 @@ class AppEmptyState extends StatelessWidget {
     );
   }
 }
-

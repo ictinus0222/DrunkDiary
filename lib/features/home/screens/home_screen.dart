@@ -45,7 +45,6 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() => _currentIndex = index);
         },
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.black,
         elevation: 0,
         selectedItemColor: Colors.amber,
         unselectedItemColor: Colors.grey.shade600,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../../app/app_theme.dart';
 import '../../alcohol/repositories/alcohol_repository.dart';
 import '../../drink_logs/models/drink_model_dto.dart';
 import '../models/discover_item_model.dart';
@@ -169,23 +170,24 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Discover',
-          style: TextStyle(
-              fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+          style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.black,
         elevation: 0,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.amber))
+          ? Center(child: CircularProgressIndicator(color: colorScheme.primary))
           : _error.isNotEmpty
               ? Center(
                   child: Text('Error: $_error',
-                      style: const TextStyle(color: Colors.red)))
+                      style: TextStyle(color: colorScheme.error)))
               : Column(
                   children: [
                     Padding(
@@ -194,25 +196,25 @@ class _SearchScreenState extends State<SearchScreen> {
                       // Search Bar
                       child: TextField(
                         controller: _controller,
-                        style: const TextStyle(color: Colors.white),
+                        style: textTheme.bodyMedium,
                         decoration: InputDecoration(
                           hintText: 'Search alcohols, brands, types...',
-                          hintStyle: TextStyle(color: Colors.grey.shade600),
+                          hintStyle: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
                           prefixIcon:
-                              const Icon(Icons.search, color: Colors.grey),
+                              Icon(Icons.search, color: customColors.textMuted),
                           suffixIcon: IconButton(
                             icon: Icon(
                               Icons.tune,
                               color: (_selectedType != null ||
                                       _selectedSort !=
                                           DiscoverSortOption.random)
-                                  ? Colors.amber
-                                  : Colors.grey,
+                                  ? colorScheme.primary
+                                  : customColors.textMuted,
                             ),
                             onPressed: _openFilterSheet,
                           ),
                           filled: true,
-                          fillColor: Colors.grey.shade900,
+                          fillColor: customColors.cardBackground,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none,

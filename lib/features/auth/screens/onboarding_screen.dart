@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../../app/app_theme.dart';
 
 class OnboardingScreen extends StatefulWidget {
   static const routeName = '/onboarding';
@@ -108,12 +109,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
 
   Widget _progressIndicator() {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
     return Column(
       children: [
         Text(
           'Step ${currentStep + 1} of $totalSteps',
-          style: const TextStyle(
-            color: Colors.grey,
+          style: TextStyle(
+            color: customColors.textMuted,
             fontSize: 14,
           ),
         ),
@@ -133,7 +135,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   shape: BoxShape.circle,
                   color: isActive
                     ? Theme.of(context).colorScheme.primary
-                      : Colors.grey.shade700,
+                      : Theme.of(context).extension<AppCustomColors>()!.borderDark,
                 ),
               );
             }),
@@ -144,6 +146,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
 
   Widget _dobStep() {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -158,10 +161,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
         const SizedBox(height: 8),
 
-        const Text(
+        Text(
           'We need this to make sure you’re legally allowed to drink.',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.grey),
+          style: TextStyle(color: customColors.textMuted),
         ),
 
         const SizedBox(height: 32),
@@ -200,6 +203,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
 
   Widget _drinkPreferencesStep() {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
     final options = [
       'Beer 🍺',
       'Whisky 🥃',
@@ -223,10 +227,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
           const SizedBox(height: 8),
 
-          const Text(
+          Text(
             'Select all that apply. This helps us tailor your experience.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey),
+            style: TextStyle(color: customColors.textMuted),
           ),
 
           const SizedBox(height: 32),
@@ -267,6 +271,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _tastePreferenceStep() {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
     final options = [
       'Smooth & easy 🍹',
       'Strong & bold 🥃',
@@ -291,10 +296,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
         const SizedBox(height: 8),
 
-        const Text(
+        Text(
           'This helps us suggest better options.',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.grey),
+          style: TextStyle(color: customColors.textMuted),
         ),
 
         const SizedBox(height: 32),
@@ -335,6 +340,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _drinkingContextStep() {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
     final options = [
       'House parties',
       'Bars / clubs',
@@ -358,10 +364,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
         const SizedBox(height: 8),
 
-        const Text(
+        Text(
           'Select all that apply.',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.grey),
+          style: TextStyle(color: customColors.textMuted),
         ),
 
         const SizedBox(height: 32),
@@ -402,6 +408,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _discoveryStyleStep() {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
     final options = [
       'Friends’ recommendations',
       'Price',
@@ -426,10 +433,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
         const SizedBox(height: 8),
 
-        const Text(
+        Text(
           'There’s no right answer.',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.grey),
+          style: TextStyle(color: customColors.textMuted),
         ),
 
         const SizedBox(height: 32),
@@ -470,6 +477,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _usernameStep() {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -485,10 +493,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
         const SizedBox(height: 8),
 
-        const Text(
+        Text(
           'This is how others will see you.',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.grey),
+          style: TextStyle(color: customColors.textMuted),
         ),
 
         const SizedBox(height: 32),

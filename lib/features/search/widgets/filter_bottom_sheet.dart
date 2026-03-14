@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/app_theme.dart';
+
 enum DiscoverSortOption { random, aToZ, highestRated, mostReviewed }
 
 class FilterBottomSheet extends StatefulWidget {
@@ -33,6 +35,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Container(
       padding: EdgeInsets.only(
         left: 24,
@@ -41,7 +47,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       ),
       decoration: BoxDecoration(
-        color: Colors.grey.shade900,
+        color: customColors.deepCardBackground,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SingleChildScrollView(
@@ -55,7 +61,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade700,
+                  color: customColors.borderDark,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -64,11 +70,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Filters',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
+                  style: textTheme.headlineSmall?.copyWith(
+                    color: colorScheme.onSurface,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -79,19 +84,18 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       _selectedType = null;
                     });
                   },
-                  child: const Text(
+                  child: Text(
                     'Reset',
-                    style: TextStyle(color: Colors.amber),
+                    style: TextStyle(color: colorScheme.primary),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Sort By',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
+              style: textTheme.titleMedium?.copyWith(
+                color: colorScheme.onSurface,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -109,18 +113,17 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               ],
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'Alcohol Type',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
+              style: textTheme.titleMedium?.copyWith(
+                color: colorScheme.onSurface,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 12),
             if (widget.availableTypes.isEmpty)
               Text('No types available.',
-                  style: TextStyle(color: Colors.grey.shade500))
+                  style: textTheme.bodyMedium?.copyWith(color: customColors.textMuted))
             else
               Wrap(
                 spacing: 8,
@@ -141,16 +144,16 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amber,
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
+                child: Text(
                   'Apply Filters',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 16,
+                  style: textTheme.titleMedium?.copyWith(
+                    color: colorScheme.onPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -163,6 +166,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   }
 
   Widget _buildSortChip(String label, DiscoverSortOption value) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isSelected = _selectedSort == value;
     return ChoiceChip(
       label: Text(label),
@@ -170,20 +174,22 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       onSelected: (selected) {
         if (selected) setState(() => _selectedSort = value);
       },
-      selectedColor: Colors.amber,
+      selectedColor: colorScheme.primary,
       backgroundColor: Colors.transparent,
       labelStyle: TextStyle(
-        color: isSelected ? Colors.black : Colors.white,
+        color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: isSelected ? Colors.amber : Colors.grey),
+        side: BorderSide(
+            color: isSelected ? colorScheme.primary : Theme.of(context).extension<AppCustomColors>()!.borderDark),
       ),
     );
   }
 
   Widget _buildTypeChip(String label, String? value) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isSelected = _selectedType == value;
     return ChoiceChip(
       label: Text(label),
@@ -191,15 +197,16 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       onSelected: (selected) {
         if (selected) setState(() => _selectedType = value);
       },
-      selectedColor: Colors.amber,
+      selectedColor: colorScheme.primary,
       backgroundColor: Colors.transparent,
       labelStyle: TextStyle(
-        color: isSelected ? Colors.black : Colors.white,
+        color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: isSelected ? Colors.amber : Colors.grey),
+        side: BorderSide(
+            color: isSelected ? colorScheme.primary : Theme.of(context).extension<AppCustomColors>()!.borderDark),
       ),
     );
   }

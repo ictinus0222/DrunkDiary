@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/flags/feature_flags.dart';
+import '../../../app/app_theme.dart';
 
 class AdminSettingsScreen extends ConsumerWidget {
   const AdminSettingsScreen({super.key});
@@ -10,12 +11,13 @@ class AdminSettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final flagsAsync = ref.watch(featureFlagsProvider);
 
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Admin Settings',
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.black,
+        title: Text('Admin Settings',
+            style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
         elevation: 0,
       ),
       body: flagsAsync.when(
@@ -31,30 +33,34 @@ class AdminSettingsScreen extends ConsumerWidget {
             ),
           ],
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => Center(child: CircularProgressIndicator(color: colorScheme.primary)),
         error: (err, stack) => Center(
             child:
-                Text('Error: $err', style: const TextStyle(color: Colors.red))),
+                Text('Error: $err', style: TextStyle(color: colorScheme.error))),
       ),
     );
   }
 
   Widget _buildFlagTile(BuildContext context, String title, String subtitle,
       bool value, String key) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final textTheme = Theme.of(context).textTheme;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1E1E),
+        color: customColors.cardBackground,
         borderRadius: BorderRadius.circular(16),
       ),
       child: SwitchListTile(
         title: Text(title,
-            style: const TextStyle(
-                color: Colors.white, fontWeight: FontWeight.bold)),
+            style: textTheme.titleMedium?.copyWith(
+                color: colorScheme.onSurface, fontWeight: FontWeight.bold)),
         subtitle: Text(subtitle,
-            style: TextStyle(color: Colors.grey.shade500, fontSize: 13)),
+            style: textTheme.bodySmall?.copyWith(color: customColors.textMuted)),
         value: value,
-        activeColor: Colors.amber,
+        activeColor: colorScheme.primary,
         onChanged: (newValue) async {
           try {
             await FirebaseFirestore.instance
@@ -63,7 +69,10 @@ class AdminSettingsScreen extends ConsumerWidget {
                 .set({key: newValue}, SetOptions(merge: true));
           } catch (e) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Failed to update flag')),
+              SnackBar(
+                content: Text('Failed to update flag', style: TextStyle(color: colorScheme.onError)),
+                backgroundColor: colorScheme.error,
+              ),
             );
           }
         },
