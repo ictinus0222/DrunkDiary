@@ -9,11 +9,11 @@
 
 ### Color Palette
 Extracted from `app_theme.dart` and inline widget styling:
-*   `--color-primary`: `Color.fromARGB(1, 255, 193, 7)` / `Colors.amber` (Used for active chips and primary accents)
-*   `--color-background`: `Color.fromARGB(1, 14, 14, 14)` / `Colors.black` (Used for Scaffolds)
-*   `--color-surface`: `Colors.grey.shade900` (Used for Cards, TextFields, and Stats containers)
-*   `--color-text-primary`: `Colors.white`
-*   `--color-text-secondary`: `Colors.grey` / `Colors.grey.shade600` / `Colors.grey.shade700`
+*   `--color-primary`: `#FFC107` (Used for active chips and primary accents)
+*   `--color-background`: `#0F0F0F` (Used for Scaffolds)
+*   `--color-surface`: `#1A1A1A` (Used for Cards, TextFields, and Stats containers)
+*   `--color-text-primary`: `#FFFFFF`
+*   `--color-text-secondary`: `#B0B0B0` (Used for muted/secondary text)
 *   `--color-success`: `Colors.green` (Used for "Like" thumbs up icon and positive username validation)
 *   `--color-error`: `Colors.red` (Used for "Dislike" thumbs down icon and error text)
 

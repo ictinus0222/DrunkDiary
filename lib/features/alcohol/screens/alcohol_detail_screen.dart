@@ -1,10 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/app_theme.dart';
-import '../../../core/flags/feature_flags.dart';
 import '../../wishlist/widgets/wishlist_action_button.dart';
 import '../../drink_logs/widgets/create_review_bottom_sheet.dart';
 import '../../drink_logs/widgets/edit_review_bottom_sheet.dart';
@@ -177,18 +175,7 @@ class AlcoholDetailScreen extends StatelessWidget {
                       likeRatio: likeRatio);
                 },
               ),
-              Consumer(
-                builder: (context, ref, child) {
-                  final flagsAsync = ref.watch(featureFlagsProvider);
-                  return flagsAsync.when(
-                    data: (flags) => flags.personalMeaningEnabled
-                        ? _PersonalMeaningSection(alcohol: alcohol)
-                        : _AboutSection(alcohol: alcohol),
-                    loading: () => const SizedBox.shrink(),
-                    error: (_, __) => _AboutSection(alcohol: alcohol),
-                  );
-                },
-              ),
+              _AboutSection(alcohol: alcohol),
               if (logs.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 Padding(

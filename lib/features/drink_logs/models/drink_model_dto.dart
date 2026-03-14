@@ -99,7 +99,6 @@ class DrinkLogModel {
     double? rating,
     bool? isLiked,
     String? note,
-    String? visibility,
     LogKind? logKind,
   }) {
     return DrinkLogModel(

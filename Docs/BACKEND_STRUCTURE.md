@@ -62,16 +62,11 @@ Source of Truth: `lib/features/wishlist/models/wishlist_item_model.dart`
 *   `note`: String? (Nullable — optional personal note, e.g., "heard about this at Jake's party")
 *   `addedAt`: Timestamp (When the item was added)
 
-### Collection: `user_alcohol_meta`
-Source of Truth: `lib/features/alcohol/screens/alcohol_detail_screen.dart` (Implementation)
-*   Document ID: `${userId}_${alcoholId}`
-- `personalNote`: String (The user's private definition of this bottle)
-- `updatedAt`: Timestamp
-
 ### Collection: `configs`
 Source of Truth: `lib/core/flags/feature_flags.dart`
 * Document ID: `app_flags`
-- `personal_meaning_enabled`: Boolean (Toggles the user-editable notes section)
+- (Add future flags here)
+
 
 **Indexes (Only If Defined):**
 No explicit secondary indexes defined in the repository (Firestore handles single-field indexing automatically; no composite index configurations like `firestore.indexes.json` are present).

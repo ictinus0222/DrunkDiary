@@ -51,7 +51,6 @@ DrunkDiary uses a **Serverless (BaaS)** architecture based on Firebase:
 - **`alcohols`**
 - **`drink_logs`**
 - **`wishlists`**
-- **`user_alcohol_meta`**
 - **`configs`**
 <!-- SYNC_ARCH_END -->
 

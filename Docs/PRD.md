@@ -79,12 +79,12 @@ Based on the onboarding flow and feature structure, the target users are individ
     - Items are displayed as rich cards showing image, type, global rating, and a checkmark if logged/reviewed by the user.
     - Search bar includes a filter button, which opens a bottom sheet allowing sorting (A-Z, High-Low Rating, Most Reviewed) and type filtering (e.g. Whisky, Rum, Vodka).
 - **Alcohol Details**
-  - **Description:** Displays alcohol information, personal logs, and global community stats. Replaces static "About" descriptions with a user-defined "Personal Meaning" section.
-  - **User Story:** As a user, I can view details of a drink, define what the bottle specifically means to me (storing a private personal note), see my personal logs (excluding reviews), and view community statistics like total global logs, global average rating, and a global like ratio.
-  - **Acceptance Criteria:** Queries all logs for the specified alcohol to calculate global total logs, personal total logs (logKind: log only), average community rating, and the global like-to-dislike ratio. Provides an editable "Personal Meaning" field stored in `user_alcohol_meta`.
+  - **Description:** Displays alcohol information, personal logs, and global community stats.
+  - **User Story:** As a user, I can view details of a drink, see my personal logs (excluding reviews), and view community statistics like total global logs, global average rating, and a global like ratio.
+  - **Acceptance Criteria:** Queries all logs for the specified alcohol to calculate global total logs, personal total logs (logKind: log only), average community rating, and the global like-to-dislike ratio. Provides a view of the user's history with the alcohol.
 - **Feature Flags & Admin Settings (A/B Testing)**
   - **Description:** A system for controlling visibility of new features globally or per segment.
-  - **User Story:** As an admin, I want to toggle features (like the Personal Meaning section) on or off for all users from within the app so I can test experimental features.
+  - **User Story:** As an admin, I want to toggle experimental features on or off for all users from within the app.
   - **Acceptance Criteria:** Real-time state management via Riverpod. Authentication-restricted entry point in Profile. Persists values in Firestore `configs` collection.
 
 ### P2 (Minor or Utility Features Already Present)

@@ -123,7 +123,7 @@ AuthGate
 * **Screen:** `AlcoholDetailScreen`
   * **Route:** `/alcoholDetail`
   * **Access:** Authenticated
-  * **Purpose:** Shows details and personal logs stream for a specific alcohol. Displays a "Community Stats" section showing total community logs, personal logs (filtered to logs only), community average rating, and a global like ratio. Replaces the static 'About' section with a user-editable 'Personal Meaning' field stored per user. Contains action buttons to trigger Logging/Reviewing.
+  * **Purpose:** Shows details and personal logs stream for a specific alcohol. Displays a "Community Stats" section showing total community logs, personal logs (filtered to logs only), community average rating, and a global like ratio. Contains action buttons to trigger Logging/Reviewing.
 * **Screen:** `ShelfScreen`
   * **Route:** `/shelf`
   * **Access:** Authenticated

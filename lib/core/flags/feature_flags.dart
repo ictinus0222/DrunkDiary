@@ -2,15 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class FeatureFlags {
-  final bool personalMeaningEnabled;
-
-  FeatureFlags({this.personalMeaningEnabled = true});
+  FeatureFlags();
 
   factory FeatureFlags.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>? ?? {};
-    return FeatureFlags(
-      personalMeaningEnabled: data['personal_meaning_enabled'] ?? true,
-    );
+    return FeatureFlags();
   }
 }
 
