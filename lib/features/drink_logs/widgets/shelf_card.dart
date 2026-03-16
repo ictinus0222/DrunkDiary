@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../app/app_theme.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../../alcohol/screens/alcohol_detail_screen.dart';
+import '../../../core/navigation/page_transitions.dart';
+import '../../../core/widgets/app_shimmer.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ShelfCard extends StatelessWidget {
   final AlcoholModel alcohol;
@@ -28,8 +31,8 @@ class ShelfCard extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => AlcoholDetailScreen(alcohol: alcohol),
+          FadeSlidePageRoute(
+            child: AlcoholDetailScreen(alcohol: alcohol),
           ),
         );
       },
@@ -50,14 +53,17 @@ class ShelfCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
               child: AspectRatio(
                 aspectRatio: 0.75,
-                child: Image.network(
-                  alcohol.imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    color: customColors.cardBackground,
-                    child: Center(
-                      child:
-                          Icon(Icons.local_bar, size: 40, color: customColors.textMuted),
+                child: Hero(
+                  tag: 'alcohol_${alcohol.id}',
+                  child: CachedNetworkImage(
+                    imageUrl: alcohol.imageUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => const AppShimmer(),
+                    errorWidget: (context, url, error) => Container(
+                      color: customColors.cardBackground,
+                      child: Center(
+                        child: Icon(Icons.local_bar, size: 40, color: customColors.textMuted),
+                      ),
                     ),
                   ),
                 ),

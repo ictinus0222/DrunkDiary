@@ -12,14 +12,12 @@ class ProfileStatsService {
         .orderBy('createdAt', descending: true)
         .get();
 
-    return _computeProfileStats(snapshot);
-  } // Checked ☑️
+    final items = snapshot.docs.map(DrinkLogModel.fromFirestore).toList();
+    return computeStatsFromLogs(items);
+  }
 
-  static Future<ProfileStatsModel> _computeProfileStats(
-      QuerySnapshot snapshot) async {
-    final docs = snapshot.docs;
-
-    final items = docs.map(DrinkLogModel.fromFirestore).toList();
+  static Future<ProfileStatsModel> computeStatsFromLogs(
+      List<DrinkLogModel> items) async {
     final totalLogs = items.where((log) => log.logKind == LogKind.log).length;
     final Set<String> uniqueAlcohols = {};
     double ratingSum = 0.0;
@@ -54,7 +52,7 @@ class ProfileStatsService {
           topRatedAlcoholName = log.alcoholName;
         }
       }
-    } // Checked ☑️
+    }
 
     String? favoriteType;
     if (typeCountMap.isNotEmpty) {
@@ -72,7 +70,6 @@ class ProfileStatsService {
           .where(FieldPath.documentId, whereIn: recentAlcoholIds)
           .get();
 
-      // Create a map to preserve order from recentAlcoholIds
       final Map<String, AlcoholModel> alcoholMap = {
         for (var doc in alcoholsSnapshot.docs)
           doc.id: AlcoholModel.fromFirestore(doc)
@@ -93,6 +90,6 @@ class ProfileStatsService {
       topRatedAlcohol: topRatedAlcoholName,
       recentLogs: recentLogs,
       recentAlcohols: recentAlcohols,
-    ); // Checked ☑️
+    );
   }
 }

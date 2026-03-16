@@ -55,6 +55,17 @@ class DrinkLogRepository {
     return snapshot.docs.map(DrinkLogModel.fromFirestore).toList();
   }
 
+  /// Real-time stream of all interaction logs for a user (Logs + Reviews)
+  Stream<List<DrinkLogModel>> watchLogsForUser(String userId) {
+    return _firestore
+        .collection('drink_logs')
+        .where('userId', isEqualTo: userId)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) =>
+            snapshot.docs.map(DrinkLogModel.fromFirestore).toList());
+  }
+
   // ============================
   // ➕ CREATE SINGLE LOG / REVIEW
   // ============================

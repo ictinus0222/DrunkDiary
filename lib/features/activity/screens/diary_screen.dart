@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drunk_diary/features/drink_logs/models/drink_model_dto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,224 +10,219 @@ import '../../alcohol/models/alcohol_model.dart';
 import '../../../core/widgets/app_empty_state.dart';
 import 'package:drunk_diary/core/navigation/tab_change_notification.dart';
 import '../../../app/app_theme.dart';
+import 'package:drunk_diary/features/drink_logs/providers/drink_logs_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/widgets/app_shimmer.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 enum DiaryLayout { timeline, gallery }
 
-class DiaryScreen extends StatefulWidget {
+class DiaryScreen extends ConsumerStatefulWidget {
   static const routeName = '/diary';
   const DiaryScreen({super.key});
 
   @override
-  State<DiaryScreen> createState() => _DiaryScreenState();
+  ConsumerState<DiaryScreen> createState() => _DiaryScreenState();
 }
 
-class _DiaryScreenState extends State<DiaryScreen> {
+class _DiaryScreenState extends ConsumerState<DiaryScreen> {
   String _selectedFilter = 'All';
   DiaryLayout _currentLayout = DiaryLayout.timeline;
 
   @override
   Widget build(BuildContext context) {
-    final userId = FirebaseAuth.instance.currentUser!.uid;
+    final logsAsync = ref.watch(drinkLogsProvider);
 
-    return Scaffold(
-      body: SafeArea(
-        child: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance
-              .collection('drink_logs')
-              .where('userId', isEqualTo: userId)
-              .orderBy('createdAt', descending: true)
-              .snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            final allLogs = snapshot.hasData
-                ? snapshot.data!.docs
-                    .map((doc) => DrinkLogModel.fromFirestore(doc))
-                    .toList()
-                : <DrinkLogModel>[];
-
-            final logs = allLogs.where((log) {
-              if (_selectedFilter == 'All') return true;
-              if (_selectedFilter == 'Logs') return log.logKind == LogKind.log;
-              if (_selectedFilter == 'Reviews') {
-                return log.logKind == LogKind.review;
-              }
-              return true;
-            }).toList();
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const _Header(),
-                const SizedBox(height: 12),
-                _StatsRow(logs: allLogs),
-                const SizedBox(height: 16),
-                _FiltersRow(
-                  selectedFilter: _selectedFilter,
-                  currentLayout: _currentLayout,
-                  onFilterChanged: (filter) {
-                    setState(() {
-                      _selectedFilter = filter;
-                    });
-                  },
-                  onLayoutChanged: (layout) {
-                    setState(() {
-                      _currentLayout = layout;
-                    });
-                  },
-                ),
-                const SizedBox(height: 8),
-                Expanded(
-                  child: _DiaryList(
-                    logs: logs,
-                    layout: _currentLayout,
+    return SafeArea(
+      child: logsAsync.when(
+        loading: () => Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              const SliverToBoxAdapter(child: _WelcomeSectionSkeleton()),
+              const SliverToBoxAdapter(child: SizedBox(height: 36)),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      AppShimmer(width: 100, height: 36, borderRadius: BorderRadius.circular(20)),
+                      const SizedBox(width: 8),
+                      AppShimmer(width: 80, height: 36, borderRadius: BorderRadius.circular(20)),
+                      const SizedBox(width: 8),
+                      AppShimmer(width: 110, height: 36, borderRadius: BorderRadius.circular(20)),
+                    ],
                   ),
                 ),
-              ],
-            );
-          },
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 16)),
+              _DiarySliverListSkeleton(layout: _currentLayout),
+            ],
+          ),
         ),
+        error: (err, stack) => Scaffold(
+          body: Center(child: Text('Error: $err')),
+        ),
+        data: (allLogs) {
+          final logs = allLogs.where((log) {
+            if (_selectedFilter == 'All') return true;
+            if (_selectedFilter == 'Logs') return log.logKind == LogKind.log;
+            if (_selectedFilter == 'Reviews') {
+              return log.logKind == LogKind.review;
+            }
+            return true;
+          }).toList();
+
+          return Scaffold(
+            floatingActionButton: allLogs.isEmpty
+                ? null
+                : FloatingActionButton.extended(
+                    onPressed: () {
+                      const TabChangeNotification(2).dispatch(context);
+                    },
+                    icon: const Icon(Icons.add, color: Colors.black),
+                    label: const Text('Log a Drink',
+                        style: TextStyle(
+                            color: Colors.black, fontWeight: FontWeight.bold)),
+                    backgroundColor: Colors.amber,
+                  ),
+            body: CustomScrollView(
+              slivers: [
+                const SliverToBoxAdapter(child: _WelcomeSection()),
+                const SliverToBoxAdapter(child: SizedBox(height: 12)),
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                SliverToBoxAdapter(
+                  child: _FiltersRow(
+                    selectedFilter: _selectedFilter,
+                    currentLayout: _currentLayout,
+                    onFilterChanged: (filter) {
+                      setState(() {
+                        _selectedFilter = filter;
+                      });
+                    },
+                    onLayoutChanged: (layout) {
+                      setState(() {
+                        _currentLayout = layout;
+                      });
+                    },
+                  ),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 8)),
+                _DiarySliverList(
+                  logs: logs,
+                  layout: _currentLayout,
+                ),
+                const SliverToBoxAdapter(
+                    child: SizedBox(height: 100)), // Space for FAB
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 }
 
-/* ----------------------------- HEADER ----------------------------- */
+/* ----------------------------- WELCOME SECTION ----------------------------- */
 
-class _Header extends StatelessWidget {
-  const _Header();
+class _WelcomeSection extends StatefulWidget {
+  const _WelcomeSection();
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Your Diary',
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall
-                ?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: Colors.amber,
-            child: const Icon(Icons.person, color: Colors.black),
-          ),
-        ],
-      ),
-    );
-  }
+  State<_WelcomeSection> createState() => _WelcomeSectionState();
 }
 
-/* ----------------------------- STATS ----------------------------- */
+class _WelcomeSectionState extends State<_WelcomeSection> {
+  late String _greeting;
 
-class _StatsRow extends StatelessWidget {
-  final List<DrinkLogModel> logs;
-  const _StatsRow({required this.logs});
+  final List<String> _morningGreetings = [
+    'Coffee or a breakfast brew?',
+    'What\'s the early pour?',
+    'Ready for the day\'s first log?',
+    'Morning! Starting fresh?',
+  ];
+
+  final List<String> _afternoonGreetings = [
+    'What are we drinking?',
+    'Found anything new?',
+    'A midday refreshment?',
+    'Time to log a memory?',
+  ];
+
+  final List<String> _eveningGreetings = [
+    'Recording a night to remember?',
+    'What\'s the poison tonight?',
+    'Sipping on something special?',
+    'Ready for another round?',
+    'Working on your collection?',
+  ];
 
   @override
-  Widget build(BuildContext context) {
-    final total = logs.where((l) => l.logKind == LogKind.log).length;
-
-    final reviewLogs = logs
-        .where((l) => l.logKind == LogKind.review && l.rating != null)
-        .toList();
-    final double? avgRating = reviewLogs.isEmpty
-        ? null
-        : reviewLogs.map((l) => l.rating!).reduce((a, b) => a + b) /
-            reviewLogs.length;
-
-    final favorite = _getFavoriteCategory(logs);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          Expanded(
-            child: _StatCard(
-              title: 'Total',
-              value: total.toString(),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _StatCard(
-              title: 'Avg Rating',
-              value: avgRating == null ? '—' : avgRating.toStringAsFixed(1),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _StatCard(
-              title: 'Favorite',
-              value: favorite ?? '—',
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String? _getFavoriteCategory(List<DrinkLogModel> logs) {
-    final Map<String, int> countMap = {};
-
-    for (final log in logs) {
-      countMap[log.alcoholType] = (countMap[log.alcoholType] ?? 0) + 1;
+  void initState() {
+    super.initState();
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      _greeting = _morningGreetings[Random().nextInt(_morningGreetings.length)];
+    } else if (hour < 17) {
+      _greeting = _afternoonGreetings[Random().nextInt(_afternoonGreetings.length)];
+    } else {
+      _greeting = _eveningGreetings[Random().nextInt(_eveningGreetings.length)];
     }
-
-    if (countMap.isEmpty) return null;
-
-    return countMap.entries.reduce((a, b) => a.value > b.value ? a : b).key;
   }
-}
-
-class _StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-
-  const _StatCard({
-    required this.title,
-    required this.value,
-  });
 
   @override
   Widget build(BuildContext context) {
-    final customColors = Theme.of(context).extension<AppCustomColors>()!;
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    final user = FirebaseAuth.instance.currentUser;
+    final displayName = user?.displayName?.split(' ').first ?? 'Friend';
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+      child: Row(
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              color: customColors.textMuted,
-              fontSize: 12,
+          CircleAvatar(
+            radius: 28,
+            backgroundColor: Colors.amber.withOpacity(0.1),
+            backgroundImage: user?.photoURL != null
+                ? NetworkImage(user!.photoURL!)
+                : null,
+            child: user?.photoURL == null
+                ? const Icon(Icons.person_outline, color: Colors.amber, size: 28)
+                : null,
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Hey $displayName! 👋",
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Colors.amber,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 1),
+                Text(
+                  _greeting,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.8,
+                      ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+          const SizedBox(width: 8),
+          IconButton(
+            onPressed: () => Navigator.pushNamed(context, '/stats'),
+            icon: const Icon(Icons.auto_graph, color: Colors.amber, size: 20),
+            tooltip: 'View Stats',
           ),
         ],
       ),
     );
   }
 }
+
 
 /* ----------------------------- FILTERS ----------------------------- */
 
@@ -249,24 +245,33 @@ class _FiltersRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          _FilterChip(
-            label: 'All',
-            selected: selectedFilter == 'All',
-            onTap: () => onFilterChanged('All'),
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _FilterChip(
+                    label: 'All Activity',
+                    selected: selectedFilter == 'All',
+                    onTap: () => onFilterChanged('All'),
+                  ),
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: 'Your Logs',
+                    selected: selectedFilter == 'Logs',
+                    onTap: () => onFilterChanged('Logs'),
+                  ),
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: 'Your Reviews',
+                    selected: selectedFilter == 'Reviews',
+                    onTap: () => onFilterChanged('Reviews'),
+                  ),
+                ],
+              ),
+            ),
           ),
           const SizedBox(width: 8),
-          _FilterChip(
-            label: 'Logs',
-            selected: selectedFilter == 'Logs',
-            onTap: () => onFilterChanged('Logs'),
-          ),
-          const SizedBox(width: 8),
-          _FilterChip(
-            label: 'Reviews',
-            selected: selectedFilter == 'Reviews',
-            onTap: () => onFilterChanged('Reviews'),
-          ),
-          const Spacer(),
           IconButton(
             onPressed: () {
               onLayoutChanged(
@@ -324,13 +329,13 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
-/* ----------------------------- DIARY ----------------------------- */
+/* ----------------------------- DIARY SLIVERS ----------------------------- */
 
-class _DiaryList extends StatelessWidget {
+class _DiarySliverList extends StatelessWidget {
   final List<DrinkLogModel> logs;
   final DiaryLayout layout;
 
-  const _DiaryList({
+  const _DiarySliverList({
     required this.logs,
     required this.layout,
   });
@@ -338,39 +343,108 @@ class _DiaryList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (logs.isEmpty) {
-      return AppEmptyState(
-        icon: Icons.history_edu_outlined,
-        title: 'Your diary is empty',
-        subtitle: 'Capture your first drink memory\nand see it here.',
-        buttonText: 'Log a Drink',
-        onAddTap: () {
-          const TabChangeNotification(2).dispatch(context);
-        },
+      return SliverFillRemaining(
+        hasScrollBody: false,
+        child: AppEmptyState(
+          icon: Icons.history_edu_outlined,
+          title: 'Your diary is empty',
+          subtitle: 'Capture your first drink memory\nand see it here.',
+          buttonText: 'Log a Drink',
+          onAddTap: () {
+            const TabChangeNotification(2).dispatch(context);
+          },
+        ),
       );
     }
 
     if (layout == DiaryLayout.gallery) {
-      return GridView.builder(
+      return SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 0.85,
+        sliver: SliverGrid(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 0.85,
+          ),
+          delegate: SliverChildBuilderDelegate(
+            (context, index) => _GalleryItem(log: logs[index]),
+            childCount: logs.length,
+          ),
         ),
-        itemCount: logs.length,
-        itemBuilder: (context, index) {
-          return _GalleryItem(log: logs[index]);
-        },
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.only(bottom: 16),
-      itemCount: logs.length,
-      itemBuilder: (context, index) {
-        return DrinkLogCard(log: logs[index]);
-      },
+    // Group logs by date
+    final groupedLogs = _groupLogsByDate(logs);
+
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          final item = groupedLogs[index];
+          if (item is String) {
+            return _DateHeader(dateLabel: item);
+          } else {
+            return DrinkLogCard(log: item as DrinkLogModel);
+          }
+        },
+        childCount: groupedLogs.length,
+      ),
+    );
+  }
+
+  List<Object> _groupLogsByDate(List<DrinkLogModel> logs) {
+    final List<Object> items = [];
+    String? lastDate;
+
+    for (final log in logs) {
+      final dateLabel = _formatHeaderDate(log.createdAt);
+      if (dateLabel != lastDate) {
+        items.add(dateLabel);
+        lastDate = dateLabel;
+      }
+      items.add(log);
+    }
+    return items;
+  }
+
+  String _formatHeaderDate(DateTime date) {
+    final now = DateTime.now();
+    if (date.year == now.year && date.month == now.month && date.day == now.day) {
+      return "Today";
+    }
+    final yesterday = now.subtract(const Duration(days: 1));
+    if (date.year == yesterday.year && date.month == yesterday.month && date.day == yesterday.day) {
+      return "Yesterday";
+    }
+
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return '${date.day} ${months[date.month - 1]}';
+  }
+}
+
+class _DateHeader extends StatelessWidget {
+  final String dateLabel;
+  const _DateHeader({required this.dateLabel});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 24, 16, 8),
+      child: Text(
+        dateLabel.toUpperCase(),
+        style: textTheme.labelMedium?.copyWith(
+          color: customColors.textMuted,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 2.0,
+        ),
+      ),
     );
   }
 }
@@ -404,9 +478,14 @@ class _GalleryItem extends StatelessWidget {
           children: [
             Positioned.fill(
               child: log.photoUrl != null && log.photoUrl!.isNotEmpty
-                  ? Image.network(
-                      log.photoUrl!,
-                      fit: BoxFit.cover,
+                  ? Hero(
+                      tag: 'alcohol_${log.id}_photo',
+                      child: CachedNetworkImage(
+                        imageUrl: log.photoUrl!,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => const AppShimmer(),
+                        errorWidget: (context, url, error) => const Icon(Icons.error),
+                      ),
                     )
                   : FutureBuilder<DocumentSnapshot>(
                       future: FirebaseFirestore.instance
@@ -417,20 +496,24 @@ class _GalleryItem extends StatelessWidget {
                         if (snapshot.hasData && snapshot.data!.exists) {
                           final alcohol =
                               AlcoholModel.fromFirestore(snapshot.data!);
-                          return Image.network(
-                            alcohol.imageUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              color: customColors.borderDark,
-                              child: const Icon(Icons.local_bar,
-                                  color: Colors.white24),
+                          return Hero(
+                            tag: 'alcohol_${alcohol.id}',
+                            child: CachedNetworkImage(
+                              imageUrl: alcohol.imageUrl,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => const AppShimmer(),
+                              errorWidget: (context, url, error) => Container(
+                                color: customColors.borderDark,
+                                child: const Icon(Icons.local_bar,
+                                    color: Colors.white24),
+                              ),
                             ),
                           );
                         }
                         return Container(
                           color: customColors.borderDark,
                           child:
-                              const Center(child: CircularProgressIndicator()),
+                              const Center(child: AppShimmer()),
                         );
                       },
                     ),
@@ -469,6 +552,84 @@ class _GalleryItem extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+/* ----------------------------- SKELETONS ----------------------------- */
+
+class _WelcomeSectionSkeleton extends StatelessWidget {
+  const _WelcomeSectionSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
+      child: Row(
+        children: [
+          AppShimmer.circular(size: 56),
+          SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppShimmer(width: 120, height: 16),
+                SizedBox(height: 8),
+                AppShimmer(width: 200, height: 28),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DiarySliverListSkeleton extends StatelessWidget {
+  final DiaryLayout layout;
+  const _DiarySliverListSkeleton({required this.layout});
+
+  @override
+  Widget build(BuildContext context) {
+    if (layout == DiaryLayout.gallery) {
+      return SliverPadding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        sliver: SliverGrid(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 0.85,
+          ),
+          delegate: SliverChildBuilderDelegate(
+            (context, index) => AppShimmer(
+              borderRadius: BorderRadius.circular(20),
+              height: double.infinity,
+            ),
+            childCount: 6,
+          ),
+        ),
+      );
+    }
+
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          if (index % 4 == 0) {
+            return const Padding(
+              padding: EdgeInsets.fromLTRB(20, 24, 16, 8),
+              child: AppShimmer(width: 80, height: 12),
+            );
+          }
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: AppShimmer(
+              height: 140,
+              borderRadius: BorderRadius.circular(16),
+            ),
+          );
+        },
+        childCount: 10,
       ),
     );
   }

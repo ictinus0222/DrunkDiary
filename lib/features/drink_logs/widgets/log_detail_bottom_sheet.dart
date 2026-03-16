@@ -3,9 +3,12 @@ import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../app/app_theme.dart';
+import '../../../core/constants/reaction_config.dart';
 import '../models/drink_model_dto.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../../drink_logs/widgets/edit_review_bottom_sheet.dart';
+import '../../../core/widgets/app_shimmer.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class LogDetailBottomSheet extends StatefulWidget {
   final DrinkLogModel log;
@@ -171,11 +174,16 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
                             child: Center(
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(16),
-                                child: Image.network(
-                                  _log.photoUrl!,
-                                  height: 240,
-                                  width: 160,
-                                  fit: BoxFit.cover,
+                                child: Hero(
+                                  tag: 'alcohol_${_log.id}_photo',
+                                  child: CachedNetworkImage(
+                                    imageUrl: _log.photoUrl!,
+                                    height: 240,
+                                    width: 160,
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) => const AppShimmer(),
+                                    errorWidget: (context, url, error) => const Icon(Icons.error),
+                                  ),
                                 ),
                               ),
                             ),
@@ -210,20 +218,17 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
                               ),
                             ],
                           )
-                        else if (!isReview && _log.isLiked != null)
+                        else if (!isReview && _log.reaction != null)
                           Row(
                             children: [
                               Icon(
-                                _log.isLiked!
-                                    ? Icons.thumb_up
-                                    : Icons.thumb_down,
-                                color:
-                                    _log.isLiked! ? customColors.success : customColors.error,
+                                ReactionConfig.getIcon(_log.reaction!),
+                                color: ReactionConfig.getColor(_log.reaction!),
                                 size: 22,
                               ),
                               const SizedBox(width: 10),
                               Text(
-                                _log.isLiked! ? 'Liked' : 'Didn\'t like',
+                                ReactionConfig.getLabel(_log.reaction!),
                                 style: textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w500,
                                 ),

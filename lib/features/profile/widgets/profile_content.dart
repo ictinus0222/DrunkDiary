@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../app/app_theme.dart';
+import '../../../core/constants/reaction_config.dart';
 import '../models/stats_model.dart';
 import '../models/user_model.dart';
 
@@ -295,10 +296,10 @@ class ProfileContent extends StatelessWidget {
                           ),
                         ],
                       )
-                    else if (log.isLiked != null)
+                    else if (log.reaction != null)
                       Icon(
-                        log.isLiked! ? Icons.thumb_up : Icons.thumb_down,
-                        color: log.isLiked! ? customColors.success : customColors.error,
+                        ReactionConfig.getIcon(log.reaction!),
+                        color: ReactionConfig.getColor(log.reaction!),
                         size: 18,
                       )
                   ],

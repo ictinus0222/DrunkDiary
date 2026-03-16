@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../core/constants/reaction_config.dart';
 import 'drink_entry.dart';
 
 class ReviewEntry extends DrinkEntry {
@@ -11,6 +12,7 @@ class ReviewEntry extends DrinkEntry {
     required super.alcoholName,
     required super.alcoholType,
     required super.rating, // ⭐ required
+    super.reaction,
     required String super.note, // 📝 required
     required super.createdAt,
     super.photoUrl,
@@ -31,6 +33,9 @@ class ReviewEntry extends DrinkEntry {
       alcoholName: data['alcoholName'],
       alcoholType: data['alcoholType'],
       rating: (data['rating'] as num).toDouble(),
+      reaction: data['reaction'] != null
+          ? DrinkReaction.fromString(data['reaction'] as String)
+          : null,
       note: data['note'],
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       photoUrl: data['photoUrl'],
@@ -50,6 +55,7 @@ class ReviewEntry extends DrinkEntry {
       'alcoholName': alcoholName,
       'alcoholType': alcoholType,
       'rating': rating,
+      'reaction': reaction?.value,
       'note': note,
       'logKind': 'review',
       'createdAt': Timestamp.fromDate(createdAt),

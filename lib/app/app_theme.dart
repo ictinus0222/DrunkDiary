@@ -49,7 +49,8 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
     if (other is! AppCustomColors) return this;
     return AppCustomColors(
       cardBackground: Color.lerp(cardBackground, other.cardBackground, t)!,
-      deepCardBackground: Color.lerp(deepCardBackground, other.deepCardBackground, t)!,
+      deepCardBackground:
+          Color.lerp(deepCardBackground, other.deepCardBackground, t)!,
       borderLight: Color.lerp(borderLight, other.borderLight, t)!,
       borderDark: Color.lerp(borderDark, other.borderDark, t)!,
       textMuted: Color.lerp(textMuted, other.textMuted, t)!,
@@ -83,12 +84,16 @@ class AppThemes {
       surface: const Color(0xFF1A1A1A),
     ),
     scaffoldBackgroundColor: const Color(0xFF0F0F0F),
+    splashFactory: NoSplash.splashFactory,
+    highlightColor: Colors.transparent,
+    splashColor: Colors.transparent,
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: Color(0xFF0F0F0F),
       selectedItemColor: Color(0xFFFFC107),
       unselectedItemColor: Color(0xFF666666),
       elevation: 0,
       type: BottomNavigationBarType.fixed,
+      enableFeedback: false,
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.transparent,
@@ -135,10 +140,21 @@ class AppThemes {
       seedColor: const Color.fromARGB(255, 255, 193, 7),
       brightness: Brightness.light,
       primary: Colors.amber.shade700,
-      secondary: Colors.amberAccent.shade700,
+      secondary: const Color(0xFFFFAB00),
       surface: Colors.white,
     ),
     scaffoldBackgroundColor: const Color(0xFFFFFFFF),
+    splashFactory: NoSplash.splashFactory,
+    highlightColor: Colors.transparent,
+    splashColor: Colors.transparent,
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: Colors.white,
+      selectedItemColor: Colors.amber,
+      unselectedItemColor: Colors.grey,
+      elevation: 0,
+      type: BottomNavigationBarType.fixed,
+      enableFeedback: false,
+    ),
     appBarTheme: const AppBarTheme(
         backgroundColor: Colors.white,
         elevation: 0,

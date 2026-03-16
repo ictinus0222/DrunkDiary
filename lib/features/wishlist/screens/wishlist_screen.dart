@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import '../../../app/app_theme.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../../alcohol/screens/alcohol_detail_screen.dart';
+import '../../../core/navigation/page_transitions.dart';
 import '../models/wishlist_item_model.dart';
 import '../repositories/wishlist_repository.dart';
 import '../widgets/add_to_wishlist_sheet.dart';
 import '../widgets/wishlist_item_card.dart';
 import '../../../core/widgets/app_empty_state.dart';
+import '../../../core/widgets/app_shimmer.dart';
 
 class WishlistScreen extends StatefulWidget {
   static const routeName = '/wishlist';
@@ -98,8 +100,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
     );
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => AlcoholDetailScreen(alcohol: alcohol),
+      FadeSlidePageRoute(
+        child: AlcoholDetailScreen(alcohol: alcohol),
       ),
     );
   }
@@ -124,9 +126,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting ||
               !_triedLoaded) {
-            return Center(
-              child: CircularProgressIndicator(color: colorScheme.primary),
-            );
+            return const _WishlistLoadingSkeleton();
           }
 
           if (snapshot.hasError) {
@@ -172,6 +172,26 @@ class _WishlistScreenState extends State<WishlistScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+/* ----------------------------- SKELETONS ----------------------------- */
+
+class _WishlistLoadingSkeleton extends StatelessWidget {
+  const _WishlistLoadingSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.only(top: 8),
+      itemCount: 5,
+      itemBuilder: (context, index) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: AppShimmer(
+          height: 90,
+          borderRadius: BorderRadius.circular(16),
+        ),
       ),
     );
   }

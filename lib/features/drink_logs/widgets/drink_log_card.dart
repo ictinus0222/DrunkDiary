@@ -1,8 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/app_theme.dart';
+import '../../../core/constants/reaction_config.dart';
+import '../../alcohol/models/alcohol_model.dart';
 import '../models/drink_model_dto.dart';
 import 'log_detail_bottom_sheet.dart';
+import '../../../core/widgets/app_shimmer.dart';
+
+import 'package:cached_network_image/cached_network_image.dart';
+import '../../../core/widgets/animated_tappable.dart';
 
 class DrinkLogCard extends StatelessWidget {
   final DrinkLogModel log;
@@ -11,7 +18,7 @@ class DrinkLogCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final hasPhoto = log.photoUrl != null && log.photoUrl!.isNotEmpty;
 
     return GestureDetector(
       onTap: () {
@@ -24,37 +31,43 @@ class DrinkLogCard extends StatelessWidget {
           builder: (_) => LogDetailBottomSheet(log: log),
         );
       },
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: log.logKind == LogKind.review
-              ? customColors.cardBackground
-              : customColors.deepCardBackground,
-          border: Border.all(
-            color: log.logKind == LogKind.review
-                ? customColors.borderLight
-                : customColors.borderDark,
-            width: 1,
-          ),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      child: hasPhoto ? _buildVerticalLayout(context) : _buildHorizontalLayout(context),
+    );
+  }
+
+  Widget _buildHorizontalLayout(BuildContext context) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: customColors.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: customColors.borderDark.withOpacity(0.5), width: 1),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _headerImage(),
-            Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _titleRow(context),
-                  const SizedBox(height: 6),
-                  _metaRow(context),
-                  const SizedBox(height: 14),
-                  _caption(context),
-                  const SizedBox(height: 14),
-                  _chipsRow(context),
-                ],
+            _posterImage(isHorizontal: true),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _titleRow(context),
+                    const SizedBox(height: 4),
+                    _metaRow(context),
+                    if (log.note != null && log.note!.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      _caption(context),
+                    ],
+                    const Spacer(),
+                    const SizedBox(height: 12),
+                    _expressiveFeedback(context),
+                  ],
+                ),
               ),
             ),
           ],
@@ -63,23 +76,124 @@ class DrinkLogCard extends StatelessWidget {
     );
   }
 
-  // ----------------------------
-  // HEADER IMAGE
-  // ----------------------------
-  Widget _headerImage() {
-    if (log.photoUrl == null || log.photoUrl!.isEmpty) {
-      return const SizedBox.shrink();
-    }
+  Widget _buildVerticalLayout(BuildContext context) {
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: customColors.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: customColors.borderDark.withOpacity(0.5), width: 1),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _posterImage(isHorizontal: false),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _titleRow(context),
+                const SizedBox(height: 4),
+                _metaRow(context),
+                if (log.note != null && log.note!.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  _caption(context),
+                ],
+                const SizedBox(height: 16),
+                _expressiveFeedback(context),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      child: AspectRatio(
-        aspectRatio: 16 / 9,
-        child: Image.network(
-          log.photoUrl!,
-          fit: BoxFit.cover,
+  //* ----------------------------
+  // POSTER IMAGE (Bottle or Photo)
+  // ----------------------------
+  Widget _posterImage({required bool isHorizontal}) {
+    final hasPhoto = log.photoUrl != null && log.photoUrl!.isNotEmpty;
+
+    return Container(
+      width: isHorizontal ? 100 : double.infinity,
+      height: isHorizontal ? null : 200, // Fixed height for photos in vertical list
+      decoration: BoxDecoration(
+        color: const Color(0xFF151515),
+        borderRadius: BorderRadius.only(
+          topLeft: const Radius.circular(16),
+          bottomLeft: isHorizontal ? const Radius.circular(16) : Radius.zero,
+          topRight: isHorizontal ? Radius.zero : const Radius.circular(16),
         ),
       ),
+      clipBehavior: Clip.antiAlias,
+      child: hasPhoto
+          ? Hero(
+              tag: 'alcohol_${log.id}_photo', // Unique tag for the specific log photo
+              child: CachedNetworkImage(
+                imageUrl: log.photoUrl!,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => const AppShimmer(),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
+              ),
+            )
+          : FutureBuilder<DocumentSnapshot>(
+              future: FirebaseFirestore.instance
+                  .collection('alcohols')
+                  .doc(log.alcoholId)
+                  .get(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data!.exists) {
+                  final alcohol = AlcoholModel.fromFirestore(snapshot.data!);
+                  return Hero(
+                    tag: 'alcohol_${alcohol.id}',
+                    child: CachedNetworkImage(
+                      imageUrl: alcohol.imageUrl,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => const AppShimmer(),
+                      errorWidget: (context, url, error) => const Center(
+                        child: Icon(Icons.local_bar, color: Colors.white24, size: 30),
+                      ),
+                    ),
+                  );
+                }
+                return const AppShimmer(
+                  height: double.infinity,
+                  width: double.infinity,
+                );
+              },
+            ),
+    );
+  }
+
+  // Expression row
+  Widget _expressiveFeedback(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    if (log.logKind == LogKind.review || log.reaction == null) return const SizedBox.shrink();
+
+    final reaction = log.reaction!;
+    final label = ReactionConfig.getLabel(reaction);
+    final icon = ReactionConfig.getIcon(reaction);
+    final color = ReactionConfig.getColor(reaction);
+
+    return Row(
+      children: [
+        Icon(icon, color: color, size: 14),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: textTheme.labelSmall?.copyWith(
+            color: color,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
     );
   }
 
@@ -89,7 +203,6 @@ class DrinkLogCard extends StatelessWidget {
   Widget _titleRow(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-    final customColors = Theme.of(context).extension<AppCustomColors>()!;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,15 +224,9 @@ class DrinkLogCard extends StatelessWidget {
                     ? Icons.star
                     : Icons.star_border,
                 color: colorScheme.primary,
-                size: 16,
+                size: 14,
               ),
             ),
-          )
-        else
-          Icon(
-            log.isLiked == true ? Icons.thumb_up : Icons.thumb_down,
-            color: log.isLiked == true ? customColors.success : customColors.error,
-            size: 20,
           ),
       ],
     );
@@ -133,9 +240,10 @@ class DrinkLogCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Text(
-      _formattedDate(),
+      '${log.alcoholType} • ${_formattedDate()}',
       style: textTheme.bodySmall?.copyWith(
         color: customColors.textMuted,
+        fontWeight: FontWeight.w500,
       ),
     );
   }
@@ -173,46 +281,18 @@ class DrinkLogCard extends StatelessWidget {
     }
     
     final textTheme = Theme.of(context).textTheme;
-    final customColors = Theme.of(context).extension<AppCustomColors>()!;
 
     return Text(
-      log.note!,
+      '"${log.note!}"',
       style: textTheme.bodyMedium?.copyWith(
-        color: customColors.textMuted,
+        color: Colors.white.withOpacity(0.9),
+        fontStyle: FontStyle.italic,
+        height: 1.4,
       ),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
     );
   }
 
-  // ----------------------------
-  // INFO CHIPS (model-safe)
-  // ----------------------------
-  Widget _chipsRow(BuildContext context) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        _chip(context, log.alcoholType),
-        _chip(context, log.logKind == LogKind.review ? 'Review' : 'Log'),
-      ],
-    );
-  }
-
-  Widget _chip(BuildContext context, String text) {
-    final customColors = Theme.of(context).extension<AppCustomColors>()!;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: customColors.borderDark,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        text,
-        style: textTheme.labelSmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurface,
-        ),
-      ),
-    );
-  }
+  // Removed old chips row
 }

@@ -116,7 +116,6 @@ class _CreateReviewBottomSheetState extends State<CreateReviewBottomSheet> {
         alcoholName: widget.alcohol.name,
         alcoholType: widget.alcohol.type,
         rating: rating,
-        isLiked: null,
         note: reviewController.text.trim(),
         logKind: LogKind.review,
         createdAt: DateTime.now(),

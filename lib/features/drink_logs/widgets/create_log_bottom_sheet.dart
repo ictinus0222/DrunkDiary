@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../app/app_theme.dart';
+import '../../../core/constants/reaction_config.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../models/drink_model_dto.dart';
 
@@ -19,7 +20,7 @@ class CreateLogBottomSheet extends StatefulWidget {
 }
 
 class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
-  bool? liked; // 👍 true | 👎 false | null
+  DrinkReaction? selectedReaction;
   bool showNoteField = false;
 
   final TextEditingController noteController = TextEditingController();
@@ -107,7 +108,7 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
         alcoholName: widget.alcohol.name,
         alcoholType: widget.alcohol.type,
         rating: null,
-        isLiked: liked,
+        reaction: selectedReaction,
         note: noteController.text.isNotEmpty ? noteController.text : null,
         logKind: LogKind.log,
         createdAt: DateTime.now(),
@@ -227,74 +228,56 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
             ),
             const SizedBox(height: 12),
             Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    icon: Icon(
-                      Icons.thumb_up_alt_outlined,
-                      color:
-                          liked == true ? customColors.success : customColors.textMuted,
-                      size: 20,
+              children: DrinkReaction.values.map((reaction) {
+                final isSelected = selectedReaction == reaction;
+                final label = ReactionConfig.getLabel(reaction);
+                final icon = ReactionConfig.getIcon(reaction);
+                final color = ReactionConfig.getColor(reaction);
+
+                return Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      right: reaction == DrinkReaction.values.last ? 0 : 8,
                     ),
-                    label: Text(
-                      'Like',
-                      style: textTheme.titleSmall?.copyWith(
-                        color:
-                            liked == true ? customColors.success : customColors.textMuted,
-                        fontWeight: FontWeight.w600,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: BorderSide(
+                          color: isSelected ? color : customColors.borderDark,
+                          width: 1.5,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        backgroundColor: isSelected
+                            ? color.withOpacity(0.12)
+                            : Colors.transparent,
+                      ),
+                      onPressed: () => setState(() => selectedReaction = reaction),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            icon,
+                            color: isSelected ? color : customColors.textMuted,
+                            size: 20,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            label,
+                            textAlign: TextAlign.center,
+                            style: textTheme.labelSmall?.copyWith(
+                              color: isSelected ? color : customColors.textMuted,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: BorderSide(
-                        color:
-                            liked == true ? customColors.success : customColors.borderDark,
-                        width: 1.5,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      backgroundColor: liked == true
-                          ? customColors.success.withOpacity(0.1)
-                          : Colors.transparent,
-                    ),
-                    onPressed: () => setState(() => liked = true),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    icon: Icon(
-                      Icons.thumb_down_alt_outlined,
-                      color: liked == false ? customColors.error : customColors.textMuted,
-                      size: 20,
-                    ),
-                    label: Text(
-                      'Dislike',
-                      style: textTheme.titleSmall?.copyWith(
-                        color:
-                            liked == false ? customColors.error : customColors.textMuted,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: BorderSide(
-                        color:
-                            liked == false ? customColors.error : customColors.borderDark,
-                        width: 1.5,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      backgroundColor: liked == false
-                          ? customColors.error.withOpacity(0.1)
-                          : Colors.transparent,
-                    ),
-                    onPressed: () => setState(() => liked = false),
-                  ),
-                ),
-              ],
+                );
+              }).toList(),
             ),
 
             const SizedBox(height: 24),

@@ -5,6 +5,7 @@ import '../../../app/app_theme.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../../alcohol/repositories/alcohol_repository.dart';
 import '../repositories/wishlist_repository.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class AddToWishlistSheet extends StatefulWidget {
   const AddToWishlistSheet({super.key});
@@ -219,30 +220,27 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
                         child: Container(
                           width: 40,
                           height: 44,
-                          child: alcohol.imageUrl.isNotEmpty
-                              ? Image.network(alcohol.imageUrl,
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (_, __, ___) => Icon(
-                                      Icons.local_bar,
-                                      color: customColors.textMuted),
-                                  // The placeholder property is added here
-                                  loadingBuilder: (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return Container(
+                            child: alcohol.imageUrl.isNotEmpty
+                                ? CachedNetworkImage(
+                                    imageUrl: alcohol.imageUrl,
+                                    fit: BoxFit.contain,
+                                    placeholder: (context, url) => Container(
                                       color: colorScheme.onSurface.withOpacity(0.1),
-                                      child: Center(
-                                        child: CircularProgressIndicator(
-                                          value: loadingProgress.expectedTotalBytes != null
-                                              ? loadingProgress.cumulativeBytesLoaded /
-                                                  loadingProgress.expectedTotalBytes!
-                                              : null,
-                                          strokeWidth: 2,
-                                          color: customColors.textMuted,
+                                      child: const Center(
+                                        child: SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.white24,
+                                          ),
                                         ),
                                       ),
-                                    );
-                                  },
-                                )
+                                    ),
+                                    errorWidget: (context, url, error) => Icon(
+                                        Icons.local_bar,
+                                        color: customColors.textMuted),
+                                  )
                               : Icon(Icons.local_bar, color: customColors.textMuted),
                           color: colorScheme.onSurface.withOpacity(0.1), // This line was moved/modified
                         ),

@@ -13,6 +13,7 @@ import 'features/profile/screens/profile_screen.dart';
 import 'features/search/screens/search_screen.dart';
 import 'features/admin/screens/admin_settings_screen.dart';
 import 'splash/splash_screen.dart';
+import 'features/activity/screens/stats_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 // imports
 
@@ -55,6 +56,7 @@ class DrunkDiaryApp extends StatelessWidget {
         AppRoutes.profile: (context) => ProfileScreen(), // ☑️
         AppRoutes.shelf: (context) => ShelfScreen(),
         AppRoutes.search: (context) => SearchScreen(), // ☑️
+        AppRoutes.stats: (context) => const StatsScreen(),
         AppRoutes.adminSettings: (context) => const AdminSettingsScreen(),
       },
 

@@ -29,6 +29,7 @@ AuthGate
 ├── OnboardingScreen
 └── HomeScreen (BottomNavigationBar)
     ├── Tab 0: DiaryScreen
+    │   └── StatsScreen (via action button)
     ├── Tab 1: WishlistScreen
     │   └── AlcoholDetailScreen (via tapping a wishlist item)
     ├── Tab 2: Discover (SearchScreen - Emphasized Icon)

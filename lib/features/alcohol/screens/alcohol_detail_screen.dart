@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/app_theme.dart';
+import '../../../core/constants/reaction_config.dart';
 import '../../wishlist/widgets/wishlist_action_button.dart';
 import '../../drink_logs/widgets/create_review_bottom_sheet.dart';
 import '../../drink_logs/widgets/edit_review_bottom_sheet.dart';
@@ -10,6 +11,8 @@ import '../models/alcohol_model.dart';
 import '../../drink_logs/models/drink_model_dto.dart';
 import '../../drink_logs/widgets/create_log_bottom_sheet.dart';
 import '../../drink_logs/widgets/drink_log_card.dart';
+import '../../../core/widgets/app_shimmer.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class AlcoholDetailScreen extends StatelessWidget {
   final AlcoholModel alcohol;
@@ -59,12 +62,13 @@ class AlcoholDetailScreen extends StatelessWidget {
       int dislikes = 0;
       final generalLogs = items.where((d) => d.logKind == LogKind.log).toList();
       for (var log in generalLogs) {
-        final bool? isLiked =
-            log.isLiked ?? (log.rating != null ? log.rating! >= 1.0 : null);
+        final bool isPositive = log.reaction == DrinkReaction.loved ||
+            log.reaction == DrinkReaction.liked ||
+            (log.rating != null && log.rating! >= 1.0);
 
-        if (isLiked == true) {
+        if (isPositive) {
           likes++;
-        } else if (isLiked == false) {
+        } else if (log.reaction == DrinkReaction.nah) {
           dislikes++;
         }
       }
@@ -223,15 +227,17 @@ class _HeroImage extends StatelessWidget {
         child: AspectRatio(
           aspectRatio: 1,
           child: alcohol.imageUrl.isNotEmpty
-              ? Image.network(
-                  alcohol.imageUrl,
-                  fit: BoxFit.contain, // best for bottles to ensure no crop
-                  loadingBuilder: (context, child, progress) {
-                    if (progress == null) return child;
-                    return Center(
-                        child: CircularProgressIndicator(color: colorScheme.primary));
-                  },
-                  errorBuilder: (_, __, ___) => _imagePlaceholder(context),
+              ? Hero(
+                  tag: 'alcohol_${alcohol.id}',
+                  child: CachedNetworkImage(
+                    imageUrl: alcohol.imageUrl,
+                    fit: BoxFit.contain, // best for bottles to ensure no crop
+                    placeholder: (context, url) => const AppShimmer(
+                      height: double.infinity,
+                      width: double.infinity,
+                    ),
+                    errorWidget: (_, __, ___) => _imagePlaceholder(context),
+                  ),
                 )
               : _imagePlaceholder(context),
         ),

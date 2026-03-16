@@ -68,22 +68,13 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: _currentIndex == 2
-                    ? Colors.amber
-                    : Colors.amber.withOpacity(0.1),
+                    ? Colors.amber.withOpacity(0.2)
+                    : Colors.amber.withOpacity(0.05),
                 shape: BoxShape.circle,
-                boxShadow: _currentIndex == 2
-                    ? [
-                        BoxShadow(
-                          color: Colors.amber.withOpacity(0.4),
-                          blurRadius: 15,
-                          spreadRadius: 2,
-                        ),
-                      ]
-                    : null,
               ),
               child: Icon(
                 Icons.search,
-                color: _currentIndex == 2 ? Colors.black : Colors.amber,
+                color: _currentIndex == 2 ? Colors.amber : Colors.grey.shade600,
                 size: 28,
               ),
             ),

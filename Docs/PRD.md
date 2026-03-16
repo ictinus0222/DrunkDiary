@@ -17,6 +17,7 @@ The application solves the problem of tracking and remembering one's experiences
 - Allow users to write personal "Reviews" for alcohols on a 0-5 scale. Reviews are formally distinct from logs and do not increment log counts.
 - Aggregate user logs into a personal "Shelf" that showcases their history and average ratings.
 - Enable discovery of alcohols via an integrated search mechanism (emphasized as the central app action).
+- **Premium UX**: Utilize Skeleton UI (Shimmer) for all primary data-driven screens to provide stable and polished loading states.
 - Manage global app features via a feature flag system to enable A/B testing and controlled rollouts.
 
 ## 4. Success Metrics (Inferred from Code)
@@ -82,6 +83,15 @@ Based on the onboarding flow and feature structure, the target users are individ
   - **Description:** Displays alcohol information, personal logs, and global community stats.
   - **User Story:** As a user, I can view details of a drink, see my personal logs (excluding reviews), and view community statistics like total global logs, global average rating, and a global like ratio.
   - **Acceptance Criteria:** Queries all logs for the specified alcohol to calculate global total logs, personal total logs (logKind: log only), average community rating, and the global like-to-dislike ratio. Provides a view of the user's history with the alcohol.
+- **Stats & Taste Identity Page**
+  - **Description:** A dedicated space for deep reflection on drinking habits and taste profile.
+  - **User Story:** As a user, I want a dedicated space to see my "Taste Identity" and deeper metrics that focus on exploration and memory rather than consumption count.
+  - **Acceptance Criteria:** 
+    - Displays unique bottles logged vs total entries.
+    - Calculates favorite spirit and highest rated bottle.
+    - Shows exploration stats (nights recorded, countries explored).
+    - Derives taste identity (e.g., "Whisky Explorer").
+    - Clean, premium, journal-like UI.
 - **Feature Flags & Admin Settings (A/B Testing)**
   - **Description:** A system for controlling visibility of new features globally or per segment.
   - **User Story:** As an admin, I want to toggle experimental features on or off for all users from within the app.

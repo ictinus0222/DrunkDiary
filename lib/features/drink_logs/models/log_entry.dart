@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../core/constants/reaction_config.dart';
 import 'drink_entry.dart';
 
 class LogEntry extends DrinkEntry {
@@ -16,6 +17,7 @@ class LogEntry extends DrinkEntry {
     required super.alcoholName,
     required super.alcoholType,
     required super.rating,
+    super.reaction,
     super.note,
     required super.createdAt,
     super.photoUrl,
@@ -38,6 +40,9 @@ class LogEntry extends DrinkEntry {
       alcoholName: data['alcoholName'],
       alcoholType: data['alcoholType'],
       rating: (data['rating'] as num).toDouble(),
+      reaction: data['reaction'] != null
+          ? DrinkReaction.fromString(data['reaction'] as String)
+          : null,
       note: data['note'],
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       photoUrl: data['photoUrl'],
@@ -61,6 +66,7 @@ class LogEntry extends DrinkEntry {
       'alcoholName': alcoholName,
       'alcoholType': alcoholType,
       'rating': rating,
+      'reaction': reaction?.value,
       'note': note,
       'logKind': 'log',
       'createdAt': Timestamp.fromDate(createdAt),

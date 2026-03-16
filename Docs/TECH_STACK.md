@@ -47,6 +47,11 @@ Version: ^3.6.0
 Source File Evidence: `pubspec.yaml`
 Reason: Relative time formatting (e.g., "5 mins ago"). Reason not explicitly documented in repository.
 
+Library: shimmer
+Version: ^3.0.0
+Source File Evidence: `pubspec.yaml`
+Reason: Implementation of skeleton loading states (shimmers) to provide a more stable and premium perceived performance during async data fetching.
+
 Library: cupertino_icons
 Version: ^1.0.8
 Source File Evidence: `pubspec.yaml`

@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../app/app_theme.dart';
 import '../../alcohol/screens/alcohol_detail_screen.dart';
+import '../../../core/navigation/page_transitions.dart';
 import '../models/discover_item_model.dart';
+import '../../../core/widgets/app_shimmer.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class DiscoverAlcoholCard extends StatelessWidget {
   final DiscoverItemModel item;
@@ -19,8 +22,8 @@ class DiscoverAlcoholCard extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => AlcoholDetailScreen(alcohol: item.alcohol),
+          FadeSlidePageRoute(
+            child: AlcoholDetailScreen(alcohol: item.alcohol),
           ),
         );
       },
@@ -52,9 +55,14 @@ class DiscoverAlcoholCard extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: item.alcohol.imageUrl.isNotEmpty
-                      ? Image.network(
-                          item.alcohol.imageUrl,
-                          fit: BoxFit.contain,
+                      ? Hero(
+                          tag: 'alcohol_${item.alcohol.id}',
+                          child: CachedNetworkImage(
+                            imageUrl: item.alcohol.imageUrl,
+                            fit: BoxFit.contain,
+                            placeholder: (context, url) => const AppShimmer(),
+                            errorWidget: (context, url, error) => Icon(Icons.error, color: customColors.textMuted, size: 40),
+                          ),
                         )
                       : Icon(Icons.local_bar,
                           color: customColors.textMuted, size: 40),

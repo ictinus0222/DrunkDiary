@@ -75,6 +75,7 @@ AuthGate
 ├── OnboardingScreen
 └── HomeScreen (BottomNavigationBar)
     ├── Tab 0: DiaryScreen
+    │   └── StatsScreen (via action button)
     ├── Tab 1: WishlistScreen
     │   └── AlcoholDetailScreen (via tapping a wishlist item)
     ├── Tab 2: Discover (SearchScreen - Emphasized Icon)
@@ -112,7 +113,7 @@ AuthGate
   * **Route:** `/diary`
   * **Access:** Authenticated
   * **Purpose:** Fetches user's `drink_logs` and displays them in a customizable diary view. Includes summary stats and a layout switcher.
-  * **State Variants:** Loading (CircularProgressIndicator), Empty (Standardized `AppEmptyState` with action to log a drink), Layouts (Timeline vs. Gallery).
+  * **State Variants:** Loading (Skeleton UI / Shimmer), Empty (Standardized `AppEmptyState` with action to log a drink), Layouts (Timeline vs. Gallery).
   * **Actions Available:** Switch between Timeline Layout (detailed list) and Gallery Layout (photo grid).
 * **Screen:** `SearchScreen`
   * **Route:** `/search`
@@ -128,18 +129,22 @@ AuthGate
   * **Route:** `/shelf`
   * **Access:** Authenticated
   * **Purpose:** Aggregates, counts, and averages the user's logs grouped by alcohol. Includes sorting functionality via a bottom sheet allowing users to reorder their items (A-Z, High Rating, Most Consumed).
-  * **State Variants:** Loading (CircularProgressIndicator), Empty (Standardized `AppEmptyState` with action to discover drinks).
+  * **State Variants:** Loading (Skeleton UI / Shimmer), Empty (Standardized `AppEmptyState` with action to discover drinks).
 * **Screen:** `WishlistScreen`
   * **Route:** `/wishlist`
   * **Access:** Authenticated
   * **Purpose:** Displays the user's personal wishlist of alcohols they want to try. Cross-references `drink_logs` to show a "Tried!" badge on already-logged items.
-  * **State Variants:** Loading (CircularProgressIndicator), Empty (Standardized `AppEmptyState` with action to add from search).
+  * **State Variants:** Loading (Skeleton UI / Shimmer), Empty (Standardized `AppEmptyState` with action to add from search).
   * **Actions Available:** FAB opens `AddToWishlistSheet` (search + note), swipe-to-dismiss removes item, tap item → `AlcoholDetailScreen`.
 * **Screen:** `ProfileScreen`
   * **Route:** `/profile` (if any)
   * **Access:** Authenticated
   * **Purpose:** Displays the user's personal profile including basic info (avatar, username), dynamic statistics (Drinks Tried, Favorite Type, Top Rated), a horizontal "Public Shelf" showcasing recently logged alcohols, and a "Recent Activity" vertical feed of individual drink logs. Contains a settings action in the app bar.
   * **Admin Logic:** Settings icon checks for `akhilsharma.ptk22@gmail.com` or `sharmakhil1704@gmail.com` to trigger navigation to `AdminSettingsScreen`.
+* **Screen:** `StatsScreen`
+  - **Route:** `/stats`
+  - **Access:** Authenticated
+  - **Purpose:** Displays detailed user metrics and taste identity cards focused on memory and exploration.
 * **Screen:** `AdminSettingsScreen`
   * **Route:** `/adminSettings`
   * **Access:** Restricted (Authorized Admin Emails Only)

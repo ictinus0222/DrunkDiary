@@ -9,6 +9,7 @@ import '../models/discover_item_model.dart';
 import '../widgets/discover_alcohol_card.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../../../core/widgets/app_empty_state.dart';
+import 'package:drunk_diary/core/widgets/app_shimmer.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -183,7 +184,7 @@ class _SearchScreenState extends State<SearchScreen> {
         elevation: 0,
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator(color: colorScheme.primary))
+          ? const _SearchLoadingSkeleton()
           : _error.isNotEmpty
               ? Center(
                   child: Text('Error: $_error',
@@ -256,6 +257,36 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                   ],
                 ),
+    );
+  }
+}
+/* ----------------------------- SKELETONS ----------------------------- */
+
+class _SearchLoadingSkeleton extends StatelessWidget {
+  const _SearchLoadingSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: AppShimmer(height: 56, borderRadius: BorderRadius.circular(12)),
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: 6,
+            itemBuilder: (context, index) => Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: AppShimmer(
+                height: 100,
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

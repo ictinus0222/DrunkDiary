@@ -3,6 +3,7 @@ import 'package:drunk_diary/features/drink_logs/widgets/log_detail_bottom_sheet.
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../core/constants/reaction_config.dart';
 import '../../drink_logs/models/drink_model_dto.dart';
 
 class AlcoholActivityWidget extends StatelessWidget {
@@ -101,7 +102,7 @@ class AlcoholActivityWidget extends StatelessWidget {
                   title: Text(
                     log.logKind == LogKind.review
                         ? "Rated ${(log.rating ?? 0.0).toStringAsFixed(1)} ★"
-                        : "Logged (${log.isLiked == true ? '👍' : '👎'})",
+                        : "Logged (${log.reaction != null ? ReactionConfig.getLabel(log.reaction!) : 'No reaction'})",
                   ),
                   subtitle: log.note != null && log.note!.isNotEmpty
                       ? Text(
@@ -112,11 +113,12 @@ class AlcoholActivityWidget extends StatelessWidget {
                       : null,
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => LogDetailBottomSheet(log: log),
-                      ),
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      useSafeArea: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (_) => LogDetailBottomSheet(log: log),
                     );
                   },
                 );

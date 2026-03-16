@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../core/constants/reaction_config.dart';
 
 enum LogKind { log, review }
 
@@ -15,7 +16,7 @@ class DrinkLogModel {
   final String alcoholType;
 
   final double? rating;
-  final bool? isLiked;
+  final DrinkReaction? reaction;
   final String? note;
 
   final LogKind logKind;
@@ -35,7 +36,7 @@ class DrinkLogModel {
     required this.alcoholName,
     required this.alcoholType,
     this.rating,
-    this.isLiked,
+    this.reaction,
     this.note,
     required this.logKind,
     required this.createdAt,
@@ -62,7 +63,11 @@ class DrinkLogModel {
       alcoholName: data['alcoholName'] as String? ?? 'Unknown drink',
       alcoholType: data['alcoholType'] as String? ?? 'unknown',
       rating: (data['rating'] as num?)?.toDouble(),
-      isLiked: data['isLiked'] as bool?,
+      reaction: data['reaction'] != null
+          ? DrinkReaction.fromString(data['reaction'] as String)
+          : (data['isLiked'] == true
+              ? DrinkReaction.liked
+              : (data['isLiked'] == false ? DrinkReaction.nah : null)),
       note: data['note'] as String?,
       logKind: data['logKind'] == 'review' ? LogKind.review : LogKind.log,
       createdAt:
@@ -82,7 +87,7 @@ class DrinkLogModel {
       'alcoholName': alcoholName,
       'alcoholType': alcoholType,
       'rating': rating,
-      'isLiked': isLiked,
+      'reaction': reaction?.value,
       'note': note,
       'logKind': logKind.name,
       'createdAt': Timestamp.fromDate(createdAt),
@@ -97,7 +102,7 @@ class DrinkLogModel {
     String? username,
     String? userPhotoUrl,
     double? rating,
-    bool? isLiked,
+    DrinkReaction? reaction,
     String? note,
     LogKind? logKind,
   }) {
@@ -110,7 +115,7 @@ class DrinkLogModel {
       alcoholName: alcoholName,
       alcoholType: alcoholType,
       rating: rating ?? this.rating,
-      isLiked: isLiked ?? this.isLiked,
+      reaction: reaction ?? this.reaction,
       note: note ?? this.note,
       logKind: logKind ?? this.logKind,
       createdAt: createdAt,

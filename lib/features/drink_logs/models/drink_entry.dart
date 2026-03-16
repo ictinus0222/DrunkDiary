@@ -1,3 +1,5 @@
+import '../../../core/constants/reaction_config.dart';
+
 enum LogKind { log, review }
 
 abstract class DrinkEntry {
@@ -11,7 +13,7 @@ abstract class DrinkEntry {
   final String alcoholType;
 
   final double? rating;
-  final bool? isLiked;
+  final DrinkReaction? reaction;
   final String? note;
 
   final LogKind logKind;
@@ -30,7 +32,7 @@ abstract class DrinkEntry {
     required this.alcoholName,
     required this.alcoholType,
     this.rating,
-    this.isLiked,
+    this.reaction,
     this.note,
     required this.logKind,
     required this.createdAt,

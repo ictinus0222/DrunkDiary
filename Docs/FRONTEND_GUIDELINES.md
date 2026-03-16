@@ -74,6 +74,11 @@ No explicit custom shadow scales or elevation configurations identified in the i
         *   Search: `Icons.search_off_outlined`
 *   **Error States:** Raw text messages rendered conditionally in UI trees (e.g., `Text(_error!, style: const TextStyle(color: Colors.red))`).
 
+### Skeleton UI (Shimmer)
+Used to represent loading states for content blocks.
+*   **Colors:** baseColor: `Colors.grey[850]`, highlightColor: `Colors.grey[800]`.
+*   **Implementation:** Replaces generic `CircularProgressIndicator` in list/grid views to keep layouts stable while filling data.
+
 ## 5. Accessibility (Only If Implemented)
 No explicit accessibility enhancements identified beyond default Flutter semantics and Material framework behavior.
 

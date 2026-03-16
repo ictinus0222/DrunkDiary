@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/app_theme.dart';
+import '../../../core/constants/reaction_config.dart';
 import '../../drink_logs/models/drink_model_dto.dart';
 
 class PublicLogTile extends StatelessWidget {
@@ -52,9 +53,14 @@ class PublicLogTile extends StatelessWidget {
                   ],
                 ),
                 if (log.logKind == LogKind.review)
-                  Text('⭐ ${(log.rating ?? 0.0).toStringAsFixed(1)}', style: textTheme.bodyMedium)
-                else
-                  Text(log.isLiked == true ? '👍' : '👎', style: textTheme.bodyMedium),
+                  Text('⭐ ${(log.rating ?? 0.0).toStringAsFixed(1)}',
+                      style: textTheme.bodyMedium)
+                else if (log.reaction != null)
+                  Icon(
+                    ReactionConfig.getIcon(log.reaction!),
+                    color: ReactionConfig.getColor(log.reaction!),
+                    size: 18,
+                  ),
               ],
             ),
 
