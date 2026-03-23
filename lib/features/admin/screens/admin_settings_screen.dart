@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/flags/feature_flags.dart';
+import '../../../core/widgets/custom_app_bar.dart';
 
 class AdminSettingsScreen extends ConsumerWidget {
   const AdminSettingsScreen({super.key});
@@ -10,14 +11,9 @@ class AdminSettingsScreen extends ConsumerWidget {
     final flagsAsync = ref.watch(featureFlagsProvider);
 
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Admin Settings',
-            style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-        elevation: 0,
-      ),
+      appBar: const CustomAppBar(title: 'Admin Settings'),
       body: flagsAsync.when(
         data: (flags) => ListView(
           padding: const EdgeInsets.all(16),

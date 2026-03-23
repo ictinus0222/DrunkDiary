@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../app/app_theme.dart';
 import '../models/stats_model.dart';
 import '../models/user_model.dart';
+import '../../../core/theme/app_text_styles.dart';
 import 'profile_content.dart';
 
 class UserProfile extends StatefulWidget {
@@ -28,7 +29,6 @@ class _UserProfileState extends State<UserProfile> {
   @override
   Widget build(BuildContext context) {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
-    final textTheme = Theme.of(context).textTheme;
 
     return ProfileContent(
       userModel: widget.userModel,
@@ -37,7 +37,7 @@ class _UserProfileState extends State<UserProfile> {
         const SizedBox(height: 16),
         Text(
           'On DrunkDiary since ${widget.userModel.createdAt.month}/${widget.userModel.createdAt.year}',
-          style: textTheme.bodySmall?.copyWith(color: customColors.textMuted),
+          style: AppTextStyles.caption.copyWith(color: customColors.textMuted),
         ),
       ],
     );

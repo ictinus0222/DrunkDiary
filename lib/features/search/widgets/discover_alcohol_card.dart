@@ -4,6 +4,7 @@ import '../../../app/app_theme.dart';
 import '../../alcohol/screens/alcohol_detail_screen.dart';
 import '../../../core/navigation/page_transitions.dart';
 import '../models/discover_item_model.dart';
+import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -16,14 +17,16 @@ class DiscoverAlcoholCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           FadeSlidePageRoute(
-            child: AlcoholDetailScreen(alcohol: item.alcohol),
+            child: AlcoholDetailScreen(
+              alcoholId: item.alcohol.id,
+              initialAlcohol: item.alcohol,
+            ),
           ),
         );
       },
@@ -85,7 +88,7 @@ class DiscoverAlcoholCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             item.alcohol.brand,
-                            style: textTheme.bodySmall?.copyWith(
+                            style: AppTextStyles.caption.copyWith(
                               color: customColors.textMuted,
                               fontWeight: FontWeight.w600,
                             ),
@@ -104,7 +107,7 @@ class DiscoverAlcoholCard extends StatelessWidget {
                           ),
                           child: Text(
                             item.alcohol.type,
-                            style: textTheme.labelSmall?.copyWith(
+                            style: AppTextStyles.caption.copyWith(
                               color: colorScheme.primary,
                               fontWeight: FontWeight.bold,
                             ),
@@ -117,14 +120,13 @@ class DiscoverAlcoholCard extends StatelessWidget {
                     // Name
                     Text(
                       item.alcohol.name,
-                      style: textTheme.titleMedium?.copyWith(
+                      style: AppTextStyles.title.copyWith(
                         color: colorScheme.onSurface,
-                        fontWeight: FontWeight.bold,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     // Rating & Indicator
                     Row(
                       children: [
@@ -134,15 +136,14 @@ class DiscoverAlcoholCard extends StatelessWidget {
                           item.reviewCount > 0
                               ? item.globalRating.toStringAsFixed(1)
                               : 'New',
-                          style: textTheme.bodyMedium?.copyWith(
+                          style: AppTextStyles.body.copyWith(
                             color: colorScheme.onSurface,
-                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         if (item.reviewCount > 0)
                           Text(
                             ' (${item.reviewCount})',
-                            style: textTheme.bodySmall?.copyWith(
+                            style: AppTextStyles.caption.copyWith(
                               color: customColors.textMuted,
                             ),
                           ),
@@ -158,7 +159,7 @@ class DiscoverAlcoholCard extends StatelessWidget {
                               const SizedBox(width: 4),
                               Text(
                                 item.hasUserReviewed ? 'Reviewed' : 'Logged',
-                                style: textTheme.labelSmall?.copyWith(
+                                style: AppTextStyles.caption.copyWith(
                                   color: customColors.success,
                                   fontWeight: FontWeight.bold,
                                 ),

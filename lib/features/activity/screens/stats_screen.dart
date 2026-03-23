@@ -1,13 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:drunk_diary/features/drink_logs/models/drink_model_dto.dart';
 import 'package:flutter/material.dart';
-import '../../../app/app_theme.dart';
-import '../../alcohol/models/alcohol_model.dart';
-
-import 'package:drunk_diary/features/drink_logs/providers/drink_logs_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/widgets/app_shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+
+import '../../../app/app_theme.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/app_shimmer.dart';
+import '../../../core/widgets/custom_app_bar.dart';
+import '../../drink_logs/models/drink_model_dto.dart';
+import '../../drink_logs/providers/drink_logs_provider.dart';
+import '../../alcohol/models/alcohol_model.dart';
 
 class StatsScreen extends ConsumerWidget {
   static const routeName = '/stats';
@@ -18,12 +20,8 @@ class StatsScreen extends ConsumerWidget {
     final logsAsync = ref.watch(drinkLogsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Taste Identity',
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
+      appBar: const CustomAppBar(
+        title: 'Taste Identity',
       ),
       body: logsAsync.when(
         loading: () => const _StatsLoadingSkeleton(),
@@ -75,9 +73,7 @@ class _IdentitySection extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             identity.toUpperCase(),
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
+            style: AppTextStyles.title.copyWith(
               color: Colors.black,
               letterSpacing: 1.2,
             ),
@@ -85,8 +81,7 @@ class _IdentitySection extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             "Based on your $favoriteSpirit collection",
-            style: TextStyle(
-              fontSize: 14,
+            style: AppTextStyles.caption.copyWith(
               color: Colors.black.withOpacity(0.7),
             ),
           ),
@@ -178,12 +173,11 @@ class _MetricCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             value,
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            style: AppTextStyles.section.copyWith(fontWeight: FontWeight.bold),
           ),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 10,
+            style: AppTextStyles.caption.copyWith(
               fontWeight: FontWeight.bold,
               color: customColors.textMuted,
               letterSpacing: 1.1,
@@ -210,9 +204,9 @@ class _TasteBreakdown extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           "TOP SELECTION",
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+          style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold, letterSpacing: 1.5),
         ),
         const SizedBox(height: 12),
         Container(
@@ -259,11 +253,11 @@ class _TasteBreakdown extends StatelessWidget {
                   children: [
                     Text(
                       highestRated.alcoholName,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: AppTextStyles.title,
                     ),
                     Text(
                       "Your highest rated bottle",
-                      style: TextStyle(color: customColors.textMuted, fontSize: 12),
+                      style: AppTextStyles.caption.copyWith(color: customColors.textMuted),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -297,9 +291,9 @@ class _ReflectionSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           "CHRONICLES",
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+          style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold, letterSpacing: 1.5),
         ),
         const SizedBox(height: 12),
         _StatTile(
@@ -354,9 +348,9 @@ class _StatTile extends StatelessWidget {
             child: Icon(icon, size: 16, color: Colors.amber),
           ),
           const SizedBox(width: 16),
-          Text(label, style: const TextStyle(color: Colors.white70)),
+          Text(label, style: AppTextStyles.body.copyWith(color: Colors.white70)),
           const Spacer(),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+          Text(value, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold, color: Colors.white)),
         ],
       ),
     );

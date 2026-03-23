@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../app/app_theme.dart';
 import '../../../core/constants/reaction_config.dart';
 import '../models/stats_model.dart';
+import '../../../core/theme/app_text_styles.dart';
 import '../models/user_model.dart';
 
 class ProfileContent extends StatelessWidget {
@@ -50,7 +51,6 @@ class ProfileContent extends StatelessWidget {
   Widget _buildProfileCard(BuildContext context) {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -79,15 +79,14 @@ class ProfileContent extends StatelessWidget {
                   children: [
                     Text(
                       userModel.displayName,
-                      style: textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
+                      style: AppTextStyles.title.copyWith(
                             color: colorScheme.onSurface,
                           ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'My Personal Shelf',
-                      style: textTheme.bodyMedium?.copyWith(
+                      style: AppTextStyles.body.copyWith(
                         color: customColors.textMuted,
                       ),
                     ),
@@ -128,7 +127,6 @@ class ProfileContent extends StatelessWidget {
 
   Widget _buildPublicShelf(BuildContext context) {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
-    final textTheme = Theme.of(context).textTheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,14 +136,13 @@ class ProfileContent extends StatelessWidget {
           children: [
             Text(
               'My Collection',
-              style: textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
+              style: AppTextStyles.title.copyWith(
                 color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             Text(
               '${userStats.recentAlcohols.length} entries',
-              style: textTheme.bodyMedium?.copyWith(
+              style: AppTextStyles.body.copyWith(
                 color: customColors.textMuted,
               ),
             ),
@@ -158,7 +155,7 @@ class ProfileContent extends StatelessWidget {
             child: Center(
               child: Text(
                 "Shelf is empty",
-                style: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
+                style: AppTextStyles.body.copyWith(color: customColors.textMuted),
               ),
             ),
           )
@@ -200,15 +197,13 @@ class ProfileContent extends StatelessWidget {
   Widget _buildRecentActivity(BuildContext context) {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Recent Activity',
-          style: textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
+          style: AppTextStyles.title.copyWith(
             color: colorScheme.onSurface,
           ),
         ),
@@ -219,7 +214,7 @@ class ProfileContent extends StatelessWidget {
             child: Center(
               child: Text(
                 "No recent activity",
-                style: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
+                style: AppTextStyles.body.copyWith(color: customColors.textMuted),
               ),
             ),
           )
@@ -265,7 +260,7 @@ class ProfileContent extends StatelessWidget {
                         children: [
                           Text(
                             log.alcoholName,
-                            style: textTheme.titleMedium?.copyWith(
+                            style: AppTextStyles.body.copyWith(
                               color: colorScheme.onSurface,
                               fontWeight: FontWeight.bold,
                             ),
@@ -275,7 +270,7 @@ class ProfileContent extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             log.alcoholType,
-                            style: textTheme.bodySmall?.copyWith(
+                            style: AppTextStyles.caption.copyWith(
                               color: customColors.textMuted,
                             ),
                           ),
@@ -289,7 +284,7 @@ class ProfileContent extends StatelessWidget {
                           const SizedBox(width: 4),
                           Text(
                             log.rating!.toStringAsFixed(1).replaceAll('.0', ''),
-                            style: textTheme.titleMedium?.copyWith(
+                            style: AppTextStyles.body.copyWith(
                               color: colorScheme.onSurface,
                               fontWeight: FontWeight.bold,
                             ),
@@ -327,7 +322,6 @@ class _StatItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     return Expanded(
       child: Column(
@@ -337,7 +331,7 @@ class _StatItem extends StatelessWidget {
           Text(
             value,
             textAlign: TextAlign.center,
-            style: textTheme.titleMedium?.copyWith(
+            style: AppTextStyles.body.copyWith(
               color: colorScheme.onSurface,
               fontWeight: FontWeight.bold,
             ),
@@ -348,7 +342,7 @@ class _StatItem extends StatelessWidget {
           Text(
             label,
             textAlign: TextAlign.center,
-            style: textTheme.bodySmall?.copyWith(
+            style: AppTextStyles.caption.copyWith(
               color: customColors.textMuted,
             ),
             maxLines: 1,

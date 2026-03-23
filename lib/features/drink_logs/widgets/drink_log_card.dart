@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/app_theme.dart';
+import '../../../core/theme/app_text_styles.dart';
 import '../../../core/constants/reaction_config.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../models/drink_model_dto.dart';
@@ -9,7 +10,6 @@ import 'log_detail_bottom_sheet.dart';
 import '../../../core/widgets/app_shimmer.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../../core/widgets/animated_tappable.dart';
 
 class DrinkLogCard extends StatelessWidget {
   final DrinkLogModel log;
@@ -172,7 +172,6 @@ class DrinkLogCard extends StatelessWidget {
 
   // Expression row
   Widget _expressiveFeedback(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
 
     if (log.logKind == LogKind.review || log.reaction == null) return const SizedBox.shrink();
 
@@ -187,7 +186,7 @@ class DrinkLogCard extends StatelessWidget {
         const SizedBox(width: 6),
         Text(
           label,
-          style: textTheme.labelSmall?.copyWith(
+          style: AppTextStyles.caption.copyWith(
             color: color,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.5,
@@ -201,7 +200,6 @@ class DrinkLogCard extends StatelessWidget {
   // TITLE + RATING
   // ----------------------------
   Widget _titleRow(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Row(
@@ -210,9 +208,9 @@ class DrinkLogCard extends StatelessWidget {
         Expanded(
           child: Text(
             log.alcoholName,
-            style: textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+            style: AppTextStyles.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
         if (log.logKind == LogKind.review)
@@ -237,11 +235,10 @@ class DrinkLogCard extends StatelessWidget {
   // ----------------------------
   Widget _metaRow(BuildContext context) {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
-    final textTheme = Theme.of(context).textTheme;
 
     return Text(
       '${log.alcoholType} • ${_formattedDate()}',
-      style: textTheme.bodySmall?.copyWith(
+      style: AppTextStyles.caption.copyWith(
         color: customColors.textMuted,
         fontWeight: FontWeight.w500,
       ),
@@ -280,11 +277,10 @@ class DrinkLogCard extends StatelessWidget {
       return const SizedBox.shrink();
     }
     
-    final textTheme = Theme.of(context).textTheme;
 
     return Text(
       '"${log.note!}"',
-      style: textTheme.bodyMedium?.copyWith(
+      style: AppTextStyles.body.copyWith(
         color: Colors.white.withOpacity(0.9),
         fontStyle: FontStyle.italic,
         height: 1.4,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_text_styles.dart';
 
 class AppCustomColors extends ThemeExtension<AppCustomColors> {
   final Color cardBackground;
@@ -75,7 +76,14 @@ class AppThemes {
 
   static final darkTheme = ThemeData(
     useMaterial3: true,
-    fontFamily: 'Roboto',
+    fontFamily: 'Inter',
+    textTheme: TextTheme(
+      bodyLarge: AppTextStyles.body,
+      bodyMedium: AppTextStyles.body,
+      bodySmall: AppTextStyles.caption,
+      titleLarge: AppTextStyles.title,
+      headlineSmall: AppTextStyles.section,
+    ),
     colorScheme: ColorScheme.fromSeed(
       seedColor: const Color(0xFFFFC107), // Amber #FFC107
       brightness: Brightness.dark,
@@ -95,16 +103,12 @@ class AppThemes {
       type: BottomNavigationBarType.fixed,
       enableFeedback: false,
     ),
-    appBarTheme: const AppBarTheme(
+    appBarTheme: AppBarTheme(
       backgroundColor: Colors.transparent,
       elevation: 0,
-      centerTitle: false,
-      iconTheme: IconThemeData(color: Colors.white),
-      titleTextStyle: TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
-      ),
+      centerTitle: true,
+      iconTheme: const IconThemeData(color: Colors.white),
+      titleTextStyle: AppTextStyles.appBarTitle,
     ),
     cardTheme: CardThemeData(
       color: const Color(0xFF1A1A1A),
@@ -135,7 +139,14 @@ class AppThemes {
 
   static final lightTheme = ThemeData(
     useMaterial3: true,
-    fontFamily: 'Roboto',
+    fontFamily: 'Inter',
+    textTheme: TextTheme(
+      bodyLarge: AppTextStyles.body,
+      bodyMedium: AppTextStyles.body,
+      bodySmall: AppTextStyles.caption,
+      titleLarge: AppTextStyles.title,
+      headlineSmall: AppTextStyles.section,
+    ),
     colorScheme: ColorScheme.fromSeed(
       seedColor: const Color.fromARGB(255, 255, 193, 7),
       brightness: Brightness.light,
@@ -155,16 +166,12 @@ class AppThemes {
       type: BottomNavigationBarType.fixed,
       enableFeedback: false,
     ),
-    appBarTheme: const AppBarTheme(
+    appBarTheme: AppBarTheme(
         backgroundColor: Colors.white,
         elevation: 0,
-        centerTitle: false,
-        iconTheme: IconThemeData(color: Colors.black),
-        titleTextStyle: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: Colors.black,
-        )),
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.black),
+        titleTextStyle: AppTextStyles.appBarTitle),
     cardTheme: CardThemeData(
       color: Colors.white,
       elevation: 0,

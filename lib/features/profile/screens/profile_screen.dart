@@ -7,6 +7,8 @@ import '../widgets/user_profile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/profile_providers.dart';
 import '../../../core/widgets/app_shimmer.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/custom_app_bar.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -17,13 +19,10 @@ class ProfileScreen extends ConsumerWidget {
     
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Profile',
-            style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-        elevation: 0,
+      appBar: CustomAppBar(
+        title: 'Profile',
         actions: [
           Container(
             margin: const EdgeInsets.only(right: 16),
@@ -55,7 +54,7 @@ class ProfileScreen extends ConsumerWidget {
       ),
       body: profileAsync.when(
         loading: () => const _ProfileLoadingSkeleton(),
-        error: (err, stack) => Center(child: Text('Failed to load profile', style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface))),
+        error: (err, stack) => Center(child: Text('Failed to load profile', style: AppTextStyles.body.copyWith(color: colorScheme.onSurface))),
         data: (profile) {
           if (profile == null) return const Center(child: Text('No profile found'));
           // Pass clean data to UserProfileContent()
@@ -158,8 +157,7 @@ class _ProfileSectionSkeleton extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 12,
+            style: AppTextStyles.caption.copyWith(
               fontWeight: FontWeight.bold,
               letterSpacing: 1.5,
               color: Colors.white54,

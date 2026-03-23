@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/app_theme.dart';
+import '../../../core/theme/app_text_styles.dart';
 import '../../../core/constants/reaction_config.dart';
 import '../../wishlist/widgets/wishlist_action_button.dart';
 import '../../drink_logs/widgets/create_review_bottom_sheet.dart';
@@ -13,19 +14,114 @@ import '../../drink_logs/widgets/create_log_bottom_sheet.dart';
 import '../../drink_logs/widgets/drink_log_card.dart';
 import '../../../core/widgets/app_shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../core/widgets/custom_app_bar.dart';
+import '../../drink_logs/providers/drink_logs_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AlcoholDetailScreen extends StatelessWidget {
-  final AlcoholModel alcohol;
+class AlcoholDetailScreen extends ConsumerStatefulWidget {
+  final String alcoholId;
+  final AlcoholModel? initialAlcohol;
 
   const AlcoholDetailScreen({
     super.key,
-    required this.alcohol,
+    required this.alcoholId,
+    this.initialAlcohol,
   });
 
-  Stream<List<DrinkLogModel>> _logsStream() {
-    final user = FirebaseAuth.instance.currentUser!;
+  @override
+  ConsumerState<AlcoholDetailScreen> createState() => _AlcoholDetailScreenState();
+}
 
-    // Gets all logs by THIS user for THIS alcohol, newest first.
+class _AlcoholDetailScreenState extends ConsumerState<AlcoholDetailScreen> {
+
+  @override
+  Widget build(BuildContext context) {
+    final alcoholAsync = ref.watch(alcoholCacheProvider(widget.alcoholId));
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return alcoholAsync.when(
+      loading: () => _buildSkeleton(context, widget.initialAlcohol),
+      error: (error, stack) => Scaffold(
+        appBar: const CustomAppBar(title: 'ERROR'),
+        body: Center(child: Text('Failed to load alcohol details: $error')),
+      ),
+      data: (alcohol) {
+        if (alcohol == null) {
+          return const Scaffold(
+            appBar: CustomAppBar(title: 'NOT FOUND'),
+            body: Center(child: Text('Alcohol not found.')),
+          );
+        }
+
+        return Scaffold(
+          appBar: CustomAppBar(
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 16.0, top: 4.0, bottom: 4.0),
+              child: CircleAvatar(
+                backgroundColor: colorScheme.onSurface.withOpacity(0.15),
+                child: IconButton(
+                  icon: Icon(Icons.arrow_back, color: colorScheme.onSurface, size: 20),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+            ),
+            actions: [
+              WishlistActionButton(alcohol: alcohol),
+            ],
+          ),
+          body: StreamBuilder<List<DrinkLogModel>>(
+            stream: _logsStream(alcohol),
+            builder: (context, snapshot) {
+              final logs = snapshot.data ?? [];
+
+              return ListView(
+                padding: const EdgeInsets.only(bottom: 120),
+                children: [
+                  _HeroImage(alcohol: alcohol),
+                  const SizedBox(height: 24),
+                  _ProductInfo(alcohol: alcohol),
+                  StreamBuilder<(int, double, int, int)>(
+                    stream: _advancedStatsStream(alcohol),
+                    builder: (context, statsSnapshot) {
+                      final (totalLogs, avgRating, personalLogs, likeRatio) =
+                          statsSnapshot.data ?? (0, 0.0, 0, 0);
+                      return _WineStats(
+                        totalLogs: totalLogs,
+                        personalLogs: personalLogs,
+                        avgRating: avgRating,
+                        likeRatio: likeRatio,
+                      );
+                    },
+                  ),
+                  _AboutSection(alcohol: alcohol),
+                  if (logs.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'Your logs',
+                        style: AppTextStyles.title.copyWith(color: colorScheme.onSurface),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ...logs.map((log) => DrinkLogCard(log: log)),
+                  ],
+                ],
+              );
+            },
+          ),
+          bottomSheet: _BottomActionBar(
+            alcohol: alcohol,
+            onWriteReviewPressed: () => onWriteReviewPressed(context, alcohol),
+            hasUserReviewedFuture: _hasUserReviewed(alcohol),
+          ),
+        );
+      },
+    );
+  }
+
+  Stream<List<DrinkLogModel>> _logsStream(AlcoholModel alcohol) {
+    final user = FirebaseAuth.instance.currentUser!;
     return FirebaseFirestore.instance
         .collection('drink_logs')
         .where('userId', isEqualTo: user.uid)
@@ -36,7 +132,7 @@ class AlcoholDetailScreen extends StatelessWidget {
             snapshot.docs.map(DrinkLogModel.fromFirestore).toList());
   }
 
-  Stream<(int, double, int, int)> _advancedStatsStream() {
+  Stream<(int, double, int, int)> _advancedStatsStream(AlcoholModel alcohol) {
     final user = FirebaseAuth.instance.currentUser!;
     return FirebaseFirestore.instance
         .collection('drink_logs')
@@ -46,8 +142,7 @@ class AlcoholDetailScreen extends StatelessWidget {
       final items = snapshot.docs.map(DrinkLogModel.fromFirestore).toList();
       if (items.isEmpty) return (0, 0.0, 0, 0);
 
-      final ratingDocs =
-          items.where((d) => d.logKind == LogKind.review).toList();
+      final ratingDocs = items.where((d) => d.logKind == LogKind.review).toList();
       double avgRating = 0.0;
       if (ratingDocs.isNotEmpty) {
         final ratings = ratingDocs.map((doc) => doc.rating ?? 0.0).toList();
@@ -82,7 +177,7 @@ class AlcoholDetailScreen extends StatelessWidget {
     });
   }
 
-  Future<void> onWriteReviewPressed(BuildContext context) async {
+  Future<void> onWriteReviewPressed(BuildContext context, AlcoholModel alcohol) async {
     final userId = FirebaseAuth.instance.currentUser!.uid;
     final alcoholId = alcohol.id;
 
@@ -119,7 +214,7 @@ class AlcoholDetailScreen extends StatelessWidget {
     }
   }
 
-  Future<bool> _hasUserReviewed() async {
+  Future<bool> _hasUserReviewed(AlcoholModel alcohol) async {
     final userId = FirebaseAuth.instance.currentUser!.uid;
     final query = await FirebaseFirestore.instance
         .collection('drink_logs')
@@ -132,15 +227,10 @@ class AlcoholDetailScreen extends StatelessWidget {
     return query.docs.isNotEmpty;
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildSkeleton(BuildContext context, AlcoholModel? initialAlcohol) {
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        leadingWidth: 64,
+      appBar: CustomAppBar(
         leading: Padding(
           padding: const EdgeInsets.only(left: 16.0, top: 4.0, bottom: 4.0),
           child: CircleAvatar(
@@ -151,58 +241,51 @@ class AlcoholDetailScreen extends StatelessWidget {
             ),
           ),
         ),
-        actions: [
-          WishlistActionButton(alcohol: alcohol),
-        ],
       ),
-      body: StreamBuilder<List<DrinkLogModel>>(
-        stream: _logsStream(),
-        builder: (context, snapshot) {
-          final logs = snapshot.data ?? [];
-
-          return ListView(
-            padding: const EdgeInsets.only(
-                bottom: 120), // Padding for the fixed bottom bar
-            children: [
-              _HeroImage(alcohol: alcohol),
-              const SizedBox(height: 24),
-              _ProductInfo(alcohol: alcohol),
-              StreamBuilder<(int, double, int, int)>(
-                stream: _advancedStatsStream(),
-                builder: (context, statsSnapshot) {
-                  final (totalLogs, avgRating, personalLogs, likeRatio) =
-                      statsSnapshot.data ?? (0, 0.0, 0, 0);
-                  return _WineStats(
-                      totalLogs: totalLogs,
-                      personalLogs: personalLogs,
-                      avgRating: avgRating,
-                      likeRatio: likeRatio);
-                },
-              ),
-              _AboutSection(alcohol: alcohol),
-              if (logs.isNotEmpty) ...[
+      body: ListView(
+        padding: const EdgeInsets.only(bottom: 120),
+        children: [
+          _HeroImage(alcohol: initialAlcohol ?? AlcoholModel(
+            id: 'loading',
+            name: '',
+            type: '',
+            brand: '',
+            abv: 0,
+            origin: '',
+            description: '',
+            imageUrl: '',
+          )),
+          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (initialAlcohol == null) ...[
+                  const AppShimmer(width: 200, height: 32),
+                  const SizedBox(height: 8),
+                  const AppShimmer(width: 120, height: 18),
+                ] else ...[
+                  Text(initialAlcohol.name, style: AppTextStyles.section),
+                  const SizedBox(height: 4),
+                  Text('By ${initialAlcohol.brand}', style: AppTextStyles.body),
+                ],
                 const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    'Your logs',
-                    style: textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onSurface),
-                  ),
+                const Row(
+                  children: [
+                    AppShimmer(width: 80, height: 36, borderRadius: BorderRadius.all(Radius.circular(20))),
+                    SizedBox(width: 8),
+                    AppShimmer(width: 100, height: 36, borderRadius: BorderRadius.all(Radius.circular(20))),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                ...logs.map((log) => DrinkLogCard(log: log)),
+                const SizedBox(height: 24),
+                const AppShimmer(height: 100, borderRadius: BorderRadius.all(Radius.circular(16))),
+                const SizedBox(height: 24),
+                const AppShimmer(height: 150, borderRadius: BorderRadius.all(Radius.circular(16))),
               ],
-            ],
-          );
-        },
-      ),
-      // Overlay bottom bar using a bottom sheet / bottom nav bar pattern
-      bottomSheet: _BottomActionBar(
-        alcohol: alcohol,
-        onWriteReviewPressed: () => onWriteReviewPressed(context),
-        hasUserReviewedFuture: _hasUserReviewed(),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -264,7 +347,6 @@ class _ProductInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -273,17 +355,17 @@ class _ProductInfo extends StatelessWidget {
         children: [
           Text(
             alcohol.name,
-            style: textTheme.headlineMedium?.copyWith(
+            style: AppTextStyles.section.copyWith(
               color: colorScheme.onSurface,
-              fontWeight: FontWeight.w900,
             ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Text(
             'By ${alcohol.brand}',
-            style: textTheme.titleMedium?.copyWith(
+            style: AppTextStyles.body.copyWith(
               color: customColors.textMuted,
-              fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 16),
@@ -300,11 +382,10 @@ class _ProductInfo extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('ABV',
-                  style: textTheme.titleMedium?.copyWith(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.w500)),
+                  style: AppTextStyles.body.copyWith(
+                      color: colorScheme.onSurface)),
               Text('${alcohol.abv.toStringAsFixed(1)}%',
-                  style: textTheme.titleMedium?.copyWith(
+                  style: AppTextStyles.body.copyWith(
                       color: colorScheme.onSurface,
                       fontWeight: FontWeight.bold)),
             ],
@@ -335,8 +416,8 @@ class _ProductInfo extends StatelessWidget {
       ),
       child: Text(
         label,
-        style:
-            TextStyle(color: colorScheme.primary, fontWeight: FontWeight.w600),
+        style: AppTextStyles.caption.copyWith(
+            color: colorScheme.primary, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -359,7 +440,6 @@ class _WineStats extends StatelessWidget {
   Widget build(BuildContext context) {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
@@ -370,9 +450,8 @@ class _WineStats extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Community Stats',
-                  style: textTheme.titleLarge?.copyWith(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.bold)),
+                  style: AppTextStyles.title.copyWith(
+                      color: colorScheme.onSurface)),
               Row(
                 children: [
                   ...List.generate(5, (index) {
@@ -386,7 +465,7 @@ class _WineStats extends StatelessWidget {
                   }),
                   const SizedBox(width: 8),
                   Text('${avgRating.toStringAsFixed(1)}/5',
-                      style: textTheme.titleMedium?.copyWith(
+                      style: AppTextStyles.body.copyWith(
                           color: colorScheme.onSurface, fontWeight: FontWeight.bold)),
                 ],
               ),
@@ -430,7 +509,6 @@ class _StatCol extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
-    final textTheme = Theme.of(context).textTheme;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -440,13 +518,12 @@ class _StatCol extends StatelessWidget {
             const SizedBox(width: 4)
           ],
           Text(value,
-              style: textTheme.titleLarge?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.bold)),
+              style: AppTextStyles.title.copyWith(
+                  color: colorScheme.onSurface)),
         ]),
         const SizedBox(height: 4),
         Text(label,
-            style: textTheme.bodySmall?.copyWith(color: customColors.textMuted)),
+            style: AppTextStyles.caption.copyWith(color: customColors.textMuted)),
       ],
     );
   }
@@ -504,7 +581,6 @@ class _PersonalMeaningSectionState extends State<_PersonalMeaningSection> {
 
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance
@@ -529,9 +605,8 @@ class _PersonalMeaningSectionState extends State<_PersonalMeaningSection> {
                 children: [
                   Text(
                     'What this means to you',
-                    style: textTheme.titleLarge?.copyWith(
+                    style: AppTextStyles.title.copyWith(
                       color: colorScheme.onSurface,
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   if (!_isEditing)
@@ -551,10 +626,10 @@ class _PersonalMeaningSectionState extends State<_PersonalMeaningSection> {
                       controller: _controller,
                       autofocus: true,
                       maxLines: null,
-                      style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
+                      style: AppTextStyles.body.copyWith(color: colorScheme.onSurface),
                       decoration: InputDecoration(
                         hintText: 'Define what this bottle is for you...',
-                        hintStyle: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
+                        hintStyle: AppTextStyles.body.copyWith(color: customColors.textMuted),
                         filled: true,
                         fillColor: customColors.cardBackground,
                         border: OutlineInputBorder(
@@ -599,7 +674,7 @@ class _PersonalMeaningSectionState extends State<_PersonalMeaningSection> {
               else if (note.isNotEmpty)
                 Text(
                   note,
-                  style: textTheme.bodyMedium?.copyWith(
+                  style: AppTextStyles.body.copyWith(
                     color: customColors.textMuted,
                     height: 1.5,
                     fontStyle: FontStyle.italic,
@@ -618,7 +693,7 @@ class _PersonalMeaningSectionState extends State<_PersonalMeaningSection> {
                     child: Text(
                       'Define what this bottle means to you...',
                       style:
-                          textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
+                          AppTextStyles.body.copyWith(color: customColors.textMuted),
                     ),
                   ),
                 ),
@@ -640,7 +715,6 @@ class _AboutSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     if (alcohol.description.isEmpty) return const SizedBox.shrink();
     return Padding(
@@ -649,13 +723,12 @@ class _AboutSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('About',
-              style: textTheme.titleLarge?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.bold)),
+              style: AppTextStyles.title.copyWith(
+                  color: colorScheme.onSurface)),
           const SizedBox(height: 8),
           Text(
             alcohol.description,
-            style: textTheme.bodyMedium?.copyWith(
+            style: AppTextStyles.body.copyWith(
                 color: customColors.textMuted, height: 1.5),
           ),
           const SizedBox(height: 24),
@@ -686,7 +759,6 @@ class _BottomActionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
-    final textTheme = Theme.of(context).textTheme;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
@@ -735,7 +807,7 @@ class _BottomActionBar extends StatelessWidget {
               icon: Icon(Icons.add, color: colorScheme.onPrimary, size: 20),
               label: Text(
                 'Log This Drink',
-                style: textTheme.titleMedium?.copyWith(
+                style: AppTextStyles.body.copyWith(
                     color: colorScheme.onPrimary,
                     fontWeight: FontWeight.bold),
               ),

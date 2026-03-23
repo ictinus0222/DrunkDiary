@@ -24,4 +24,10 @@ class AlcoholRepository {
     final snapshot = await _firestore.collection('alcohols').get();
     return snapshot.docs.map((doc) => AlcoholModel.fromFirestore(doc)).toList();
   }
+
+  Future<AlcoholModel?> getAlcoholById(String id) async {
+    final doc = await _firestore.collection('alcohols').doc(id).get();
+    if (!doc.exists) return null;
+    return AlcoholModel.fromFirestore(doc);
+  }
 }

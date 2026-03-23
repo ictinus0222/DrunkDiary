@@ -8,6 +8,7 @@ import 'package:drunk_diary/core/navigation/tab_change_notification.dart';
 import 'package:drunk_diary/features/drink_logs/providers/drink_logs_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/widgets/app_shimmer.dart';
+import '../../../core/widgets/custom_app_bar.dart';
 
 class ShelfScreen extends ConsumerStatefulWidget {
   static const routeName = '/shelf';
@@ -91,27 +92,15 @@ class _ShelfScreenState extends ConsumerState<ShelfScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text("My Shelf ",
-                    style: textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold)),
-                Icon(Icons.auto_awesome, color: colorScheme.primary, size: 20),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text("${allShelfAlcohols.length} bottles in collection",
-                style: textTheme.bodyMedium?.copyWith(
-                    color: customColors.textMuted)),
-          ],
-        ),
-        toolbarHeight: 80,
-      ),
+      appBar: const CustomAppBar(title: 'Shelf'),
       body: Column(children: [
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text("${allShelfAlcohols.length} bottles in collection",
+              style: textTheme.bodyMedium?.copyWith(
+                  color: customColors.textMuted)),
+        ),
         // Top Search & Sorts
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -290,17 +279,7 @@ class _ShelfLoadingSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AppShimmer(width: 120, height: 24),
-            SizedBox(height: 8),
-            AppShimmer(width: 180, height: 16),
-          ],
-        ),
-        toolbarHeight: 80,
-      ),
+      appBar: const CustomAppBar(title: 'Shelf'),
       body: Column(
         children: [
           Padding(

@@ -32,7 +32,10 @@ class ShelfCard extends StatelessWidget {
         Navigator.push(
           context,
           FadeSlidePageRoute(
-            child: AlcoholDetailScreen(alcohol: alcohol),
+            child: AlcoholDetailScreen(
+              alcoholId: alcohol.id,
+              initialAlcohol: alcohol,
+            ),
           ),
         );
       },

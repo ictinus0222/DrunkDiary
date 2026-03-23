@@ -12,6 +12,7 @@ import '../widgets/add_to_wishlist_sheet.dart';
 import '../widgets/wishlist_item_card.dart';
 import '../../../core/widgets/app_empty_state.dart';
 import '../../../core/widgets/app_shimmer.dart';
+import '../../../core/widgets/custom_app_bar.dart';
 
 class WishlistScreen extends StatefulWidget {
   static const routeName = '/wishlist';
@@ -101,7 +102,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
     Navigator.push(
       context,
       FadeSlidePageRoute(
-        child: AlcoholDetailScreen(alcohol: alcohol),
+        child: AlcoholDetailScreen(
+          alcoholId: item.alcoholId,
+          initialAlcohol: alcohol,
+        ),
       ),
     );
   }
@@ -113,14 +117,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Wishlist',
-          style: textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
+      appBar: const CustomAppBar(title: 'Wishlist'),
       body: StreamBuilder<List<WishlistItemModel>>(
         stream: _wishlistRepo.streamWishlist(_userId),
         builder: (context, snapshot) {

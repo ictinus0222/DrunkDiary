@@ -9,7 +9,9 @@ import '../models/discover_item_model.dart';
 import '../widgets/discover_alcohol_card.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../../../core/widgets/app_empty_state.dart';
-import 'package:drunk_diary/core/widgets/app_shimmer.dart';
+import '../../../core/widgets/app_shimmer.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/custom_app_bar.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -173,22 +175,17 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Discover',
-          style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        elevation: 0,
+      appBar: const CustomAppBar(
+        title: 'Discover',
       ),
       body: _isLoading
           ? const _SearchLoadingSkeleton()
           : _error.isNotEmpty
               ? Center(
                   child: Text('Error: $_error',
-                      style: TextStyle(color: colorScheme.error)))
+                      style: AppTextStyles.body.copyWith(color: colorScheme.error)))
               : Column(
                   children: [
                     Padding(
@@ -197,10 +194,10 @@ class _SearchScreenState extends State<SearchScreen> {
                       // Search Bar
                       child: TextField(
                         controller: _controller,
-                        style: textTheme.bodyMedium,
+                        style: AppTextStyles.body,
                         decoration: InputDecoration(
                           hintText: 'Search alcohols, brands, types...',
-                          hintStyle: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
+                          hintStyle: AppTextStyles.body.copyWith(color: customColors.textMuted),
                           prefixIcon:
                               Icon(Icons.search, color: customColors.textMuted),
                           suffixIcon: IconButton(

@@ -1,54 +1,56 @@
 ﻿Analyzing drunk_diary...                                        
 
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\app\app_theme.dart:67:31 - deprecated_member_use
-  error - The argument type 'CardTheme' can't be assigned to the parameter type 'CardThemeData?'.  - lib\app\app_theme.dart:104:16 - argument_type_not_assignable
-  error - The argument type 'CardTheme' can't be assigned to the parameter type 'CardThemeData?'.  - lib\app\app_theme.dart:152:16 - argument_type_not_assignable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\app\app_theme.dart:69:42 - deprecated_member_use
    info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\widgets\app_empty_state.dart:39:44 - deprecated_member_use
    info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\widgets\app_empty_state.dart:41:59 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\activity\screens\diary_screen.dart:444:36 - deprecated_member_use
-   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\features\admin\screens\admin_settings_screen.dart:65:9 - deprecated_member_use
-   info - Don't use 'BuildContext's across async gaps - lib\features\admin\screens\admin_settings_screen.dart:73:34 - use_build_context_synchronously
-   info - Don't use 'BuildContext's across async gaps - lib\features\alcohol\screens\alcohol_detail_screen.dart:98:9 - use_build_context_synchronously
-   info - Don't use 'BuildContext's across async gaps - lib\features\alcohol\screens\alcohol_detail_screen.dart:109:9 - use_build_context_synchronously
-warning - The value of the local variable 'customColors' isn't used - lib\features\alcohol\screens\alcohol_detail_screen.dart:136:11 - unused_local_variable
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\alcohol\screens\alcohol_detail_screen.dart:148:52 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\alcohol\screens\alcohol_detail_screen.dart:342:36 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\alcohol\screens\alcohol_detail_screen.dart:344:55 - deprecated_member_use
-   info - Don't use 'BuildContext's across async gaps - lib\features\alcohol\screens\alcohol_detail_screen.dart:500:28 - use_build_context_synchronously
-   info - Don't use 'BuildContext's across async gaps - lib\features\alcohol\screens\alcohol_detail_screen.dart:501:88 - use_build_context_synchronously
-   info - Don't use 'BuildContext's across async gaps - lib\features\alcohol\screens\alcohol_detail_screen.dart:501:146 - use_build_context_synchronously
-   info - Don't use 'BuildContext's across async gaps - lib\features\auth\screens\onboarding_screen.dart:626:30 - use_build_context_synchronously
-   info - Don't use 'BuildContext's across async gaps - lib\features\auth\screens\onboarding_screen.dart:632:30 - use_build_context_synchronously
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\screens\shelf_screen.dart:178:87 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\screens\shelf_screen.dart:344:68 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\screens\shelf_screen.dart:350:51 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\screens\shelf_screen.dart:357:51 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\create_log_bottom_sheet.dart:258:50 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\create_log_bottom_sheet.dart:291:48 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\create_log_bottom_sheet.dart:414:64 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\create_review_bottom_sheet.dart:251:51 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\create_review_bottom_sheet.dart:316:64 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\activity\screens\diary_screen.dart:183:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\activity\screens\diary_screen.dart:528:36 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\activity\screens\stats_screen.dart:90:35 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps - lib\features\alcohol\screens\alcohol_detail_screen.dart:100:9 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\alcohol\screens\alcohol_detail_screen.dart:111:9 - use_build_context_synchronously
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\alcohol\screens\alcohol_detail_screen.dart:147:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\alcohol\screens\alcohol_detail_screen.dart:330:36 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\alcohol\screens\alcohol_detail_screen.dart:332:55 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps - lib\features\alcohol\screens\alcohol_detail_screen.dart:487:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\alcohol\screens\alcohol_detail_screen.dart:488:88 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\alcohol\screens\alcohol_detail_screen.dart:488:146 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\auth\screens\onboarding_screen.dart:634:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\auth\screens\onboarding_screen.dart:640:30 - use_build_context_synchronously
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\screens\shelf_screen.dart:221:62 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\screens\shelf_screen.dart:227:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\screens\shelf_screen.dart:234:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\screens\shelf_screen.dart:279:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\create_log_bottom_sheet.dart:253:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\create_log_bottom_sheet.dart:397:64 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\create_review_bottom_sheet.dart:250:51 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\create_review_bottom_sheet.dart:315:64 - deprecated_member_use
+warning - Unused import: '../../../core/widgets/animated_tappable.dart' - lib\features\drink_logs\widgets\drink_log_card.dart:12:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\drink_log_card.dart:46:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\drink_log_card.dart:87:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\drink_log_card.dart:288:29 - deprecated_member_use
    info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\edit_review_bottom_sheet.dart:145:51 - deprecated_member_use
    info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\edit_review_bottom_sheet.dart:209:64 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\log_detail_bottom_sheet.dart:124:41 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\log_detail_bottom_sheet.dart:149:49 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\log_detail_bottom_sheet.dart:153:70 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\log_detail_bottom_sheet.dart:362:66 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\shelf_card.dart:44:43 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\screens\home_screen.dart:73:36 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\screens\home_screen.dart:78:47 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\search\widgets\discover_alcohol_card.dart:92:56 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\search\widgets\discover_alcohol_card.dart:95:60 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\wishlist\widgets\add_to_wishlist_sheet.dart:222:54 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\wishlist\widgets\add_to_wishlist_sheet.dart:252:44 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\wishlist\widgets\add_to_wishlist_sheet.dart:254:63 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\wishlist\widgets\add_to_wishlist_sheet.dart:324:62 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\log_detail_bottom_sheet.dart:127:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\log_detail_bottom_sheet.dart:152:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\log_detail_bottom_sheet.dart:156:70 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\log_detail_bottom_sheet.dart:367:66 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\drink_logs\widgets\shelf_card.dart:47:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\screens\home_screen.dart:71:36 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\screens\home_screen.dart:72:36 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\search\widgets\discover_alcohol_card.dart:100:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\search\widgets\discover_alcohol_card.dart:103:60 - deprecated_member_use
+   info - The 'child' argument should be last in widget constructor invocations - lib\features\wishlist\widgets\add_to_wishlist_sheet.dart:223:29 - sort_child_properties_last
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\wishlist\widgets\add_to_wishlist_sheet.dart:228:68 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\wishlist\widgets\add_to_wishlist_sheet.dart:245:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\wishlist\widgets\add_to_wishlist_sheet.dart:268:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\wishlist\widgets\add_to_wishlist_sheet.dart:270:63 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\wishlist\widgets\add_to_wishlist_sheet.dart:340:62 - deprecated_member_use
    info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\wishlist\widgets\wishlist_item_card.dart:35:37 - deprecated_member_use
    info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\wishlist\widgets\wishlist_item_card.dart:50:41 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\wishlist\widgets\wishlist_item_card.dart:71:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\wishlist\widgets\wishlist_item_card.dart:71:58 - deprecated_member_use
    info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\wishlist\widgets\wishlist_item_card.dart:111:60 - deprecated_member_use
    info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\wishlist\widgets\wishlist_item_card.dart:114:64 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\wishlist\widgets\wishlist_item_card.dart:182:34 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\wishlist\widgets\wishlist_item_card.dart:182:36 - deprecated_member_use
    info - Don't invoke 'print' in production code - scripts\sync_readme.dart:6:5 - avoid_print
    info - Statements in an if should be enclosed in a block - scripts\sync_readme.dart:35:13 - curly_braces_in_flow_control_structures
    info - Statements in an if should be enclosed in a block - scripts\sync_readme.dart:37:13 - curly_braces_in_flow_control_structures

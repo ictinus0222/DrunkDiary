@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drunk_diary/features/drink_logs/models/drink_model_dto.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../drink_logs/widgets/drink_log_card.dart';
@@ -14,6 +13,8 @@ import 'package:drunk_diary/features/drink_logs/providers/drink_logs_provider.da
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/widgets/app_shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/custom_app_bar.dart';
 
 enum DiaryLayout { timeline, gallery }
 
@@ -36,6 +37,16 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
     return SafeArea(
       child: logsAsync.when(
         loading: () => Scaffold(
+          appBar: CustomAppBar(
+            isDiaryScreen: true,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.bar_chart),
+                onPressed: () => Navigator.pushNamed(context, '/stats'),
+                tooltip: 'View Stats',
+              ),
+            ],
+          ),
           body: CustomScrollView(
             slivers: [
               const SliverToBoxAdapter(child: _WelcomeSectionSkeleton()),
@@ -73,6 +84,16 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
           }).toList();
 
           return Scaffold(
+            appBar: CustomAppBar(
+              isDiaryScreen: true,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.bar_chart),
+                  onPressed: () => Navigator.pushNamed(context, '/stats'),
+                  tooltip: 'View Stats',
+                ),
+              ],
+            ),
             floatingActionButton: allLogs.isEmpty
                 ? null
                 : FloatingActionButton.extended(
@@ -139,6 +160,10 @@ class _WelcomeSectionState extends State<_WelcomeSection> {
     'What\'s the early pour?',
     'Ready for the day\'s first log?',
     'Morning! Starting fresh?',
+    'The morning after?',
+    'Hydration (with flavor)?',
+    'A little \'hair of the dog\'?',
+    'Quiet morning, loud bottle.',
   ];
 
   final List<String> _afternoonGreetings = [
@@ -146,6 +171,11 @@ class _WelcomeSectionState extends State<_WelcomeSection> {
     'Found anything new?',
     'A midday refreshment?',
     'Time to log a memory?',
+    'Is it 5 PM yet?',
+    'A sip of sophistication?',
+    'Whatever floats your bottle.',
+    'Sip happens.',
+    'Found a liquid treasure?',
   ];
 
   final List<String> _eveningGreetings = [
@@ -154,6 +184,15 @@ class _WelcomeSectionState extends State<_WelcomeSection> {
     'Sipping on something special?',
     'Ready for another round?',
     'Working on your collection?',
+    'Blurry nights, clear memories?',
+    'Drunk on life, or just Gin?',
+    'Tasting notes: Liquid regret?',
+    'Another day, another pour.',
+    'Sip, log, repeat.',
+    'Fuel for the story.',
+    'A toast to the moon.',
+    'Sipping with style.',
+    'Your cabinet is calling.',
   ];
 
   @override
@@ -171,51 +210,26 @@ class _WelcomeSectionState extends State<_WelcomeSection> {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    final displayName = user?.displayName?.split(' ').first ?? 'Friend';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 28,
-            backgroundColor: Colors.amber.withOpacity(0.1),
-            backgroundImage: user?.photoURL != null
-                ? NetworkImage(user!.photoURL!)
-                : null,
-            child: user?.photoURL == null
-                ? const Icon(Icons.person_outline, color: Colors.amber, size: 28)
-                : null,
-          ),
-          const SizedBox(width: 16),
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  "Hey $displayName! 👋",
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.amber,
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 1),
-                Text(
                   _greeting,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: -0.8,
-                      ),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: 'GiveYouGlory',
+                    fontSize: 32,
+                    color: Colors.amber,
+                  ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            onPressed: () => Navigator.pushNamed(context, '/stats'),
-            icon: const Icon(Icons.auto_graph, color: Colors.amber, size: 20),
-            tooltip: 'View Stats',
           ),
         ],
       ),
@@ -319,9 +333,8 @@ class _FilterChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.body.copyWith(
             color: selected ? Colors.black : Colors.white,
-            fontWeight: FontWeight.w500,
           ),
         ),
       ),
@@ -432,14 +445,13 @@ class _DateHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 24, 16, 8),
       child: Text(
         dateLabel.toUpperCase(),
-        style: textTheme.labelMedium?.copyWith(
+        style: AppTextStyles.caption.copyWith(
           color: customColors.textMuted,
           fontWeight: FontWeight.bold,
           letterSpacing: 2.0,
@@ -541,10 +553,9 @@ class _GalleryItem extends StatelessWidget {
               right: 12,
               child: Text(
                 log.alcoholName,
-                style: const TextStyle(
+                style: AppTextStyles.caption.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 12,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -567,15 +578,11 @@ class _WelcomeSectionSkeleton extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
       child: Row(
         children: [
-          AppShimmer.circular(size: 56),
-          SizedBox(width: 16),
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                AppShimmer(width: 120, height: 16),
-                SizedBox(height: 8),
-                AppShimmer(width: 200, height: 28),
+                AppShimmer(width: 250, height: 36, borderRadius: BorderRadius.all(Radius.circular(12))),
               ],
             ),
           ),
