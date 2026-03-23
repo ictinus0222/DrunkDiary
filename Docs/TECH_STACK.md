@@ -52,6 +52,11 @@ Version: ^3.0.0
 Source File Evidence: `pubspec.yaml`
 Reason: Implementation of skeleton loading states (shimmers) to provide a more stable and premium perceived performance during async data fetching.
 
+Library: flutter_svg
+Version: ^2.0.10
+Source File Evidence: `pubspec.yaml`
+Reason: Rendering scalable vector graphics (SVGs), primarily for the AppBar branding logo.
+
 Library: cupertino_icons
 Version: ^1.0.8
 Source File Evidence: `pubspec.yaml`
@@ -149,6 +154,12 @@ dependencies:
   intl: ^0.19.0
   timeago: ^3.6.0
   cached_network_image: ^3.3.1
+  flutter_svg: ^2.0.10
+
+fonts:
+  - CategoriesElegant
+  - DMSans
+  - GiveYouGlory
 ```
 *(Exact locked dependency graphs are available in `pubspec.lock`)*.
 

@@ -112,9 +112,9 @@ AuthGate
 * **Screen:** `DiaryScreen`
   * **Route:** `/diary`
   * **Access:** Authenticated
-  * **Purpose:** Fetches user's `drink_logs` and displays them in a customizable diary view. Includes summary stats and a layout switcher.
+  * **Purpose:** Fetches user's `drink_logs` and displays them in a customizable diary view. Includes summary stats and a layout switcher. Standardized with the `drunk_diary_logo.svg` branding.
   * **State Variants:** Loading (Skeleton UI / Shimmer), Empty (Standardized `AppEmptyState` with action to log a drink), Layouts (Timeline vs. Gallery).
-  * **Actions Available:** Switch between Timeline Layout (detailed list) and Gallery Layout (photo grid).
+  * **Actions Available:** Switch between Timeline Layout (detailed list) and Gallery Layout (photo grid). Working filter chips for Log/Review types.
 * **Screen:** `SearchScreen`
   * **Route:** `/search`
   * **Access:** Authenticated

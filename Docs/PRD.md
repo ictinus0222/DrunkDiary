@@ -54,7 +54,9 @@ Based on the onboarding flow and feature structure, the target users are individ
   - **User Story:** As a user, I want to see my logs in order in my diary, and be able to switch to a visual gallery of my drinks.
   - **Acceptance Criteria:** 
     - Fetches `drink_logs` for `userId`, calculates Total, Avg Rating, and Favorite category dynamically.
-    - Includes a layout switcher button that toggles between Timeline and Gallery views.
+    - **Branding:** Uses the standardized `drunk_diary_logo.svg` in the AppBar.
+    - **Layouts:** Includes a layout switcher button that toggles between Timeline and Gallery views.
+    - **Filtering:** Includes "All Activity", "Your Logs", and "Your Reviews" chips with full query logic.
   - **Edge Cases:** Empty state shows a prompt to "log your first drink".
 - **The Shelf**
   - **Description:** Aggregates all user logs and groups them by `alcoholId`.
@@ -101,9 +103,6 @@ Based on the onboarding flow and feature structure, the target users are individ
 
 ## 7. Explicitly OUT OF SCOPE (Critical Section)
 The following are NOT implemented in the codebase:
-- **Timeline Filtering:** The Diary screen has UI chips for "All", "Public", and "Private", but they are placeholder components without backing query logic.
-- **Alternative Authentication:** Apple Sign-In, Email/Password, and Phone Auth are not present. Only Google Auth is implemented.
-- **Dynamic Legal Age Limits:** The system currently hardcodes the legal age constraint to 18 worldwide. It does not check country-specific limits.
 - **Log Management:** Deleting or editing standard logs is not clearly implemented (only editing public reviews is supported).
 - **In-App Analytics/Telemetry:** No analytics tools (Mixpanel, GA) are implemented.
 - **Push Notifications:** No logic for alerting users when they are tagged in a log.

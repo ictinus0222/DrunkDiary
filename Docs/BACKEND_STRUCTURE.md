@@ -42,14 +42,13 @@ Source of Truth: `lib/features/drink_logs/models/drink_model_dto.dart`
 *   `alcoholName`: String (Default: 'Unknown drink')
 *   `alcoholType`: String (Default: 'unknown')
 *   `rating`: Number? (Nullable, mapped to double. Used exclusively for Reviews.)
-*   `isLiked`: Boolean? (Nullable. Used exclusively for Logs to indicate thumbs up/down.)
+*   `reaction`: String? (Enum mapped to string: 'loved', 'liked', 'nah'. Used for Logs.)
 *   `note`: String? (Nullable)
 *   `logKind`: String (Enum mapped to string: 'log' or 'review')
 *   `createdAt`: Timestamp (Mapped to DateTime)
 *   `consumedAt`: Timestamp? (Nullable, Mapped to DateTime)
 *   `photoUrl`: String? (Nullable)
 *   `photoUploadedAt`: Timestamp? (Nullable, Mapped to DateTime)
-*   `createdByUserId`: String? (Nullable)
 
 ### Collection: `wishlists`
 Source of Truth: `lib/features/wishlist/models/wishlist_item_model.dart`

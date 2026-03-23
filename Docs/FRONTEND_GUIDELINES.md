@@ -17,11 +17,19 @@ Extracted from `app_theme.dart` and inline widget styling:
 *   `--color-success`: `Colors.green` (Used for "Like" thumbs up icon and positive username validation)
 *   `--color-error`: `Colors.red` (Used for "Dislike" thumbs down icon and error text)
 
+### Design Tokens
+*   `APP_BAR_VISUAL_HEIGHT`: `28` (Source of truth for branding assets in AppBar)
+
 ### Typography
-*   **Font Family:** `Roboto` (Defined explicitly in `app_theme.dart`).
-*   **Font Weights:** Regular (default), `FontWeight.w500`, `FontWeight.w600`, `FontWeight.bold`.
-*   **Font Sizes (Explicitly hardcoded values found in codebase):** `12`, `13`, `14`, `16`, `18`, `20`, `22`, `24`, `28`.
-*   *Note: Text themes fall back to Material 3 defaults (`titleLarge`, `headlineSmall`, `bodyMedium`) where explicit font sizes are not declared.*
+*   **Font Families:**
+    - `CategoriesElegant`: Primary branding font.
+    - `Inter`: Primary body font.
+    - `DMSans`: Secondary UI font.
+    - `GiveYouGlory`: Decorative font for greetings.
+*   **Font Weights:** Regular, `FontWeight.w500`, `FontWeight.w600`, `FontWeight.bold`.
+*   **Font Sizes:** `12`, `13`, `14`, `16`, `18`, `20`, `22`, `24`, `28`, `32`.
+*   **AppBar Styling:**
+    - Text: `fontSize: 22`, `letterSpacing: 2.0`, `height: 1.0`, with a `1px` downward optical shift.
 
 ### Spacing System
 Spacing relies heavily on `EdgeInsets` and `SizedBox` implementations without a strict centralized scale token system.
@@ -59,7 +67,10 @@ No explicit custom shadow scales or elevation configurations identified in the i
     *   Log Cards: Subtle grey border or flatter background (`Colors.grey.shade900`). Focus on icon indicator (thumbs up/down).
     *   Review Cards: Slightly elevated or distinct subtle accent (e.g. faint amber border/gradient or different shade of grey `Colors.grey.shade800`) to highlight a formal rating constraint.
 
-### Bottom Navigation
+### App Bar
+*   **Standardized Branding:**
+    - Diary Screen: SVG logo (`drunk_diary_logo.svg`) scaled to `APP_BAR_VISUAL_HEIGHT`.
+    - Other Screens: ALL CAPS text titles with `Transform.translate` for precise vertical centering.
 *   **BottomNavigationBar:** Fixed type (`BottomNavigationBarType.fixed`) containing exactly 5 tabs.
 *   **Centered Action Icon:** The central navigation item (Index 2) is specifically highlighted as a circular action button with a golden glow/shadow and amber opacity background to denote it as the "Core Discovery Action."
 
