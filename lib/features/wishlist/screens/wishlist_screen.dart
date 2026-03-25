@@ -12,7 +12,7 @@ import '../widgets/add_to_wishlist_sheet.dart';
 import '../widgets/wishlist_item_card.dart';
 import '../../../core/widgets/app_empty_state.dart';
 import '../../../core/widgets/app_shimmer.dart';
-import '../../../core/widgets/custom_app_bar.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class WishlistScreen extends StatefulWidget {
   static const routeName = '/wishlist';
@@ -117,35 +117,74 @@ class _WishlistScreenState extends State<WishlistScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Wishlist'),
       body: StreamBuilder<List<WishlistItemModel>>(
         stream: _wishlistRepo.streamWishlist(_userId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting ||
               !_triedLoaded) {
-            return const _WishlistLoadingSkeleton();
+            return CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+              slivers: [
+                SliverAppBar(
+                  floating: true,
+                  snap: true,
+                  centerTitle: true,
+                  title: Text('WISHLIST', style: AppTextStyles.appBarTitle),
+                ),
+                SliverToBoxAdapter(
+                  child: _WishlistLoadingSkeleton(),
+                ),
+              ],
+            );
           }
 
           if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                'Something went wrong.',
-                style: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
-              ),
+            return CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+              slivers: [
+                SliverAppBar(
+                  floating: true,
+                  snap: true,
+                  centerTitle: true,
+                  title: Text('WISHLIST', style: AppTextStyles.appBarTitle),
+                ),
+                SliverFillRemaining(
+                  child: Center(
+                    child: Text(
+                      'Something went wrong.',
+                      style: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
+                    ),
+                  ),
+                ),
+              ],
             );
           }
 
           final items = snapshot.data ?? [];
 
           if (items.isEmpty) {
-            return AppEmptyState(
-              icon: Icons.bookmark_border,
-              title: 'Your wishlist is empty',
-              subtitle:
-                  'Save drinks you\'ve heard about\nand want to try later.',
-              buttonText: 'Add Your First Drink',
-              buttonIcon: Icons.bookmark_add,
-              onAddTap: _openAddSheet,
+            return CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+              slivers: [
+                SliverAppBar(
+                  floating: true,
+                  snap: true,
+                  centerTitle: true,
+                  title: Text('WISHLIST', style: AppTextStyles.appBarTitle),
+                ),
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: AppEmptyState(
+                    icon: Icons.bookmark_border,
+                    title: 'Your wishlist is empty',
+                    subtitle:
+                        'Save drinks you\'ve heard about\nand want to try later.',
+                    buttonText: 'Add Your First Drink',
+                    buttonIcon: Icons.bookmark_add,
+                    onAddTap: _openAddSheet,
+                  ),
+                ),
+              ],
             );
           }
 
@@ -153,19 +192,34 @@ class _WishlistScreenState extends State<WishlistScreen> {
             color: colorScheme.primary,
             backgroundColor: customColors.cardBackground,
             onRefresh: _loadTriedIds,
-            child: ListView.builder(
-              padding: const EdgeInsets.only(top: 8, bottom: 100),
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                final item = items[index];
-                final isTried = _triedAlcoholIds.contains(item.alcoholId);
-                return WishlistItemCard(
-                  item: item,
-                  isTried: isTried,
-                  onRemove: () => _removeItem(item.id),
-                  onTap: () => _navigateToDetail(item),
-                );
-              },
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+              slivers: [
+                SliverAppBar(
+                  floating: true,
+                  snap: true,
+                  centerTitle: true,
+                  title: Text('WISHLIST', style: AppTextStyles.appBarTitle),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.only(top: 8, bottom: 100),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final item = items[index];
+                        final isTried = _triedAlcoholIds.contains(item.alcoholId);
+                        return WishlistItemCard(
+                          item: item,
+                          isTried: isTried,
+                          onRemove: () => _removeItem(item.id),
+                          onTap: () => _navigateToDetail(item),
+                        );
+                      },
+                      childCount: items.length,
+                    ),
+                  ),
+                ),
+              ],
             ),
           );
         },
@@ -180,14 +234,15 @@ class _WishlistLoadingSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.only(top: 8),
-      itemCount: 5,
-      itemBuilder: (context, index) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: AppShimmer(
-          height: 90,
-          borderRadius: BorderRadius.circular(16),
+    return Column(
+      children: List.generate(
+        5,
+        (index) => Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: AppShimmer(
+            height: 90,
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
       ),
     );

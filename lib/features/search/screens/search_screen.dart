@@ -11,7 +11,6 @@ import '../widgets/filter_bottom_sheet.dart';
 import '../../../core/widgets/app_empty_state.dart';
 import '../../../core/widgets/app_shimmer.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../../core/widgets/custom_app_bar.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -177,83 +176,102 @@ class _SearchScreenState extends State<SearchScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: 'Discover',
-      ),
-      body: _isLoading
-          ? const _SearchLoadingSkeleton()
-          : _error.isNotEmpty
-              ? Center(
-                  child: Text('Error: $_error',
-                      style: AppTextStyles.body.copyWith(color: colorScheme.error)))
-              : Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      // Search Bar
-                      child: TextField(
-                        controller: _controller,
-                        style: AppTextStyles.body,
-                        decoration: InputDecoration(
-                          hintText: 'Search alcohols, brands, types...',
-                          hintStyle: AppTextStyles.body.copyWith(color: customColors.textMuted),
-                          prefixIcon:
-                              Icon(Icons.search, color: customColors.textMuted),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              Icons.tune,
-                              color: (_selectedType != null ||
-                                      _selectedSort !=
-                                          DiscoverSortOption.random)
-                                  ? colorScheme.primary
-                                  : customColors.textMuted,
-                            ),
-                            onPressed: _openFilterSheet,
-                          ),
-                          filled: true,
-                          fillColor: customColors.cardBackground,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                        onChanged: (value) {
-                          _searchQuery = value.trim();
-                          _applyFilters();
-                        },
+      body: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+        slivers: [
+          SliverAppBar(
+            floating: true,
+            snap: true,
+            centerTitle: true,
+            title: Text('DISCOVER', style: AppTextStyles.appBarTitle),
+          ),
+          if (_isLoading)
+            const SliverToBoxAdapter(
+              child: _SearchLoadingSkeleton(),
+            )
+          else if (_error.isNotEmpty)
+            SliverFillRemaining(
+              child: Center(
+                child: Text('Error: $_error',
+                    style: AppTextStyles.body.copyWith(color: colorScheme.error)),
+              ),
+            )
+          else ...[
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 8),
+                // Search Bar
+                child: TextField(
+                  controller: _controller,
+                  style: AppTextStyles.body,
+                  decoration: InputDecoration(
+                    hintText: 'Search alcohols, brands, types...',
+                    hintStyle: AppTextStyles.body.copyWith(color: customColors.textMuted),
+                    prefixIcon:
+                        Icon(Icons.search, color: customColors.textMuted),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.tune,
+                        color: (_selectedType != null ||
+                                _selectedSort !=
+                                    DiscoverSortOption.random)
+                            ? colorScheme.primary
+                            : customColors.textMuted,
                       ),
+                      onPressed: _openFilterSheet,
                     ),
-                    Expanded(
-                      child: _filteredAlcohols.isEmpty
-                          ? AppEmptyState(
-                              icon: Icons.search_off_outlined,
-                              title: 'No results found',
-                              subtitle:
-                                  'Try searching for something else\nor clearing your filters.',
-                              buttonText: 'Clear Search',
-                              onAddTap: () {
-                                _controller.clear();
-                                setState(() {
-                                  _searchQuery = '';
-                                  _selectedType = null;
-                                  _selectedSort = DiscoverSortOption.random;
-                                });
-                                _applyFilters();
-                              },
-                            )
-                          : ListView.builder(
-                              padding: const EdgeInsets.all(16),
-                              itemCount: _filteredAlcohols.length,
-                              itemBuilder: (context, index) {
-                                return DiscoverAlcoholCard(
-                                  item: _filteredAlcohols[index],
-                                );
-                              },
-                            ),
+                    filled: true,
+                    fillColor: customColors.cardBackground,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
                     ),
-                  ],
+                  ),
+                  onChanged: (value) {
+                    _searchQuery = value.trim();
+                    _applyFilters();
+                  },
                 ),
+              ),
+            ),
+            if (_filteredAlcohols.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: AppEmptyState(
+                  icon: Icons.search_off_outlined,
+                  title: 'No results found',
+                  subtitle:
+                      'Try searching for something else\nor clearing your filters.',
+                  buttonText: 'Clear Search',
+                  onAddTap: () {
+                    _controller.clear();
+                    setState(() {
+                      _searchQuery = '';
+                      _selectedType = null;
+                      _selectedSort = DiscoverSortOption.random;
+                    });
+                    _applyFilters();
+                  },
+                ),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.all(16),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      return DiscoverAlcoholCard(
+                        item: _filteredAlcohols[index],
+                      );
+                    },
+                    childCount: _filteredAlcohols.length,
+                  ),
+                ),
+              ),
+          ],
+        ],
+      ),
     );
   }
 }
@@ -270,16 +288,13 @@ class _SearchLoadingSkeleton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: AppShimmer(height: 56, borderRadius: BorderRadius.circular(12)),
         ),
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: 6,
-            itemBuilder: (context, index) => Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: AppShimmer(
-                height: 100,
-                borderRadius: BorderRadius.circular(16),
-              ),
+        ...List.generate(
+          6,
+          (index) => Padding(
+            padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+            child: AppShimmer(
+              height: 100,
+              borderRadius: BorderRadius.circular(16),
             ),
           ),
         ),

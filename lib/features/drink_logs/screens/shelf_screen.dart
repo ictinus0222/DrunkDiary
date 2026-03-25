@@ -8,7 +8,7 @@ import 'package:drunk_diary/core/navigation/tab_change_notification.dart';
 import 'package:drunk_diary/features/drink_logs/providers/drink_logs_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/widgets/app_shimmer.dart';
-import '../../../core/widgets/custom_app_bar.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class ShelfScreen extends ConsumerStatefulWidget {
   static const routeName = '/shelf';
@@ -92,84 +92,99 @@ class _ShelfScreenState extends ConsumerState<ShelfScreen> {
     }
 
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Shelf'),
-      body: Column(children: [
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text("${allShelfAlcohols.length} bottles in collection",
-              style: textTheme.bodyMedium?.copyWith(
-                  color: customColors.textMuted)),
-        ),
-        // Top Search & Sorts
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: TextField(
-              style: textTheme.bodyMedium,
-              decoration: InputDecoration(
-                  hintText: "Search your collection...",
-                  hintStyle: textTheme.bodyMedium
-                      ?.copyWith(color: customColors.textMuted),
-                  prefixIcon: Icon(Icons.search, color: customColors.textMuted),
-                  filled: true,
-                  fillColor: customColors.cardBackground,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14)),
-              onChanged: (val) {
-                setState(() {
-                  searchQuery = val;
-                });
-              }),
-        ),
+      body: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+        slivers: [
+          SliverAppBar(
+            floating: true,
+            snap: true,
+            centerTitle: true,
+            title: Text('SHELF', style: AppTextStyles.appBarTitle),
+          ),
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text("${allShelfAlcohols.length} bottles in collection",
+                      style: textTheme.bodyMedium?.copyWith(
+                          color: customColors.textMuted)),
+                ),
+                // Top Search & Sorts
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: TextField(
+                      style: textTheme.bodyMedium,
+                      decoration: InputDecoration(
+                          hintText: "Search your collection...",
+                          hintStyle: textTheme.bodyMedium
+                              ?.copyWith(color: customColors.textMuted),
+                          prefixIcon: Icon(Icons.search, color: customColors.textMuted),
+                          filled: true,
+                          fillColor: customColors.cardBackground,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 16, vertical: 14)),
+                      onChanged: (val) {
+                        setState(() {
+                          searchQuery = val;
+                        });
+                      }),
+                ),
+                SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Row(children: [
+                      _sortChip(context, 'Recent'),
+                      const SizedBox(width: 8),
+                      _sortChip(context, 'Rating'),
+                      const SizedBox(width: 8),
+                      _sortChip(context, 'Name'),
+                      const SizedBox(width: 8),
+                      _sortChip(context, 'ABV%'),
+                    ])),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
 
-        SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(children: [
-              _sortChip(context, 'Recent'),
-              const SizedBox(width: 8),
-              _sortChip(context, 'Rating'),
-              const SizedBox(width: 8),
-              _sortChip(context, 'Name'),
-              const SizedBox(width: 8),
-              _sortChip(context, 'ABV%'),
-            ])),
-
-        const SizedBox(height: 16),
-
-        // Main Shelf View
-        Expanded(
-          child: shelves.isEmpty
-              ? AppEmptyState(
-                  icon: Icons.inventory_2_outlined,
-                  title: allShelfAlcohols.isEmpty
-                      ? 'Your shelf is empty'
-                      : 'No matches found',
-                  subtitle: allShelfAlcohols.isEmpty
-                      ? 'Log your first drink to start building\nyour personal collection.'
-                      : 'Try searching for something else\nor clearing your filters.',
-                  buttonText: allShelfAlcohols.isEmpty
-                      ? 'Discover Drinks'
-                      : 'Clear Search',
-                  onAddTap: () {
-                    if (allShelfAlcohols.isEmpty) {
-                      // Dispatch notification to jump to Search tab
-                      const TabChangeNotification(2).dispatch(context);
-                    } else {
-                      setState(() {
-                        searchQuery = '';
-                      });
-                    }
-                  },
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 60),
-                  itemCount: shelves.length,
-                  itemBuilder: (context, index) {
+          // Main Shelf View
+          if (shelves.isEmpty)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: AppEmptyState(
+                icon: Icons.inventory_2_outlined,
+                title: allShelfAlcohols.isEmpty
+                    ? 'Your shelf is empty'
+                    : 'No matches found',
+                subtitle: allShelfAlcohols.isEmpty
+                    ? 'Log your first drink to start building\nyour personal collection.'
+                    : 'Try searching for something else\nor clearing your filters.',
+                buttonText: allShelfAlcohols.isEmpty
+                    ? 'Discover Drinks'
+                    : 'Clear Search',
+                onAddTap: () {
+                  if (allShelfAlcohols.isEmpty) {
+                    // Dispatch notification to jump to Search tab
+                    const TabChangeNotification(2).dispatch(context);
+                  } else {
+                    setState(() {
+                      searchQuery = '';
+                    });
+                  }
+                },
+              ),
+            )
+          else
+            SliverPadding(
+              padding: const EdgeInsets.only(bottom: 60),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
                     final chunk = shelves[index];
                     final Color glow = glowColors[index % glowColors.length];
 
@@ -206,27 +221,22 @@ class _ShelfScreenState extends ConsumerState<ShelfScreen> {
                             color: customColors.borderDark,
                             borderRadius: BorderRadius.circular(4),
                             boxShadow: [
-                              // Top faint shelf edge
                               BoxShadow(
                                 color: colorScheme.onSurface.withOpacity(0.1),
                                 blurRadius: 1,
                                 offset: const Offset(0, -1),
                               ),
-                              // Bottom strong colorful glow
                               BoxShadow(
                                 color: glow.withOpacity(0.8),
                                 blurRadius: 10,
-                                offset: const Offset(0,
-                                    4), // Shift the glow downwards so it looks like light coming from under the shelf
+                                offset: const Offset(0, 4),
                               ),
-                              // A secondary diffuse bottom glow
                               BoxShadow(
                                 color: glow.withOpacity(0.4),
                                 blurRadius: 25,
                                 offset: const Offset(0, 8),
                               )
                             ],
-                            // Give it a subtle vertical gradient so the top of the shelf looks solid exactly like the screenshot
                             gradient: LinearGradient(
                                 begin: Alignment.topCenter,
                                 end: Alignment.bottomCenter,
@@ -235,14 +245,15 @@ class _ShelfScreenState extends ConsumerState<ShelfScreen> {
                                   customColors.deepCardBackground
                                 ])),
                       ),
-
-                      const SizedBox(
-                          height: 70), // Spacing to next shelf string
+                      const SizedBox(height: 70),
                     ]);
                   },
+                  childCount: shelves.length,
                 ),
-        )
-      ]),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -279,49 +290,63 @@ class _ShelfLoadingSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Shelf'),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: AppShimmer(height: 48, borderRadius: BorderRadius.circular(12)),
+      body: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+        slivers: [
+          SliverAppBar(
+            floating: true,
+            snap: true,
+            centerTitle: true,
+            title: Text('SHELF', style: AppTextStyles.appBarTitle),
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
+          SliverToBoxAdapter(
+            child: Column(
               children: [
-                AppShimmer(width: 80, height: 36, borderRadius: BorderRadius.all(Radius.circular(20))),
-                SizedBox(width: 8),
-                AppShimmer(width: 80, height: 36, borderRadius: BorderRadius.all(Radius.circular(20))),
-                SizedBox(width: 8),
-                AppShimmer(width: 80, height: 36, borderRadius: BorderRadius.all(Radius.circular(20))),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: AppShimmer(height: 48, borderRadius: BorderRadius.circular(12)),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    children: [
+                      AppShimmer(width: 80, height: 36, borderRadius: BorderRadius.all(Radius.circular(20))),
+                      SizedBox(width: 8),
+                      AppShimmer(width: 80, height: 36, borderRadius: BorderRadius.all(Radius.circular(20))),
+                      SizedBox(width: 8),
+                      AppShimmer(width: 80, height: 36, borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              itemCount: 3,
-              itemBuilder: (context, index) => Container(
-                margin: const EdgeInsets.only(bottom: 80),
-                child: const Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Expanded(child: _ShelfCardSkeleton()),
-                        SizedBox(width: 32),
-                        Expanded(child: _ShelfCardSkeleton()),
-                        SizedBox(width: 32),
-                        Expanded(child: _ShelfCardSkeleton()),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    AppShimmer(height: 8, borderRadius: BorderRadius.all(Radius.circular(4))),
-                  ],
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => Container(
+                  margin: const EdgeInsets.only(bottom: 80),
+                  child: const Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Expanded(child: _ShelfCardSkeleton()),
+                          SizedBox(width: 32),
+                          Expanded(child: _ShelfCardSkeleton()),
+                          SizedBox(width: 32),
+                          Expanded(child: _ShelfCardSkeleton()),
+                        ],
+                      ),
+                      SizedBox(height: 8),
+                      AppShimmer(height: 8, borderRadius: BorderRadius.all(Radius.circular(4))),
+                    ],
+                  ),
                 ),
+                childCount: 3,
               ),
             ),
           ),

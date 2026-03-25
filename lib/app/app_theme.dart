@@ -104,7 +104,9 @@ class AppThemes {
       enableFeedback: false,
     ),
     appBarTheme: AppBarTheme(
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color(0xFF0F0F0F),
+      surfaceTintColor: Colors.transparent,
+      scrolledUnderElevation: 0,
       elevation: 0,
       centerTitle: true,
       iconTheme: const IconThemeData(color: Colors.white),
@@ -167,7 +169,9 @@ class AppThemes {
       enableFeedback: false,
     ),
     appBarTheme: AppBarTheme(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFFFFFFF),
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
         elevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.black),

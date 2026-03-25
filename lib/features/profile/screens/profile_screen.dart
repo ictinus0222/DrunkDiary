@@ -8,7 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/profile_providers.dart';
 import '../../../core/widgets/app_shimmer.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../../core/widgets/custom_app_bar.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -21,48 +20,62 @@ class ProfileScreen extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: CustomAppBar(
-        title: 'Profile',
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            decoration: BoxDecoration(
-              color: customColors.cardBackground,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
-              icon: Icon(Icons.settings, color: customColors.textMuted),
-              onPressed: () {
-                final user = FirebaseAuth.instance.currentUser;
-                final adminEmails = [
-                  'akhilsharma.ptk22@gmail.com',
-                  'sharmakhil1704@gmail.com',
-                ];
+      body: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+        slivers: [
+          SliverAppBar(
+            floating: true,
+            snap: true,
+            centerTitle: true,
+            title: Text('PROFILE', style: AppTextStyles.appBarTitle),
+            actions: [
+              Container(
+                margin: const EdgeInsets.only(right: 16),
+                decoration: BoxDecoration(
+                  color: customColors.cardBackground,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: IconButton(
+                  icon: Icon(Icons.settings, color: customColors.textMuted),
+                  onPressed: () {
+                    final user = FirebaseAuth.instance.currentUser;
+                    final adminEmails = [
+                      'akhilsharma.ptk22@gmail.com',
+                      'sharmakhil1704@gmail.com',
+                    ];
 
-                if (user != null && adminEmails.contains(user.email)) {
-                  Navigator.pushNamed(context, '/adminSettings');
-                } else {
-                  // Show generic settings or do nothing
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Settings coming soon!', style: TextStyle(color: colorScheme.onSurface))),
-                  );
-                }
-              },
+                    if (user != null && adminEmails.contains(user.email)) {
+                      Navigator.pushNamed(context, '/adminSettings');
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Settings coming soon!', style: TextStyle(color: colorScheme.onSurface))),
+                      );
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+          profileAsync.when(
+            loading: () => const SliverToBoxAdapter(child: _ProfileLoadingSkeleton()),
+            error: (err, stack) => SliverFillRemaining(
+              child: Center(
+                child: Text('Failed to load profile', style: AppTextStyles.body.copyWith(color: colorScheme.onSurface)),
+              ),
             ),
+            data: (profile) {
+              if (profile == null) {
+                return const SliverFillRemaining(child: Center(child: Text('No profile found')));
+              }
+              return SliverToBoxAdapter(
+                child: UserProfile(
+                  userModel: profile.userData,
+                  userStats: profile.stats,
+                ),
+              );
+            },
           ),
         ],
-      ),
-      body: profileAsync.when(
-        loading: () => const _ProfileLoadingSkeleton(),
-        error: (err, stack) => Center(child: Text('Failed to load profile', style: AppTextStyles.body.copyWith(color: colorScheme.onSurface))),
-        data: (profile) {
-          if (profile == null) return const Center(child: Text('No profile found'));
-          // Pass clean data to UserProfileContent()
-          return UserProfile(
-            userModel: profile.userData,
-            userStats: profile.stats,
-          );
-        },
       ),
     );
   }
@@ -74,18 +87,16 @@ class _ProfileLoadingSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SingleChildScrollView(
-      child: Column(
-        children: [
-          _ProfileHeaderSkeleton(),
-          SizedBox(height: 24),
-          _ProfileStatsSkeleton(),
-          SizedBox(height: 32),
-          _ProfileSectionSkeleton(title: 'YOUR SHELF'),
-          SizedBox(height: 32),
-          _ProfileSectionSkeleton(title: 'RECENT ACTIVITY'),
-        ],
-      ),
+    return const Column(
+      children: [
+        _ProfileHeaderSkeleton(),
+        SizedBox(height: 24),
+        _ProfileStatsSkeleton(),
+        SizedBox(height: 32),
+        _ProfileSectionSkeleton(title: 'YOUR SHELF'),
+        SizedBox(height: 32),
+        _ProfileSectionSkeleton(title: 'RECENT ACTIVITY'),
+      ],
     );
   }
 }

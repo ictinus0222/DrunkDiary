@@ -14,7 +14,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/widgets/app_shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../../core/widgets/custom_app_bar.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import '../../../core/constants/app_constants.dart';
 
 enum DiaryLayout { timeline, gallery }
 
@@ -37,18 +38,25 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
     return SafeArea(
       child: logsAsync.when(
         loading: () => Scaffold(
-          appBar: CustomAppBar(
-            isDiaryScreen: true,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.bar_chart),
-                onPressed: () => Navigator.pushNamed(context, '/stats'),
-                tooltip: 'View Stats',
-              ),
-            ],
-          ),
           body: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
             slivers: [
+              SliverAppBar(
+                floating: true,
+                snap: true,
+                centerTitle: true,
+                title: SvgPicture.asset(
+                  'assets/icons/drunk_diary_logo.svg',
+                  height: APP_BAR_VISUAL_HEIGHT,
+                ),
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.bar_chart),
+                    onPressed: () => Navigator.pushNamed(context, '/stats'),
+                    tooltip: 'View Stats',
+                  ),
+                ],
+              ),
               const SliverToBoxAdapter(child: _WelcomeSectionSkeleton()),
               const SliverToBoxAdapter(child: SizedBox(height: 36)),
               SliverToBoxAdapter(
@@ -84,16 +92,6 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
           }).toList();
 
           return Scaffold(
-            appBar: CustomAppBar(
-              isDiaryScreen: true,
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.bar_chart),
-                  onPressed: () => Navigator.pushNamed(context, '/stats'),
-                  tooltip: 'View Stats',
-                ),
-              ],
-            ),
             floatingActionButton: allLogs.isEmpty
                 ? null
                 : FloatingActionButton.extended(
@@ -107,7 +105,24 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
                     backgroundColor: Colors.amber,
                   ),
             body: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
               slivers: [
+                SliverAppBar(
+                  floating: true,
+                  snap: true,
+                  centerTitle: true,
+                  title: SvgPicture.asset(
+                    'assets/icons/drunk_diary_logo.svg',
+                    height: APP_BAR_VISUAL_HEIGHT,
+                  ),
+                  actions: [
+                    IconButton(
+                      icon: const Icon(Icons.bar_chart),
+                      onPressed: () => Navigator.pushNamed(context, '/stats'),
+                      tooltip: 'View Stats',
+                    ),
+                  ],
+                ),
                 const SliverToBoxAdapter(child: _WelcomeSection()),
                 const SliverToBoxAdapter(child: SizedBox(height: 12)),
                 const SliverToBoxAdapter(child: SizedBox(height: 24)),
@@ -132,8 +147,8 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
                   logs: logs,
                   layout: _currentLayout,
                 ),
-                const SliverToBoxAdapter(
-                    child: SizedBox(height: 100)), // Space for FAB
+                // FAB naturally floats above the list, no need for large bottom padding
+                const SliverToBoxAdapter(child: SizedBox(height: 32)),
               ],
             ),
           );

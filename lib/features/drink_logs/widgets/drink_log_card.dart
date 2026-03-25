@@ -63,7 +63,6 @@ class DrinkLogCard extends StatelessWidget {
                       const SizedBox(height: 12),
                       _caption(context),
                     ],
-                    const Spacer(),
                     const SizedBox(height: 12),
                     _expressiveFeedback(context),
                   ],
