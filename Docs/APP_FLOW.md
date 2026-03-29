@@ -33,6 +33,7 @@ Last Updated: 2026-03-29
   9. User clicks "Finish".
      * System Action: Firestore transaction attempts to claim username and save user profile.
      * System Action: Logs `sign_up` and `onboarding_complete` analytics events.
+     * **System Action**: Calls `setUserId` to link future activity to this profile.
   10. Resulting State: `Navigator.pushNamedAndRemoveUntil('/home')`.
 * **Error States:**
   * Trigger: Google Sign-in fails. 
@@ -186,6 +187,11 @@ AuthGate
 * No explicit device-specific logic identified (e.g., tablet/desktop layouts or breakpoints).
 
 ## 8. Animations & Transitions (If Implemented)
-* **`FadeSlidePageRoute`** (`lib/core/navigation/page_transitions.dart`): A custom `PageRouteBuilder` that combines a fade-in with a subtle upward slide (`Offset(0, 0.05)` → `Offset.zero`) over 300ms using `Curves.easeOut`. Used for navigating to `AlcoholDetailScreen` from Wishlist, Shelf, and Discover cards.
-* **`TabChangeNotification`** (`lib/core/navigation/tab_change_notification.dart`): A custom `Notification` subclass enabling child screens (Diary, Shelf) to programmatically switch the parent `HomeScreen` tab index — primarily used to navigate users to the Search tab (index 2) from empty states and action buttons.
+* **`FadeSlidePageRoute`** (`lib/core/navigation/page_transitions.dart`): A custom `PageRouteBuilder` that combines a fade-in with a subtle upward slide (`Offset(0, 0.05)` → `Offset.zero`) over 300ms using `Curves.easeOut`.
+* **Hero Animations**: Uses **context-aware prefixes** to prevent tag collisions in the `IndexedStack` (where all tabs are active simultaneously):
+  - `search_alcohol_[ID]` (Discover tab)
+  - `shelf_alcohol_[ID]` (Shelf tab)
+  - `stats_alcohol_[ID]` (Stats screen)
+  - `alcohol_log_[LOG_ID]` (Diary entry)
+* **`TabChangeNotification`** (`lib/core/navigation/tab_change_notification.dart`): A custom `Notification` subclass enabling child screens (Diary, Shelf) to programmatically switch the parent `HomeScreen` tab index.
 * Modal bottom sheets use default Flutter slide-up transitions.

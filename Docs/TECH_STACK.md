@@ -110,8 +110,9 @@ Hosting:
 Firebase (Identified via `firebase.json` containing Project ID `drunkdiary-d9241`).
 
 ## 5. Monitoring
-- **Telemetry:** Firebase Analytics used for tracking user behavior and feature engagement. Automatically tracks screen transitions and custom business events.
+- **Telemetry:** Firebase Analytics used for tracking user behavior and feature engagement. Automatically tracks screen transitions and custom business events. Supports context-aware identity tracking (`setUserId`).
 - **Crash Reporting:** No explicit crash reporting (e.g., Crashlytics) identified yet.
+- **Icon Generation:** `flutter_launcher_icons: ^0.14.3` used for cross-platform icon scaling and adaptive background/foreground management.
 
 ## 6. Development Tooling
 
@@ -157,7 +158,13 @@ dependencies:
   cached_network_image: ^3.3.1
   shimmer: ^3.0.0
   flutter_svg: ^2.0.10
-  firebase_analytics: ^11.3.3
+  firebase_analytics: ^12.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.3
 
 fonts:
   - CategoriesElegant

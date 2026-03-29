@@ -122,7 +122,12 @@ Used to represent loading states for content blocks.
 No explicit accessibility enhancements identified beyond default Flutter semantics and Material framework behavior.
 
 ## 6. Animation & Transitions (If Present)
-*   **`FadeSlidePageRoute`** (`lib/core/navigation/page_transitions.dart`): Custom `PageRouteBuilder` combining fade + subtle upward slide (`Offset(0, 0.05)` → `Offset.zero`, 300ms, `Curves.easeOut`). Used for all `AlcoholDetailScreen` navigations from Wishlist, Shelf, and Discover.
+*   **`FadeSlidePageRoute`** (`lib/core/navigation/page_transitions.dart`): Custom `PageRouteBuilder` combining fade + subtle upward slide (`Offset(0, 0.05)` → `Offset.zero`, 300ms, `Curves.easeOut`).
+*   **Hero Animations**: Uses **context-aware prefixes** to prevent tag collisions in the `IndexedStack` (where all tabs are active simultaneously):
+    *   `search_alcohol_[ID]` (Discover tab)
+    - `shelf_alcohol_[ID]` (Shelf tab)
+    - `stats_alcohol_[ID]` (Stats screen)
+    - `alcohol_log_[LOG_ID]` (Diary entry)
 *   **`AnimatedTappable`** (`lib/core/widgets/animated_tappable.dart`): Exists but currently **disabled** (tap handlers are no-ops). Originally provided a scale-down press effect.
 *   Modal bottom sheets use default Flutter slide-up transitions.
 
