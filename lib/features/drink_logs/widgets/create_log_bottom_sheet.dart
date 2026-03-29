@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../app/app_theme.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/constants/reaction_config.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../models/drink_model_dto.dart';
@@ -121,6 +122,13 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
       if (selectedPhoto != null) {
         await _uploadPhoto(logRef, user.uid);
       }
+
+      // 🏆 Log analytics event
+      await AnalyticsService().logCreateDrinkLog(
+        logKind: 'log',
+        alcoholType: widget.alcohol.type,
+        reaction: selectedReaction?.name ?? 'unknown',
+      );
 
       if (mounted) Navigator.pop(context);
     } catch (_) {

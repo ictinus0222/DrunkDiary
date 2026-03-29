@@ -233,7 +233,7 @@ class _TasteBreakdown extends StatelessWidget {
                     if (snapshot.hasData && snapshot.data!.exists) {
                       final alcohol = AlcoholModel.fromFirestore(snapshot.data!);
                       return Hero(
-                        tag: 'alcohol_${alcohol.id}',
+                        tag: 'stats_alcohol_${alcohol.id}',
                         child: CachedNetworkImage(
                           imageUrl: alcohol.imageUrl,
                           fit: BoxFit.contain,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../../core/analytics/analytics_service.dart';
 
 import '../../../app/app_theme.dart';
 import '../../alcohol/repositories/alcohol_repository.dart';
@@ -146,6 +147,11 @@ class _SearchScreenState extends State<SearchScreen> {
     setState(() {
       _filteredAlcohols = result;
     });
+
+    // 🏆 Log analytics if search returns zero results
+    if (result.isEmpty && _searchQuery.length > 2) {
+      AnalyticsService().logZeroResults(_searchQuery);
+    }
   }
 
   void _openFilterSheet() {
@@ -231,6 +237,11 @@ class _SearchScreenState extends State<SearchScreen> {
                   onChanged: (value) {
                     _searchQuery = value.trim();
                     _applyFilters();
+                    
+                    // 🏆 Log analytics event (only for terms > 2 chars to avoid noise)
+                    if (_searchQuery.length > 2) {
+                      AnalyticsService().logSearch(_searchQuery);
+                    }
                   },
                 ),
               ),

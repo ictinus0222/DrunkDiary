@@ -109,8 +109,9 @@ No CI/CD configuration found in repository.
 Hosting:
 Firebase (Identified via `firebase.json` containing Project ID `drunkdiary-d9241`).
 
-Monitoring:
-No explicit application monitoring or telemetry configuration (e.g., Crashlytics, Sentry) identified in repository.
+## 5. Monitoring
+- **Telemetry:** Firebase Analytics used for tracking user behavior and feature engagement. Automatically tracks screen transitions and custom business events.
+- **Crash Reporting:** No explicit crash reporting (e.g., Crashlytics) identified yet.
 
 ## 6. Development Tooling
 
@@ -156,6 +157,7 @@ dependencies:
   cached_network_image: ^3.3.1
   shimmer: ^3.0.0
   flutter_svg: ^2.0.10
+  firebase_analytics: ^11.3.3
 
 fonts:
   - CategoriesElegant

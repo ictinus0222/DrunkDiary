@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../alcohol/models/alcohol_model.dart';
 import '../models/wishlist_item_model.dart';
+import '../../../core/analytics/analytics_service.dart';
 
 class WishlistRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -51,6 +52,12 @@ class WishlistRepository {
     );
 
     await _firestore.collection('wishlists').add(item.toMap());
+ 
+    // 🏆 Log analytics event
+    await AnalyticsService().logAddToWishlist(
+      alcoholId: alcohol.id,
+      alcoholName: alcohol.name,
+    );
   }
 
   // ============================

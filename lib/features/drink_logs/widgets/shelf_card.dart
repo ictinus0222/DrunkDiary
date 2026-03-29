@@ -35,6 +35,7 @@ class ShelfCard extends StatelessWidget {
             child: AlcoholDetailScreen(
               alcoholId: alcohol.id,
               initialAlcohol: alcohol,
+              heroTag: 'shelf_alcohol_${alcohol.id}',
             ),
           ),
         );
@@ -57,7 +58,7 @@ class ShelfCard extends StatelessWidget {
               child: AspectRatio(
                 aspectRatio: 0.75,
                 child: Hero(
-                  tag: 'alcohol_${alcohol.id}',
+                  tag: 'shelf_alcohol_${alcohol.id}',
                   child: CachedNetworkImage(
                     imageUrl: alcohol.imageUrl,
                     fit: BoxFit.cover,

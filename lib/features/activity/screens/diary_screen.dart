@@ -524,7 +524,7 @@ class _GalleryItem extends StatelessWidget {
                           final alcohol =
                               AlcoholModel.fromFirestore(snapshot.data!);
                           return Hero(
-                            tag: 'alcohol_${alcohol.id}',
+                            tag: 'alcohol_log_${log.id}',
                             child: CachedNetworkImage(
                               imageUrl: alcohol.imageUrl,
                               fit: BoxFit.cover,

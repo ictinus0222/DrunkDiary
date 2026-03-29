@@ -6,6 +6,7 @@ Last Updated: 2026-03-29
 * **Primary Entry Points:** 
   * Default route behavior: The application starts at `main.dart` which initializes Firebase and renders the `App` widget with its initial `home` set to `AuthGate()`.
 * **OAuth Providers:** Google Sign-In is explicitly configured and triggered from the login screen.
+* **Telemetry:** Firebase Analytics is integrated at the root level to track navigation and user actions.
 * **Missing Elements (Not Implemented):**
   * No deep linking logic identified in codebase.
   * No push notification entry flows identified.
@@ -31,6 +32,7 @@ Last Updated: 2026-03-29
      * System Action: Debounces and checks availability against `usernames` collection.
   9. User clicks "Finish".
      * System Action: Firestore transaction attempts to claim username and save user profile.
+     * System Action: Logs `sign_up` and `onboarding_complete` analytics events.
   10. Resulting State: `Navigator.pushNamedAndRemoveUntil('/home')`.
 * **Error States:**
   * Trigger: Google Sign-in fails. 
@@ -49,8 +51,9 @@ Last Updated: 2026-03-29
   3. User Action (Optional): Types a query in `TextField`.
   4. System Action: Fetches matching documents from `alcohols` collection applying sort, filter, and text criteria, while checking the user's `drink_logs` for indicators.
   5. UI Elements: Renders matched cards showing global ratings and user logging status.
-  6. User Action: Taps an alcohol card.
-  7. Resulting State: `Navigator.push(AlcoholDetailScreen)`.
+  6. **System Action**: If search returns no results, logs `zero_search_results` with the query string.
+  7. User Action: Taps an alcohol card.
+  8. Resulting State: `Navigator.push(AlcoholDetailScreen)`.
 
 ### Flow: Log a Drink / Write a Review
 * **Goal:** Record an interaction with an alcohol.
@@ -61,7 +64,8 @@ Last Updated: 2026-03-29
   3. UI Elements: User interacts with Reaction selector (Loved / Liked / Nah via `DrinkReaction` enum) (or Rating slider for Reviews), Note text field, and Photo picker.
   4. User Action: Taps "Save log" (or "Publish review").
   5. System Action: Uploads photo (if selected) to Firebase Storage, then writes/updates document in `drink_logs`. 
-  6. Resulting State: `Navigator.pop(context)` closes the bottom sheet.
+  6. **System Action**: Logs `create_drink_log` with kind (log/review) and reaction metadata.
+  7. Resulting State: `Navigator.pop(context)` closes the bottom sheet.
 * **Error States:**
   * Trigger: Firebase write failure.
     * Message: SnackBar displays "Could not save log" (or "Could not publish review").

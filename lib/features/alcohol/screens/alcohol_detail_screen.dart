@@ -21,11 +21,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class AlcoholDetailScreen extends ConsumerStatefulWidget {
   final String alcoholId;
   final AlcoholModel? initialAlcohol;
+  final String? heroTag;
 
   const AlcoholDetailScreen({
     super.key,
     required this.alcoholId,
     this.initialAlcohol,
+    this.heroTag,
   });
 
   @override
@@ -77,7 +79,10 @@ class _AlcoholDetailScreenState extends ConsumerState<AlcoholDetailScreen> {
               return ListView(
                 padding: const EdgeInsets.only(bottom: 120),
                 children: [
-                  _HeroImage(alcohol: alcohol),
+                  _HeroImage(
+                    alcohol: alcohol,
+                    heroTag: widget.heroTag ?? 'alcohol_${alcohol.id}',
+                  ),
                   const SizedBox(height: 24),
                   _ProductInfo(alcohol: alcohol),
                   StreamBuilder<(int, double, int, int)>(
@@ -245,16 +250,19 @@ class _AlcoholDetailScreenState extends ConsumerState<AlcoholDetailScreen> {
       body: ListView(
         padding: const EdgeInsets.only(bottom: 120),
         children: [
-          _HeroImage(alcohol: initialAlcohol ?? AlcoholModel(
-            id: 'loading',
-            name: '',
-            type: '',
-            brand: '',
-            abv: 0,
-            origin: '',
-            description: '',
-            imageUrl: '',
-          )),
+          _HeroImage(
+            alcohol: initialAlcohol ?? AlcoholModel(
+              id: 'loading',
+              name: '',
+              type: '',
+              brand: '',
+              abv: 0,
+              origin: '',
+              description: '',
+              imageUrl: '',
+            ),
+            heroTag: widget.heroTag ?? 'alcohol_${widget.alcoholId}',
+          ),
           const SizedBox(height: 24),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -293,8 +301,9 @@ class _AlcoholDetailScreenState extends ConsumerState<AlcoholDetailScreen> {
 
 class _HeroImage extends StatelessWidget {
   final AlcoholModel alcohol;
+  final String heroTag;
 
-  const _HeroImage({required this.alcohol});
+  const _HeroImage({required this.alcohol, required this.heroTag});
 
   @override
   Widget build(BuildContext context) {
@@ -311,7 +320,7 @@ class _HeroImage extends StatelessWidget {
           aspectRatio: 1,
           child: alcohol.imageUrl.isNotEmpty
               ? Hero(
-                  tag: 'alcohol_${alcohol.id}',
+                  tag: heroTag,
                   child: CachedNetworkImage(
                     imageUrl: alcohol.imageUrl,
                     fit: BoxFit.contain, // best for bottles to ensure no crop

@@ -26,6 +26,7 @@ class DiscoverAlcoholCard extends StatelessWidget {
             child: AlcoholDetailScreen(
               alcoholId: item.alcohol.id,
               initialAlcohol: item.alcohol,
+              heroTag: 'search_alcohol_${item.alcohol.id}',
             ),
           ),
         );
@@ -59,7 +60,7 @@ class DiscoverAlcoholCard extends StatelessWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: item.alcohol.imageUrl.isNotEmpty
                       ? Hero(
-                          tag: 'alcohol_${item.alcohol.id}',
+                          tag: 'search_alcohol_${item.alcohol.id}',
                           child: CachedNetworkImage(
                             imageUrl: item.alcohol.imageUrl,
                             fit: BoxFit.contain,

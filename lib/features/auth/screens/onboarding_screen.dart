@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../app/app_theme.dart';
+import '../../../core/analytics/analytics_service.dart';
 
 class OnboardingScreen extends StatefulWidget {
   static const routeName = '/onboarding';
@@ -192,6 +193,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ElevatedButton(
           onPressed: isAgeValid
               ? () {
+            AnalyticsService().logOnboardingStep(0, 'dob_selected');
             setState(() => currentStep = 1);
           }
               : null,
@@ -261,6 +263,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ElevatedButton(
             onPressed: selectedDrinkPreferences.isNotEmpty
                 ? () {
+              AnalyticsService().logOnboardingStep(1, 'drink_pref_selected');
               setState(() => currentStep = 2);
             }
             : null,
@@ -330,6 +333,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ElevatedButton(
           onPressed: selectedTasteProfile.isNotEmpty
               ? () {
+            AnalyticsService().logOnboardingStep(2, 'taste_pref_selected');
             setState(() => currentStep = 3);
           }
           : null,
@@ -398,6 +402,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ElevatedButton(
           onPressed: selectedDrinkingContext.isNotEmpty
               ? () {
+            AnalyticsService().logOnboardingStep(3, 'context_selected');
             setState(() => currentStep = 4); // Step 5 next
           }
               : null,
@@ -467,6 +472,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ElevatedButton(
           onPressed: selectedDrinkingContext.isNotEmpty
               ? () {
+            AnalyticsService().logOnboardingStep(4, 'discovery_style_selected');
             setState(() => currentStep = 5); // Step 5 next
           }
               : null,
@@ -627,6 +633,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           SetOptions(merge: true),
         );
       });
+
+      // 🏆 Log analytics events
+      await AnalyticsService().logSignUp('google');
+      await AnalyticsService().logOnboardingComplete();
     } catch (e) {
       setState(() => isLoading = false);
 

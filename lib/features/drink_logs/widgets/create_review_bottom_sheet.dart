@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../app/app_theme.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../models/drink_model_dto.dart';
 
@@ -133,6 +134,13 @@ class _CreateReviewBottomSheetState extends State<CreateReviewBottomSheet> {
       if (selectedPhoto != null) {
         await _uploadPhoto(ref, user.uid);
       }
+
+      // 🏆 Log analytics event
+      await AnalyticsService().logCreateDrinkLog(
+        logKind: 'review',
+        alcoholType: widget.alcohol.type,
+        reaction: rating.toStringAsFixed(1),
+      );
 
       if (mounted) Navigator.pop(context);
     } catch (e) {

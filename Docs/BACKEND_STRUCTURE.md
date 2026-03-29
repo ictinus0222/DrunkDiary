@@ -97,6 +97,7 @@ No explicit API server routes exist in this repository. All data fetching operat
 *   **Session cookies / JWT:** Managed internally by the Firebase Auth SDK. Token expiry and refresh logic are not manually handled in the codebase.
 *   **Permission Logic:** Restricted Firestore write access implemented in Security Rules for specific collections:
     *   `match /configs/{document}` write access restricted to specific verified email tokens (`akhilsharma.ptk22@gmail.com` or `sharmakhil1704@gmail.com`).
+*   **Analytics Layer:** Operates as a write-only interface via `firebase_analytics` SDK. Data is processed by Google's backend and visualized in the Firebase Console. No direct database access or read logic for analytics is required on the client side.
 *   Hashing strength not explicitly visible in code (managed by Google/Firebase).
 
 ## 6. Data Validation Rules (Code-Verified Only)

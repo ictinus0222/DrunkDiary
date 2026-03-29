@@ -15,6 +15,7 @@ import 'features/admin/screens/admin_settings_screen.dart';
 import 'splash/splash_screen.dart';
 import 'features/activity/screens/stats_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 // imports
 
 void main() async {
@@ -34,8 +35,11 @@ void main() async {
 
 class DrunkDiaryApp extends StatelessWidget {
   // root widget of the application
-  const DrunkDiaryApp(
-      {super.key}); // stateless because app-level config doesn't change
+  const DrunkDiaryApp({super.key}); // stateless because app-level config doesn't change
+
+  static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+  static FirebaseAnalyticsObserver observer =
+      FirebaseAnalyticsObserver(analytics: analytics);
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +47,7 @@ class DrunkDiaryApp extends StatelessWidget {
       //root container for material design app
       title: 'DrunkDiary', // app-switcher name
       debugShowCheckedModeBanner: false, // disable debug banner
+      navigatorObservers: [observer],
 
       home: const AuthGate(), //  AuthGate handles routing based on auth state
 

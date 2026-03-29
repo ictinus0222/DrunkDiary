@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import '../../../core/analytics/analytics_service.dart';
 
 final GoogleSignIn _googleSignIn = GoogleSignIn(
   serverClientId: '1080840005468-j82oa5apllnb65o6r4j831crdplodv3t.apps.googleusercontent.com',
@@ -44,6 +45,10 @@ Future<void> signInWithGoogle() async {
     if (user == null) {
       throw Exception("Google sign-in failed: Firebase user is null");
     }
+
+    // 🏆 Log analytics event
+    await AnalyticsService().setUserId(user.uid);
+    await AnalyticsService().logLogin('google');
 
     // 5. Check Firestore user document
     final userDoc =

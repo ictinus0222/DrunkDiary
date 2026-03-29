@@ -20,8 +20,14 @@ The application solves the problem of tracking and remembering one's experiences
 - **Premium UX**: Utilize Skeleton UI (Shimmer) for all primary data-driven screens to provide stable and polished loading states.
 - Manage global app features via a feature flag system to enable A/B testing and controlled rollouts.
 
-## 4. Success Metrics (Inferred from Code)
-No explicit success metrics or analytics tracking logic (e.g., Mixpanel, Google Analytics events) are implemented in the current codebase.
+## 4. Success Metrics
+Core user engagement and feature usage are tracked via Firebase Analytics to measure retention and discover popular alcohols. Key metrics include:
+- **Onboarding Completion:** Percentage of users who finish the 5-step onboarding and claim a username.
+- **Logging Velocity:** Average number of logs/reviews created per user per week.
+- **Search Intent:** Most searched alcohol types and brands.
+- **Session Duration:** Active time spent in "Diary" and "Shelf" views.
+- **Wishlist Conversion:** Percentage of users who add an item to their wishlist and eventually log it.
+- **Search Content Gap:** Number of "Zero Result" searches per week to prioritize database additions.
 
 ## 5. Target Users & Personas (Inferred)
 Based on the onboarding flow and feature structure, the target users are individuals of legal drinking age (18+).
@@ -98,13 +104,20 @@ Based on the onboarding flow and feature structure, the target users are individ
   - **Description:** A system for controlling visibility of new features globally or per segment.
   - **User Story:** As an admin, I want to toggle experimental features on or off for all users from within the app.
   - **Acceptance Criteria:** Real-time state management via Riverpod. Authentication-restricted entry point in Profile. Persists values in Firestore `configs` collection.
+- **In-App Analytics**
+  - **Description:** Tracking core user interactions to understand app usage, retention, and content gaps.
+  - **Acceptance Criteria:** 
+    - Automatically tracks screen views.
+    - **Identity Tracking:** Links activity to unique `userId` via `setUserId` for accurate retention metrics.
+    - **Intent Funnel:** Tracks `add_to_wishlist` events to measure purchase/trial interest.
+    - **Catalog Health:** Tracks `zero_search_results` to identify missing alcohols in the database.
+    - **Core Loops:** Instrumented events for Sign-In, Drink Logging, and Alcohol Searches.
 
 ### P2 (Minor or Utility Features Already Present)
 
 ## 7. Explicitly OUT OF SCOPE (Critical Section)
 The following are NOT implemented in the codebase:
 - **Log Management:** Deleting or editing standard logs is not clearly implemented (only editing public reviews is supported).
-- **In-App Analytics/Telemetry:** No analytics tools (Mixpanel, GA) are implemented.
 - **Push Notifications:** No logic for alerting users when they are tagged in a log.
 
 ## 8. User Scenarios (Only Implemented Flows)
