@@ -555,7 +555,7 @@ class _GalleryItem extends StatelessWidget {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withOpacity(0.4),
+                      Colors.black.withValues(alpha: 0.4),
                     ],
                   ),
                 ),

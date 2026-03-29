@@ -66,7 +66,7 @@ class AppThemes {
   static final AppCustomColors darkCustomColors = AppCustomColors(
     cardBackground: const Color(0xFF1A1A1A),
     deepCardBackground: const Color(0xFF0F0F0F),
-    borderLight: const Color(0xFFFFC107).withOpacity(0.3),
+    borderLight: const Color(0xFFFFC107).withValues(alpha: 0.3),
     borderDark: const Color(0xFF333333),
     textMuted: const Color(0xFFB0B0B0),
     success: Colors.green,

@@ -28,6 +28,7 @@ Core user engagement and feature usage are tracked via Firebase Analytics to mea
 - **Session Duration:** Active time spent in "Diary" and "Shelf" views.
 - **Wishlist Conversion:** Percentage of users who add an item to their wishlist and eventually log it.
 - **Search Content Gap:** Number of "Zero Result" searches per week to prioritize database additions.
+- **Feedback Loop:** Volume and sentiment of user-submitted feedback via the in-app portal to identify UX pain points.
 
 ## 5. Target Users & Personas (Inferred)
 Based on the onboarding flow and feature structure, the target users are individuals of legal drinking age (18+).
@@ -100,6 +101,14 @@ Based on the onboarding flow and feature structure, the target users are individ
     - Shows exploration stats (nights recorded, countries explored).
     - Derives taste identity (e.g., "Whisky Explorer").
     - Clean, premium, journal-like UI.
+- **In-App Feedback System**
+  - **Description:** Allows users to submit screenshots and text feedback directly from their profile.
+  - **User Story:** As a user, I want to easily report bugs or suggest features without leaving the app.
+  - **Acceptance Criteria:** 
+    - Floating action button or icon in Profile triggers `BetterFeedback` overlay.
+    - Captures a screenshot of the current screen.
+    - Sends feedback via configured email client using `flutter_email_sender`.
+    - Handles "No email client found" gracefully with a SnackBar.
 - **Feature Flags & Admin Settings (A/B Testing)**
   - **Description:** A system for controlling visibility of new features globally or per segment.
   - **User Story:** As an admin, I want to toggle experimental features on or off for all users from within the app.

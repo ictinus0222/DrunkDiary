@@ -58,9 +58,29 @@ Source File Evidence: `pubspec.yaml`
 Reason: Rendering scalable vector graphics (SVGs), primarily for the AppBar branding logo.
 
 Library: cupertino_icons
-Version: ^1.0.8
+Version: ^1.0.9
 Source File Evidence: `pubspec.yaml`
 Reason: Default iOS styling icons. Reason not explicitly documented in repository.
+
+Library: feedback
+Version: ^3.1.0
+Source File Evidence: `pubspec.yaml`
+Reason: In-app feedback collection (screenshots + annotation).
+
+Library: flutter_email_sender
+Version: ^8.0.0
+Source File Evidence: `pubspec.yaml`
+Reason: Sending emails with attachments (used by Feedback system).
+
+Library: path_provider
+Version: ^2.1.4
+Source File Evidence: `pubspec.yaml`
+Reason: Accessing local file system paths for temporary storage.
+
+Library: package_info_plus
+Version: ^9.0.0
+Source File Evidence: `pubspec.yaml`
+Reason: Reading application package information.
 
 ## 3. Backend Stack
 
@@ -150,20 +170,24 @@ dependencies:
   cloud_firestore: ^6.1.1
   image_picker: ^1.2.1
   firebase_storage: ^13.0.4
-  google_fonts: ^6.3.3
+  google_fonts: ^8.0.2
   flutter_riverpod: ^3.0.3
-  google_sign_in: ^6.2.1
-  intl: ^0.19.0
+  google_sign_in: ^7.2.0
+  intl: any
   timeago: ^3.6.0
   cached_network_image: ^3.3.1
   shimmer: ^3.0.0
   flutter_svg: ^2.0.10
   firebase_analytics: ^12.2.0
+  feedback: ^3.1.0
+  flutter_email_sender: ^8.0.0
+  path_provider: ^2.1.4
+  package_info_plus: ^9.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.3
 
 fonts:

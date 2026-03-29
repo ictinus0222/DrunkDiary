@@ -40,9 +40,9 @@ dependencies:
   cloud_firestore: ^6.1.1
   image_picker: ^1.2.1
   firebase_storage: ^13.0.4
-  google_fonts: ^6.3.3
+  google_fonts: ^8.0.2
   flutter_riverpod: ^3.0.3
-  google_sign_in: ^6.2.1
+  google_sign_in: ^7.2.0
   intl: any
   timeago: ^3.6.0
   cached_network_image: ^3.3.1
@@ -50,9 +50,9 @@ dependencies:
   flutter_svg: ^2.0.10
   firebase_analytics: ^12.2.0
   feedback: ^3.1.0
-  flutter_email_sender: ^6.0.3
+  flutter_email_sender: ^8.0.0
   path_provider: ^2.1.4
-  package_info_plus: ^8.1.1
+  package_info_plus: ^9.0.0
 
 
 dev_dependencies:
@@ -64,7 +64,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.3
 
 # For information on the generic Dart part of this file, see the

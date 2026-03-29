@@ -70,8 +70,19 @@ Last Updated: 2026-03-29
 * **Error States:**
   * Trigger: Firebase write failure.
     * Message: SnackBar displays "Could not save log" (or "Could not publish review").
-* **Edge Cases:**
-  * For reviews: Uses a deterministic document ID (`{userId}_{alcoholId}`) to overwrite existing reviews rather than creating duplicates. If a review exists, "EDIT REVIEW" opens the review editor with existing data populated.
+*   **Flow: Submit In-App Feedback**
+  * **Goal:** Report an issue or suggest a feature without leaving the app.
+  * **Entry Point:** `ProfileScreen` (leadingIconButton).
+  * **Happy Path:**
+    1. User taps the feedback icon.
+    2. System Action: Triggers `BetterFeedback.of(context).show(...)` overlay.
+    3. User Action: Captures/Annotates screenshot and types feedback description.
+    4. User Action: Taps submit.
+    5. System Action: Triggers `FeedbackHandler`. Uses `flutter_email_sender` to launch the device's default email client with the screenshot as an attachment.
+    6. Resulting State: Device email composer opens.
+  * **Error States:**
+    * Trigger: No email client configured on device (PlatformException).
+    * Message: SnackBar displays "No email client found. Please configure an email account."
 
 ## 3. Navigation Map (Actual Structure Only)
 
@@ -93,7 +104,8 @@ AuthGate
     ├── Tab 3: ShelfScreen
     │   └── AlcoholDetailScreen
     └── Tab 4: ProfileScreen
-        └── AdminSettingsScreen (Restricted Entry via Settings Icon)
+        ├── AdminSettingsScreen (Restricted Entry via Settings Icon)
+        └── FeedbackOverlay (via Feedback Icon)
 ```
 
 ## 4. Screen Inventory (Code-Verified)

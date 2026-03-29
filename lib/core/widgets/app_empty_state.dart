@@ -36,9 +36,9 @@ class AppEmptyState extends StatelessWidget {
               height: 100,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: colorScheme.primary.withOpacity(0.1),
+                color: colorScheme.primary.withValues(alpha: 0.1),
                 border:
-                    Border.all(color: colorScheme.primary.withOpacity(0.3), width: 2),
+                    Border.all(color: colorScheme.primary.withValues(alpha: 0.3), width: 2),
               ),
               child: Icon(
                 icon,

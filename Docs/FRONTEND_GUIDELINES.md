@@ -29,7 +29,7 @@ Defined in `lib/core/constants/reaction_config.dart` → `ReactionConfig.getColo
 Defined in `lib/app/app_theme.dart` as `ThemeExtension<AppCustomColors>`. Access via `Theme.of(context).extension<AppCustomColors>()!`.
 *   `cardBackground`: `Color(0xFF1A1A1A)` — Standard card/container fill
 *   `deepCardBackground`: `Color(0xFF0F0F0F)` — Deeper nested surfaces
-*   `borderLight`: `Color(0xFFFFC107).withOpacity(0.3)` — Amber accent borders
+*   `borderLight`: `Color(0xFFFFC107).withValues(alpha: 0.3)` — Amber accent borders
 *   `borderDark`: `Color(0xFF333333)` — Subtle dark borders
 *   `textMuted`: `Color(0xFFB0B0B0)` — Secondary/muted text
 *   `success`: `Colors.green`
@@ -96,9 +96,10 @@ No explicit custom shadow scales or elevation configurations identified in the i
     *   Review Cards: Slightly elevated or distinct subtle accent (e.g. faint amber border/gradient or different shade of grey `Colors.grey.shade800`) to highlight a formal rating constraint.
 
 ### App Bar
-*   **Standardized Branding:**
-    - Diary Screen: SVG logo (`drunk_diary_logo.svg`) scaled to `APP_BAR_VISUAL_HEIGHT`.
-    - Other Screens: ALL CAPS text titles with `Transform.translate` for precise vertical centering.
+*   **CustomAppBar:** All secondary screens utilize the `CustomAppBar` component which implements the project's branding standards:
+    - **Branding:** Diary Screen uses `drunk_diary_logo.svg` (scaled to `APP_BAR_VISUAL_HEIGHT`).
+    - **Header Formatting:** Other screens use ALL CAPS titles with a `Transform.translate(offset: Offset(0, 1))` shift for precise optical vertical centering.
+    - **Branding Consistency:** Uses `CategoriesElegant` font for titles by default.
 *   **BottomNavigationBar:** Fixed type (`BottomNavigationBarType.fixed`) containing exactly 5 tabs.
 *   **Centered Action Icon:** The central navigation item (Index 2) is specifically highlighted as a circular action button with a golden glow/shadow and amber opacity background to denote it as the "Core Discovery Action."
 
@@ -128,7 +129,10 @@ No explicit accessibility enhancements identified beyond default Flutter semanti
     - `shelf_alcohol_[ID]` (Shelf tab)
     - `stats_alcohol_[ID]` (Stats screen)
     - `alcohol_log_[LOG_ID]` (Diary entry)
-*   **`AnimatedTappable`** (`lib/core/widgets/animated_tappable.dart`): Exists but currently **disabled** (tap handlers are no-ops). Originally provided a scale-down press effect.
+*   **BetterFeedback UI**:
+    - Uses a custom dark theme (`Color(0xFF121212)`) and sheet color (`Color(0xFF1E1E1E)`).
+    - Triggered from Profile Screen's leading action button.
+    - Provides a full-screen screenshot annotation and text entry interface.
 *   Modal bottom sheets use default Flutter slide-up transitions.
 
 ### Light Theme

@@ -17,6 +17,7 @@ import 'features/activity/screens/stats_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:feedback/feedback.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 // imports
 
 void main() async {
@@ -27,6 +28,12 @@ void main() async {
     // connect flutter app to Firebase backend
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Initialize Google Sign-In (v7.0.0+ requirement)
+  await GoogleSignIn.instance.initialize(
+    serverClientId: '1080840005468-j82oa5apllnb65o6r4j831crdplodv3t.apps.googleusercontent.com',
+  );
+
   runApp(
     const ProviderScope(
       child: DrunkDiaryApp(),

@@ -3,17 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../../core/analytics/analytics_service.dart';
 
-final GoogleSignIn _googleSignIn = GoogleSignIn(
-  serverClientId: '1080840005468-j82oa5apllnb65o6r4j831crdplodv3t.apps.googleusercontent.com',
-  scopes: [
-    'email',
-  ],
-);
+// Note: GoogleSignIn is now a singleton (v7.0.0+)
+// Initialization happens in main.dart
+final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 
 Future<void> signInWithGoogle() async {
   try {
-    //  Trigger Google sign-in
-    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+    // 1. Trigger Google sign-in (Authenticate)
+    final GoogleSignInAccount? googleUser = await _googleSignIn.authenticate();
 
     if (googleUser == null) {
       // User cancelled the sign-in
@@ -21,20 +18,29 @@ Future<void> signInWithGoogle() async {
       return;
     }
 
-    //  Get auth details
-    final GoogleSignInAuthentication googleAuth =
-    await googleUser.authentication;
-
-    // Create Firebase credential
+    // 2. Get auth details (Identity/idToken)
+    final googleAuth = await googleUser.authentication;
     final String? idToken = googleAuth.idToken;
 
     if (idToken == null) {
       throw Exception("Missing Google ID Token");
     }
-    //  Create Firebase credential (with accessToken and idToken)
-    final OAuthCredential credential =
-    GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
+
+    // 3. Get authorization (accessToken)
+    // In v7.0.0+, accessToken is retrieved via the authorizationClient
+    final authorization = await googleUser.authorizationClient.authorizeScopes([
+      'email',
+      'openid',
+    ]);
+    final String? accessToken = authorization.accessToken;
+
+    if (accessToken == null) {
+      throw Exception("Missing Google Access Token");
+    }
+
+    // 4. Create Firebase credential
+    final OAuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: accessToken,
       idToken: idToken,
     );
     // 4. Sign in to Firebase

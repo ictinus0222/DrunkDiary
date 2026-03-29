@@ -60,7 +60,7 @@ class _AlcoholDetailScreenState extends ConsumerState<AlcoholDetailScreen> {
             leading: Padding(
               padding: const EdgeInsets.only(left: 16.0, top: 4.0, bottom: 4.0),
               child: CircleAvatar(
-                backgroundColor: colorScheme.onSurface.withOpacity(0.15),
+                backgroundColor: colorScheme.onSurface.withValues(alpha: 0.15),
                 child: IconButton(
                   icon: Icon(Icons.arrow_back, color: colorScheme.onSurface, size: 20),
                   onPressed: () => Navigator.pop(context),
@@ -196,6 +196,7 @@ class _AlcoholDetailScreenState extends ConsumerState<AlcoholDetailScreen> {
 
     if (query.docs.isNotEmpty) {
       final review = DrinkLogModel.fromFirestore(query.docs.first);
+      if (!context.mounted) return;
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
@@ -207,6 +208,7 @@ class _AlcoholDetailScreenState extends ConsumerState<AlcoholDetailScreen> {
         ),
       );
     } else {
+      if (!context.mounted) return;
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
@@ -239,7 +241,7 @@ class _AlcoholDetailScreenState extends ConsumerState<AlcoholDetailScreen> {
         leading: Padding(
           padding: const EdgeInsets.only(left: 16.0, top: 4.0, bottom: 4.0),
           child: CircleAvatar(
-            backgroundColor: colorScheme.onSurface.withOpacity(0.15),
+            backgroundColor: colorScheme.onSurface.withValues(alpha: 0.15),
             child: IconButton(
               icon: Icon(Icons.arrow_back, color: colorScheme.onSurface, size: 20),
               onPressed: () => Navigator.pop(context),
@@ -419,9 +421,9 @@ class _ProductInfo extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: colorScheme.primary.withOpacity(0.2),
+        color: colorScheme.primary.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: colorScheme.primary.withOpacity(0.5)),
+        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.5)),
       ),
       child: Text(
         label,
@@ -573,8 +575,14 @@ class _PersonalMeaningSectionState extends State<_PersonalMeaningSection> {
       }, SetOptions(merge: true));
       setState(() => _isEditing = false);
     } catch (e) {
+      if (!context.mounted) return;
+      final colorScheme = Theme.of(context).colorScheme;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save note', style: TextStyle(color: Theme.of(context).colorScheme.onError)), backgroundColor: Theme.of(context).colorScheme.error),
+        SnackBar(
+          content: Text('Failed to save note',
+              style: TextStyle(color: colorScheme.onError)),
+          backgroundColor: colorScheme.error,
+        ),
       );
     } finally {
       if(mounted) {

@@ -40,7 +40,8 @@ AuthGate
     ├── Tab 3: ShelfScreen
     │   └── AlcoholDetailScreen
     └── Tab 4: ProfileScreen
-        └── AdminSettingsScreen (Restricted Entry via Settings Icon)
+        ├── AdminSettingsScreen (Restricted Entry via Settings Icon)
+        └── FeedbackOverlay (via Feedback Icon)
 ```
 <!-- SYNC_FLOW_END -->
 
