@@ -2,8 +2,8 @@
 
 ## 1. Product Overview
 Project Title: DrunkDiary
-Version: 1.0.0+1
-Last Updated: 2026-03-03
+Version: 1.0.2+3
+Last Updated: 2026-03-29
 Owner: Not explicitly identified in the repository metadata.
 
 DrunkDiary is a Flutter-based mobile application that allows legal-age users to log or review the alcoholic beverages they consume for personal tracking. It securely authenticates users via Google, ensures they are 18+, and acts as a digital diary and tracking shelf for their drinking journey. The app provides a timeline of past drinks, aggregates statistics (like favorite drinks and average ratings) in a "Shelf" view, and enables discovery of beverages via a centralized search architecture.
@@ -13,7 +13,7 @@ The application solves the problem of tracking and remembering one's experiences
 
 ## 3. Goals & Objectives (Current State Only)
 - Authenticate users securely into the ecosystem and enforce a strict age gate (18+).
-- Allow users to quickly capture a "Drink Log" (capturing a thumbs up/down, photo, tags, and context). These are the only entries counted as "Personal Logs".
+- Allow users to quickly capture a "Drink Log" (capturing a reaction — loved/liked/nah, photo, tags, and context). These are the only entries counted as "Personal Logs".
 - Allow users to write personal "Reviews" for alcohols on a 0-5 scale. Reviews are formally distinct from logs and do not increment log counts.
 - Aggregate user logs into a personal "Shelf" that showcases their history and average ratings.
 - Enable discovery of alcohols via an integrated search mechanism (emphasized as the central app action).
@@ -40,7 +40,7 @@ Based on the onboarding flow and feature structure, the target users are individ
 - **Private Drink Logging**
   - **Description:** Allows users to log an alcohol privately.
   - **User Story:** As a user, I want to log what I briefly drank with friends.
-  - **Acceptance Criteria:** User can select Like/Dislike, write a note, and attach a photo (from camera/gallery). Data saves to Firestore with `logKind: LogKind.log`.
+  - **Acceptance Criteria:** User can select a reaction (Loved / Liked / Nah via `DrinkReaction` enum), write a note, and attach a photo (from camera/gallery). Data saves to Firestore with `logKind: LogKind.log`.
   - **Edge Cases:** Missing photo or note resolves to null.
 - **Personal Drink Reviewing**
   - **Description:** Allows users to formally rate and review an alcohol for personal use.
@@ -83,8 +83,8 @@ Based on the onboarding flow and feature structure, the target users are individ
     - Search bar includes a filter button, which opens a bottom sheet allowing sorting (A-Z, High-Low Rating, Most Reviewed) and type filtering (e.g. Whisky, Rum, Vodka).
 - **Alcohol Details**
   - **Description:** Displays alcohol information, personal logs, and global community stats.
-  - **User Story:** As a user, I can view details of a drink, see my personal logs (excluding reviews), and view community statistics like total global logs, global average rating, and a global like ratio.
-  - **Acceptance Criteria:** Queries all logs for the specified alcohol to calculate global total logs, personal total logs (logKind: log only), average community rating, and the global like-to-dislike ratio. Provides a view of the user's history with the alcohol.
+  - **User Story:** As a user, I can view details of a drink, see my personal logs (excluding reviews), and view community statistics like total global logs, global average rating, and a global reaction distribution.
+  - **Acceptance Criteria:** Queries all logs for the specified alcohol to calculate global total logs, personal total logs (logKind: log only), average community rating, and the global reaction distribution. Provides a view of the user's history with the alcohol.
 - **Stats & Taste Identity Page**
   - **Description:** A dedicated space for deep reflection on drinking habits and taste profile.
   - **User Story:** As a user, I want a dedicated space to see my "Taste Identity" and deeper metrics that focus on exploration and memory rather than consumption count.
@@ -115,7 +115,7 @@ The following are NOT implemented in the codebase:
   - **Error States:** If DOB makes user <18, blocks progress. If username is taken, transaction fails and displays "Username already taken".
 - **Scenario 2: Searching and Logging a Drink**
   - **Context:** User is at a bar and wants to log a drink.
-  - **Step-by-step:** Go to Search Tab -> Type drink name -> Tap Alcohol -> Tap "LOG" -> Tap "Like" thumb -> Save log.
+  - **Step-by-step:** Go to Search Tab -> Type drink name -> Tap Alcohol -> Tap "LOG" -> Select reaction (Loved / Liked / Nah) -> Save log.
   - **System Behavior:** Bottom sheet closes, log is pushed to `drink_logs` collection, and diary immediately refreshes via StreamBuilder.
 
 ## 9. Dependencies & Constraints

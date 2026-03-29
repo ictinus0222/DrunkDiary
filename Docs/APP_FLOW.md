@@ -1,5 +1,7 @@
 # Application Flow Documentation
 
+Last Updated: 2026-03-29
+
 ## 1. Entry Points (Code-Verified Only)
 * **Primary Entry Points:** 
   * Default route behavior: The application starts at `main.dart` which initializes Firebase and renders the `App` widget with its initial `home` set to `AuthGate()`.
@@ -40,7 +42,7 @@
 
 ### Flow: Search and View Item
 * **Goal:** Discover and view an alcohol item.
-* **Entry Point:** `SearchScreen` (Tab index 1).
+* **Entry Point:** `SearchScreen` (Tab index 2).
 * **Happy Path:**
   1. `SearchScreen`: Opens on a "Discover" view displaying all database alcohols as rich cards.
   2. User Action (Optional): Taps the filter icon to open the `FilterBottomSheet` to select Sort Order and Alcohol Type.
@@ -56,7 +58,7 @@
 * **Happy Path:**
   1. `AlcoholDetailScreen`: User taps "LOG" (or "REVIEW").
   2. System Action: triggers `showModalBottomSheet(CreateLogBottomSheet)` (or `CreateReviewBottomSheet`).
-  3. UI Elements: User interacts with Thumb-up/down (or Slider), Note text field, and Photo picker.
+  3. UI Elements: User interacts with Reaction selector (Loved / Liked / Nah via `DrinkReaction` enum) (or Rating slider for Reviews), Note text field, and Photo picker.
   4. User Action: Taps "Save log" (or "Publish review").
   5. System Action: Uploads photo (if selected) to Firebase Storage, then writes/updates document in `drink_logs`. 
   6. Resulting State: `Navigator.pop(context)` closes the bottom sheet.
@@ -124,7 +126,7 @@ AuthGate
 * **Screen:** `AlcoholDetailScreen`
   * **Route:** `/alcoholDetail`
   * **Access:** Authenticated
-  * **Purpose:** Shows details and personal logs stream for a specific alcohol. Displays a "Community Stats" section showing total community logs, personal logs (filtered to logs only), community average rating, and a global like ratio. Contains action buttons to trigger Logging/Reviewing.
+  * **Purpose:** Shows details and personal logs stream for a specific alcohol. Displays a "Community Stats" section showing total community logs, personal logs (filtered to logs only), community average rating, and a global reaction distribution. Contains action buttons to trigger Logging/Reviewing.
 * **Screen:** `ShelfScreen`
   * **Route:** `/shelf`
   * **Access:** Authenticated
@@ -135,7 +137,7 @@ AuthGate
   * **Access:** Authenticated
   * **Purpose:** Displays the user's personal wishlist of alcohols they want to try. Cross-references `drink_logs` to show a "Tried!" badge on already-logged items.
   * **State Variants:** Loading (Skeleton UI / Shimmer), Empty (Standardized `AppEmptyState` with action to add from search).
-  * **Actions Available:** FAB opens `AddToWishlistSheet` (search + note), swipe-to-dismiss removes item, tap item → `AlcoholDetailScreen`.
+  * **Actions Available:** Empty state button opens `AddToWishlistSheet` (search + note), `WishlistItemCard` provides remove action, tap item → `AlcoholDetailScreen`.
 * **Screen:** `ProfileScreen`
   * **Route:** `/profile` (if any)
   * **Access:** Authenticated
@@ -180,4 +182,6 @@ AuthGate
 * No explicit device-specific logic identified (e.g., tablet/desktop layouts or breakpoints).
 
 ## 8. Animations & Transitions (If Implemented)
-* No explicit custom animation logic identified in the immediate feature screens. The app relies exclusively on default Flutter material navigation transitions (slide-ins) and modal sheet slide-ups.
+* **`FadeSlidePageRoute`** (`lib/core/navigation/page_transitions.dart`): A custom `PageRouteBuilder` that combines a fade-in with a subtle upward slide (`Offset(0, 0.05)` → `Offset.zero`) over 300ms using `Curves.easeOut`. Used for navigating to `AlcoholDetailScreen` from Wishlist, Shelf, and Discover cards.
+* **`TabChangeNotification`** (`lib/core/navigation/tab_change_notification.dart`): A custom `Notification` subclass enabling child screens (Diary, Shelf) to programmatically switch the parent `HomeScreen` tab index — primarily used to navigate users to the Search tab (index 2) from empty states and action buttons.
+* Modal bottom sheets use default Flutter slide-up transitions.

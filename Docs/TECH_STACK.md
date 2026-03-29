@@ -2,7 +2,7 @@
 
 ## 1. Stack Overview
 
-Last Updated: 2026-03-03
+Last Updated: 2026-03-29
 
 Architecture Type:
 Mobile Client / Serverless Backend (Flutter application communicating directly with Firebase services).
@@ -154,6 +154,7 @@ dependencies:
   intl: ^0.19.0
   timeago: ^3.6.0
   cached_network_image: ^3.3.1
+  shimmer: ^3.0.0
   flutter_svg: ^2.0.10
 
 fonts:

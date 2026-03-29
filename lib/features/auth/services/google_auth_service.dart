@@ -3,59 +3,67 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 final GoogleSignIn _googleSignIn = GoogleSignIn(
+  serverClientId: '1080840005468-j82oa5apllnb65o6r4j831crdplodv3t.apps.googleusercontent.com',
   scopes: [
     'email',
   ],
 );
 
 Future<void> signInWithGoogle() async {
-  //  Trigger Google sign-in
-  final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+  try {
+    //  Trigger Google sign-in
+    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
-  if (googleUser == null) {
-    // User cancelled the sign-in
-    return;
-  }
+    if (googleUser == null) {
+      // User cancelled the sign-in
+      print("Google Sign-In: User cancelled");
+      return;
+    }
 
-  //  Get auth details
-  final GoogleSignInAuthentication googleAuth =
-  await googleUser.authentication;
+    //  Get auth details
+    final GoogleSignInAuthentication googleAuth =
+    await googleUser.authentication;
 
-  // Create Firebase credential
-  final String? idToken = googleAuth.idToken;
+    // Create Firebase credential
+    final String? idToken = googleAuth.idToken;
 
-  if (idToken == null) {
-    throw Exception("Missing Google ID Token");
-  }
-  //  Create Firebase credential (NO accessToken)
-  final OAuthCredential credential =
-  GoogleAuthProvider.credential(
-    idToken: idToken,
-  );
-  // 4. Sign in to Firebase
-  final UserCredential userCredential =
-  await FirebaseAuth.instance.signInWithCredential(credential);
+    if (idToken == null) {
+      throw Exception("Missing Google ID Token");
+    }
+    //  Create Firebase credential (with accessToken and idToken)
+    final OAuthCredential credential =
+    GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: idToken,
+    );
+    // 4. Sign in to Firebase
+    final UserCredential userCredential =
+    await FirebaseAuth.instance.signInWithCredential(credential);
 
-  final user = userCredential.user;
-  if (user == null) {
-    throw Exception("Google sign-in failed");
-  }
+    final user = userCredential.user;
+    if (user == null) {
+      throw Exception("Google sign-in failed: Firebase user is null");
+    }
 
-  // 5. Check Firestore user document
-  final userDoc =
-  FirebaseFirestore.instance.collection('users').doc(user.uid);
+    // 5. Check Firestore user document
+    final userDoc =
+        FirebaseFirestore.instance.collection('users').doc(user.uid);
 
-  final docSnapshot = await userDoc.get();
+    final docSnapshot = await userDoc.get();
 
-  // 6. Create user document (first login only)
-  if (!docSnapshot.exists) {
-    await userDoc.set({
-      'email': user.email,
-      'displayName': user.displayName,
-      'photoUrl': user.photoURL,
-      'createdAt': FieldValue.serverTimestamp(),
-      'onboardingCompleted': false,
-      'authProvider': 'google',
-    });
+    // 6. Create user document (first login only)
+    if (!docSnapshot.exists) {
+      await userDoc.set({
+        'email': user.email,
+        'displayName': user.displayName,
+        'photoUrl': user.photoURL,
+        'createdAt': FieldValue.serverTimestamp(),
+        'onboardingCompleted': false,
+        'authProvider': 'google',
+      });
+    }
+  } catch (e) {
+    print("Google Sign-In Error: $e");
+    rethrow;
   }
 }

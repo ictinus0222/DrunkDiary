@@ -5,7 +5,7 @@ DrunkDiary is a Flutter-based mobile application that allows legal-age users to 
 ## 🚀 Overview
 <!-- SYNC_OVERVIEW_START -->
 - Authenticate users securely into the ecosystem and enforce a strict age gate (18+).
-- Allow users to quickly capture a "Drink Log" (capturing a thumbs up/down, photo, tags, and context). These are the only entries counted as "Personal Logs".
+- Allow users to quickly capture a "Drink Log" (capturing a reaction — loved/liked/nah, photo, tags, and context). These are the only entries counted as "Personal Logs".
 - Allow users to write personal "Reviews" for alcohols on a 0-5 scale. Reviews are formally distinct from logs and do not increment log counts.
 - Aggregate user logs into a personal "Shelf" that showcases their history and average ratings.
 <!-- SYNC_OVERVIEW_END -->

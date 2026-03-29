@@ -1,5 +1,7 @@
 # Frontend Design System & Guidelines
 
+Last Updated: 2026-03-29
+
 ## 1. Design Principles (Inferred From UI)
 *   **High Contrast Dark UI:** The primary implementation centers entirely around a dark theme with a stark black background and high-visibility amber accents.
 *   **Card-based Grouping:** Content (logs, shelf items, stats) is primarily grouped and elevated visually using distinct dark-grey surface containers.
@@ -14,20 +16,46 @@ Extracted from `app_theme.dart` and inline widget styling:
 *   `--color-surface`: `#1A1A1A` (Used for Cards, TextFields, and Stats containers)
 *   `--color-text-primary`: `#FFFFFF`
 *   `--color-text-secondary`: `#B0B0B0` (Used for muted/secondary text)
-*   `--color-success`: `Colors.green` (Used for "Like" thumbs up icon and positive username validation)
-*   `--color-error`: `Colors.red` (Used for "Dislike" thumbs down icon and error text)
+*   `--color-success`: `Colors.green` (Used for positive username validation)
+*   `--color-error`: `Colors.red` (Used for error text)
+
+### Reaction Colors (DrinkReaction)
+Defined in `lib/core/constants/reaction_config.dart` → `ReactionConfig.getColor()`:
+*   `loved`: `Color(0xFFFFC107)` — Gold/Amber (heart icon)
+*   `liked`: `Colors.white70` — Neutral white (thumbs up icon)
+*   `nah`: `Color(0xFFE53935)` — Vibrant Red (broken heart icon)
+
+### AppCustomColors (ThemeExtension)
+Defined in `lib/app/app_theme.dart` as `ThemeExtension<AppCustomColors>`. Access via `Theme.of(context).extension<AppCustomColors>()!`.
+*   `cardBackground`: `Color(0xFF1A1A1A)` — Standard card/container fill
+*   `deepCardBackground`: `Color(0xFF0F0F0F)` — Deeper nested surfaces
+*   `borderLight`: `Color(0xFFFFC107).withOpacity(0.3)` — Amber accent borders
+*   `borderDark`: `Color(0xFF333333)` — Subtle dark borders
+*   `textMuted`: `Color(0xFFB0B0B0)` — Secondary/muted text
+*   `success`: `Colors.green`
+*   `error`: `Colors.red`
+*   `warning`: `Color(0xFFFFC107)`
 
 ### Design Tokens
 *   `APP_BAR_VISUAL_HEIGHT`: `28` (Source of truth for branding assets in AppBar)
 
 ### Typography
 *   **Font Families:**
-    - `CategoriesElegant`: Primary branding font.
-    - `Inter`: Primary body font.
+    - `CategoriesElegant`: Primary branding font (AppBar titles).
+    - `Inter`: Primary body font (via `google_fonts` and `AppTextStyles`).
     - `DMSans`: Secondary UI font.
     - `GiveYouGlory`: Decorative font for greetings.
-*   **Font Weights:** Regular, `FontWeight.w500`, `FontWeight.w600`, `FontWeight.bold`.
-*   **Font Sizes:** `12`, `13`, `14`, `16`, `18`, `20`, `22`, `24`, `28`, `32`.
+*   **Font Weights:** Regular (`w400`), `FontWeight.w500`, `FontWeight.w600`, `FontWeight.w700` (bold).
+
+### AppTextStyles (Centralized Type Scale)
+Defined in `lib/core/theme/app_text_styles.dart`. All styles use Google Fonts `Inter` unless noted.
+*   `caption`: `12px`, `w400`, grey — Metadata, timestamps
+*   `body`: `14px`, `w500` — Default text
+*   `title`: `16px`, `w600`, `height: 1.2` — Card titles (alcohol names)
+*   `subtitle`: `18px`, `w600` — Smaller section headers
+*   `section`: `20px`, `w700` — Section headings ("Taste Identity", "Recent Activity")
+*   `appBarTitle`: `22px`, `letterSpacing: 2.0`, `height: 1.0` — Uses `CategoriesElegant` font family
+
 *   **AppBar Styling:**
     - Text: `fontSize: 22`, `letterSpacing: 2.0`, `height: 1.0`, with a `1px` downward optical shift.
 
@@ -94,7 +122,12 @@ Used to represent loading states for content blocks.
 No explicit accessibility enhancements identified beyond default Flutter semantics and Material framework behavior.
 
 ## 6. Animation & Transitions (If Present)
-No explicit custom animation system identified. Relies entirely on implicit Material 3 default transitions (e.g., Bottom Sheet slide-up).
+*   **`FadeSlidePageRoute`** (`lib/core/navigation/page_transitions.dart`): Custom `PageRouteBuilder` combining fade + subtle upward slide (`Offset(0, 0.05)` → `Offset.zero`, 300ms, `Curves.easeOut`). Used for all `AlcoholDetailScreen` navigations from Wishlist, Shelf, and Discover.
+*   **`AnimatedTappable`** (`lib/core/widgets/animated_tappable.dart`): Exists but currently **disabled** (tap handlers are no-ops). Originally provided a scale-down press effect.
+*   Modal bottom sheets use default Flutter slide-up transitions.
+
+### Light Theme
+A complete `lightTheme` and `lightCustomColors` definition exists in `app_theme.dart` (lines 131-190). It is **not currently applied** — `main.dart` only uses `darkTheme`. Available for future use.
 
 ## 7. Responsive Behavior (If Visible)
 No explicit responsive differentiation implemented beyond default framework behavior. Viewports scale linearly.

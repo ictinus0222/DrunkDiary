@@ -1,5 +1,7 @@
 # Backend Architecture & Database Structure
 
+Last Updated: 2026-03-29
+
 ## 1. Architecture Overview (As Implemented)
 Architecture pattern not explicitly defined; inferred from folder organization. The application operates on a "Serverless / Backend-as-a-Service (BaaS)" architecture using Firebase directly from the Flutter client. There is no dedicated API server, Node.js/Python backend, or centralized controller layer in this repository. All database reads/writes and authentication flows are executed directly from the client application using the Firebase SDK.
 
@@ -7,14 +9,19 @@ Architecture pattern not explicitly defined; inferred from folder organization. 
 The application uses Cloud Firestore (NoSQL). The schema below is inferred exactly from the Data Transfer Objects (DTOs) and Models implemented in Dart (`UserModel`, `DrinkLogModel`, `AlcoholModel`).
 
 ### Collection: `users`
-Source of Truth: `lib/features/profile/models/user_model.dart`
+Source of Truth: `lib/features/profile/models/user_model.dart` + `lib/features/auth/services/google_auth_service.dart`
 *   `id`: String (Document ID)
+*   `email`: String (Set once during initial Google Sign-In, sourced from `FirebaseAuth.user.email`)
 *   `displayName`: String (Default: '')
 *   `photoUrl`: String? (Nullable)
 *   `ageVerified`: Boolean (Default: false)
 *   `createdAt`: Timestamp (Mapped to DateTime)
 *   `bio`: String? (Nullable)
 *   `username`: String (Default: '')
+*   `authProvider`: String (Set once during initial Google Sign-In. Value: `'google'`)
+*   `onboardingCompleted`: Boolean (Default: false. Set to `true` after onboarding finishes. Read by `AuthGate` to route users.)
+
+> **Note:** `email`, `authProvider`, and `onboardingCompleted` are written directly in `google_auth_service.dart` and `onboarding_screen.dart` via raw Firestore maps. They are **not** part of `UserModel.fromFirestore()` — `onboardingCompleted` is accessed via raw map indexing in `AuthGate`.
 
 ### Collection: `usernames`
 Source of Truth: `lib/features/auth/screens/onboarding_screen.dart` (Transaction logic)
@@ -114,7 +121,18 @@ No rate limiting middleware identified.
 No background job system identified.
 
 ## 11. Database Migrations
-No structured migration system identified. Schema updates appear to be handled entirely via Dart-side model mapping fallbacks (e.g., `data['photoUrl'] ?? ''`).
+No structured migration system identified. Schema updates are handled via Dart-side model mapping fallbacks (e.g., `data['photoUrl'] ?? ''`).
+
+### Active Migration: `isLiked` → `DrinkReaction`
+The `DrinkLogModel.fromFirestore()` factory in `drink_model_dto.dart` contains a **live migration fallback** for the legacy `isLiked` boolean field:
+```dart
+reaction: data['reaction'] != null
+    ? DrinkReaction.fromString(data['reaction'] as String)
+    : (data['isLiked'] == true
+        ? DrinkReaction.liked
+        : (data['isLiked'] == false ? DrinkReaction.nah : null)),
+```
+This converts old `isLiked: true` → `DrinkReaction.liked` and `isLiked: false` → `DrinkReaction.nah` at read time. New documents write the `reaction` field as a string (`'loved'`, `'liked'`, `'nah'`) and do not write `isLiked`.
 
 ## 12. Backup & Recovery
 Backup strategy not documented in repository.
