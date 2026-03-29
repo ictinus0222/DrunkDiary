@@ -16,6 +16,7 @@ import 'splash/splash_screen.dart';
 import 'features/activity/screens/stats_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:feedback/feedback.dart';
 // imports
 
 void main() async {
@@ -43,29 +44,37 @@ class DrunkDiaryApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      //root container for material design app
-      title: 'DrunkDiary', // app-switcher name
-      debugShowCheckedModeBanner: false, // disable debug banner
-      navigatorObservers: [observer],
+    return BetterFeedback(
+      theme: FeedbackThemeData(
+        background: const Color(0xFF121212),
+        feedbackSheetColor: const Color(0xFF1E1E1E),
+        activeFeedbackModeColor: const Color(0xFFFF5722),
+        brightness: Brightness.dark,
+      ),
+      child: MaterialApp(
+        //root container for material design app
+        title: 'DrunkDiary', // app-switcher name
+        debugShowCheckedModeBanner: false, // disable debug banner
+        navigatorObservers: [observer],
 
-      home: const AuthGate(), //  AuthGate handles routing based on auth state
+        home: const AuthGate(), //  AuthGate handles routing based on auth state
 
-      routes: {
-        AppRoutes.auth: (context) => AuthGate(),
-        AppRoutes.splash: (context) => const SplashScreen(),
-        AppRoutes.login: (context) => const LoginScreen(),
-        AppRoutes.home: (context) => HomeScreen(),
-        AppRoutes.onboarding: (context) => OnboardingScreen(),
-        AppRoutes.diary: (context) => DiaryScreen(),
-        AppRoutes.profile: (context) => ProfileScreen(), // ☑️
-        AppRoutes.shelf: (context) => ShelfScreen(),
-        AppRoutes.search: (context) => SearchScreen(), // ☑️
-        AppRoutes.stats: (context) => const StatsScreen(),
-        AppRoutes.adminSettings: (context) => const AdminSettingsScreen(),
-      },
+        routes: {
+          AppRoutes.auth: (context) => AuthGate(),
+          AppRoutes.splash: (context) => const SplashScreen(),
+          AppRoutes.login: (context) => const LoginScreen(),
+          AppRoutes.home: (context) => HomeScreen(),
+          AppRoutes.onboarding: (context) => OnboardingScreen(),
+          AppRoutes.diary: (context) => DiaryScreen(),
+          AppRoutes.profile: (context) => ProfileScreen(), // ☑️
+          AppRoutes.shelf: (context) => ShelfScreen(),
+          AppRoutes.search: (context) => SearchScreen(), // ☑️
+          AppRoutes.stats: (context) => const StatsScreen(),
+          AppRoutes.adminSettings: (context) => const AdminSettingsScreen(),
+        },
 
-      theme: AppThemes.darkTheme,
+        theme: AppThemes.darkTheme,
+      ),
     );
   }
 }

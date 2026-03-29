@@ -8,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/profile_providers.dart';
 import '../../../core/widgets/app_shimmer.dart';
 import '../../../core/theme/app_text_styles.dart';
+import 'package:feedback/feedback.dart';
+import '../../../core/utils/feedback_handler.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -28,6 +30,35 @@ class ProfileScreen extends ConsumerWidget {
             snap: true,
             centerTitle: true,
             title: Text('PROFILE', style: AppTextStyles.appBarTitle),
+            leadingWidth: 72,
+            leading: Center(
+              child: Container(
+                margin: const EdgeInsets.only(left: 16),
+                decoration: BoxDecoration(
+                  color: customColors.cardBackground,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: IconButton(
+                  icon: Icon(Icons.feedback_outlined, color: customColors.textMuted),
+                  onPressed: () {
+                    BetterFeedback.of(context).show((feedback) async {
+                      try {
+                        await FeedbackHandler.onFeedbackSubmitted(feedback);
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text('No email client found. Please configure an email account.'),
+                              backgroundColor: colorScheme.error,
+                            ),
+                          );
+                        }
+                      }
+                    });
+                  },
+                ),
+              ),
+            ),
             actions: [
               Container(
                 margin: const EdgeInsets.only(right: 16),
