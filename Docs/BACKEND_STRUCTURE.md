@@ -1,6 +1,6 @@
 # Backend Architecture & Database Structure
 
-Last Updated: 2026-03-29
+Last Updated: 2026-04-03
 
 ## 1. Architecture Overview (As Implemented)
 Architecture pattern not explicitly defined; inferred from folder organization. The application operates on a "Serverless / Backend-as-a-Service (BaaS)" architecture using Firebase directly from the Flutter client. There is no dedicated API server, Node.js/Python backend, or centralized controller layer in this repository. All database reads/writes and authentication flows are executed directly from the client application using the Firebase SDK.

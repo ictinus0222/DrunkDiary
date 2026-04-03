@@ -2,8 +2,8 @@
 
 ## 1. Product Overview
 Project Title: DrunkDiary
-Version: 1.0.3+4
-Last Updated: 2026-03-29
+Version: 1.0.4+5
+Last Updated: 2026-04-03
 Owner: Not explicitly identified in the repository metadata.
 
 DrunkDiary is a Flutter-based mobile application that allows legal-age users to log or review the alcoholic beverages they consume for personal tracking. It securely authenticates users via Google, ensures they are 18+, and acts as a digital diary and tracking shelf for their drinking journey. The app provides a timeline of past drinks, aggregates statistics (like favorite drinks and average ratings) in a "Shelf" view, and enables discovery of beverages via a centralized search architecture.
@@ -113,6 +113,14 @@ Based on the onboarding flow and feature structure, the target users are individ
   - **Description:** A system for controlling visibility of new features globally or per segment.
   - **User Story:** As an admin, I want to toggle experimental features on or off for all users from within the app.
   - **Acceptance Criteria:** Real-time state management via Riverpod. Authentication-restricted entry point in Profile. Persists values in Firestore `configs` collection.
+- **Safe Logout Mechanism**
+  - **Description:** Allows users to securely sign out of the application.
+  - **User Story:** As a user, I want to safely logout from my account so that my data is protected and I can switch accounts if needed.
+  - **Acceptance Criteria:**
+    - A "Logout" option in a Settings Sidebar (Drawer) accessible from the Profile screen.
+    - Clears the Firebase Auth session.
+    - Triggers `GoogleSignIn().signOut()` to ensure full disconnect.
+    - Redirects the user back to the Login screen.
 - **In-App Analytics**
   - **Description:** Tracking core user interactions to understand app usage, retention, and content gaps.
   - **Acceptance Criteria:** 

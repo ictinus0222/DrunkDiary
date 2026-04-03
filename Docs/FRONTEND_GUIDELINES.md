@@ -1,6 +1,6 @@
 # Frontend Design System & Guidelines
 
-Last Updated: 2026-03-29
+Last Updated: 2026-04-03
 
 ## 1. Design Principles (Inferred From UI)
 *   **High Contrast Dark UI:** The primary implementation centers entirely around a dark theme with a stark black background and high-visibility amber accents.
@@ -101,6 +101,15 @@ No explicit custom shadow scales or elevation configurations identified in the i
     - **Header Formatting:** Other screens use ALL CAPS titles with a `Transform.translate(offset: Offset(0, 1))` shift for precise optical vertical centering.
     - **Branding Consistency:** Uses `CategoriesElegant` font for titles by default.
 *   **BottomNavigationBar:** Fixed type (`BottomNavigationBarType.fixed`) containing exactly 5 tabs.
+*   **Settings Drawer (Sidebar)**
+    - **Description:** A right-aligned `Drawer` accessible from the Profile screen.
+    - **Visuals:** Uses `--color-surface` and standard `ListTile` components. Maintains the project's dark theme and amber accents.
+    - **Items:**
+      - Header with Avatar + Username.
+      - "Admin Settings" (list tile, conditional if user is admin).
+      - "Logout" (list tile with `Icons.logout`).
+    - **Interaction:** Opens when the user taps the settings icon in the Profile AppBar.
+
 *   **Centered Action Icon:** The central navigation item (Index 2) is specifically highlighted as a circular action button with a golden glow/shadow and amber opacity background to denote it as the "Core Discovery Action."
 
 ### State Indicators

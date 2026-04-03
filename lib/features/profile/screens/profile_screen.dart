@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 
 import '../../../app/app_theme.dart';
 import '../widgets/user_profile.dart';
@@ -10,6 +10,7 @@ import '../../../core/widgets/app_shimmer.dart';
 import '../../../core/theme/app_text_styles.dart';
 import 'package:feedback/feedback.dart';
 import '../../../core/utils/feedback_handler.dart';
+import '../widgets/settings_drawer.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -22,6 +23,7 @@ class ProfileScreen extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      endDrawer: const SettingsDrawer(),
       body: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
         slivers: [
@@ -66,23 +68,11 @@ class ProfileScreen extends ConsumerWidget {
                   color: customColors.cardBackground,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: IconButton(
-                  icon: Icon(Icons.settings, color: customColors.textMuted),
-                  onPressed: () {
-                    final user = FirebaseAuth.instance.currentUser;
-                    final adminEmails = [
-                      'akhilsharma.ptk22@gmail.com',
-                      'sharmakhil1704@gmail.com',
-                    ];
-
-                    if (user != null && adminEmails.contains(user.email)) {
-                      Navigator.pushNamed(context, '/adminSettings');
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Settings coming soon!', style: TextStyle(color: colorScheme.onSurface))),
-                      );
-                    }
-                  },
+                child: Builder(
+                  builder: (context) => IconButton(
+                    icon: Icon(Icons.settings, color: customColors.textMuted),
+                    onPressed: () => Scaffold.of(context).openEndDrawer(),
+                  ),
                 ),
               ),
             ],

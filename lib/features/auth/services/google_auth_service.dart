@@ -78,3 +78,13 @@ Future<void> signInWithGoogle() async {
     rethrow;
   }
 }
+Future<void> signOutGoogle() async {
+  try {
+    await FirebaseAuth.instance.signOut();
+    await _googleSignIn.signOut();
+    print("Google Sign-Out: Successful");
+  } catch (e) {
+    print("Google Sign-Out Error: $e");
+    rethrow;
+  }
+}

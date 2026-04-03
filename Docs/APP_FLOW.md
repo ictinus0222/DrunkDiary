@@ -1,6 +1,6 @@
 # Application Flow Documentation
 
-Last Updated: 2026-03-29
+Last Updated: 2026-04-03
 
 ## 1. Entry Points (Code-Verified Only)
 * **Primary Entry Points:** 
@@ -33,13 +33,12 @@ Last Updated: 2026-03-29
   9. User clicks "Finish".
      * System Action: Firestore transaction attempts to claim username and save user profile.
      * System Action: Logs `sign_up` and `onboarding_complete` analytics events.
-     * **System Action**: Calls `setUserId` to link future activity to this profile.
+     * System Action: Calls `setUserId` to link future activity to this profile.
   10. Resulting State: `Navigator.pushNamedAndRemoveUntil('/home')`.
 * **Error States:**
   * Trigger: Google Sign-in fails. 
     * Message: Shows caught exception message or "Something went wrong. Please try again." in red text on `LoginScreen`.
   * Trigger: Username already taken during transaction.
-    * Message: SnackBar displays "Username already taken. Try another."
   * Trigger: General failure at final onboarding stage.
     * Message: SnackBar displays "Something went wrong. Please try again."
 
@@ -104,7 +103,9 @@ AuthGate
     ├── Tab 3: ShelfScreen
     │   └── AlcoholDetailScreen
     └── Tab 4: ProfileScreen
-        ├── AdminSettingsScreen (Restricted Entry via Settings Icon)
+        ├── SettingsDrawer (Sidebar)
+        │   ├── AdminSettingsScreen (via Admin Toggle)
+        │   └── Logout Action
         └── FeedbackOverlay (via Feedback Icon)
 ```
 
@@ -159,7 +160,10 @@ AuthGate
   * **Route:** `/profile` (if any)
   * **Access:** Authenticated
   * **Purpose:** Displays the user's personal profile including basic info (avatar, username), dynamic statistics (Drinks Tried, Favorite Type, Top Rated), a horizontal "Public Shelf" showcasing recently logged alcohols, and a "Recent Activity" vertical feed of individual drink logs. Contains a settings action in the app bar.
-  * **Admin Logic:** Settings icon checks for `akhilsharma.ptk22@gmail.com` or `sharmakhil1704@gmail.com` to trigger navigation to `AdminSettingsScreen`.
+  * **Actions Available:** Tapping the Settings icon opens the `SettingsDrawer`.
+* **Component:** `SettingsDrawer`
+  * **Purpose:** Provides a right-aligned sidebar for account settings and logout functionality.
+  * **Admin Logic:** Includes an entry point for `AdminSettingsScreen` if the authenticated account matches authorized admin emails.
 * **Screen:** `StatsScreen`
   - **Route:** `/stats`
   - **Access:** Authenticated

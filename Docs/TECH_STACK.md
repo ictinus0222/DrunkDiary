@@ -2,13 +2,14 @@
 
 ## 1. Stack Overview
 
-Last Updated: 2026-03-29
+Last Updated: 2026-04-03
 
 Architecture Type:
 Mobile Client / Serverless Backend (Flutter application communicating directly with Firebase services).
 
 Deployment Configuration:
-Firebase configuration identified via `firebase.json`. No external server deployments explicitly documented.
+Firebase configuration identified via `firebase.json`.
+Build uses Android Gradle Plugin (AGP) 8.9.1 and JDK 17 as the minimum baseline for modern Flutter builds (configured in `android/app/build.gradle`).
 
 ## 2. Frontend Stack (Mobile Client)
 
@@ -33,12 +34,12 @@ Source File Evidence: `pubspec.yaml`
 Reason: Fetching and caching network images. Reason not explicitly documented in repository.
 
 Library: google_fonts
-Version: ^6.3.3
+Version: ^8.0.2
 Source File Evidence: `pubspec.yaml`
 Reason: Custom typography loading. Reason not explicitly documented in repository.
 
 Library: intl
-Version: ^0.19.0
+Version: any
 Source File Evidence: `pubspec.yaml`
 Reason: Internationalization and date formatting. Reason not explicitly documented in repository.
 
@@ -97,7 +98,7 @@ Source File Evidence: `pubspec.yaml`
 Reason: User authentication tracking and token management. Reason not explicitly documented in repository.
 
 Library: google_sign_in
-Version: ^6.2.1
+Version: ^7.2.0
 Source File Evidence: `pubspec.yaml`
 Reason: Google OAuth provider integration. Reason not explicitly documented in repository.
 
@@ -142,7 +143,7 @@ Testing tools:
 - `flutter_test` (Flutter SDK default testing framework)
 
 Linting:
-- `flutter_lints`: ^5.0.0
+- `flutter_lints`: ^6.0.0
 - Configured via `analysis_options.yaml` (includes `package:flutter_lints/flutter.yaml`).
 
 Husky / Pre-commit hooks:
