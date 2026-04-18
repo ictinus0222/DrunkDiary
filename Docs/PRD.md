@@ -2,8 +2,8 @@
 
 ## 1. Product Overview
 Project Title: DrunkDiary
-Version: 1.0.4+5
-Last Updated: 2026-04-03
+Version: 1.0.6+8
+Last Updated: 2026-04-18
 Owner: Not explicitly identified in the repository metadata.
 
 DrunkDiary is a Flutter-based mobile application that allows legal-age users to log or review the alcoholic beverages they consume for personal tracking. It securely authenticates users via Google, ensures they are 18+, and acts as a digital diary and tracking shelf for their drinking journey. The app provides a timeline of past drinks, aggregates statistics (like favorite drinks and average ratings) in a "Shelf" view, and enables discovery of beverages via a centralized search architecture.
@@ -12,7 +12,7 @@ DrunkDiary is a Flutter-based mobile application that allows legal-age users to 
 The application solves the problem of tracking and remembering one's experiences with different alcoholic beverages. The core user workflow enables users to log specific moments associated with drinks (noting the context and taking photos) alongside a system where they can review and rate alcohols for their personal records.
 
 ## 3. Goals & Objectives (Current State Only)
-- Authenticate users securely into the ecosystem and enforce a strict age gate (18+).
+- Authenticate users securely into the ecosystem and enforce a safe user environment via a global Age Gate.
 - Allow users to quickly capture a "Drink Log" (capturing a reaction — loved/liked/nah, photo, tags, and context). These are the only entries counted as "Personal Logs".
 - Allow users to write personal "Reviews" for alcohols on a 0-5 scale. Reviews are formally distinct from logs and do not increment log counts.
 - Aggregate user logs into a personal "Shelf" that showcases their history and average ratings.
@@ -22,27 +22,32 @@ The application solves the problem of tracking and remembering one's experiences
 
 ## 4. Success Metrics
 Core user engagement and feature usage are tracked via Firebase Analytics to measure retention and discover popular alcohols. Key metrics include:
-- **Onboarding Completion:** Percentage of users who finish the 5-step onboarding and claim a username.
+- **Onboarding Completion:** Percentage of users who finish the 6-step perceived onboarding funnel and claim a unique identity.
 - **Logging Velocity:** Average number of logs/reviews created per user per week.
 - **Search Intent:** Most searched alcohol types and brands.
 - **Session Duration:** Active time spent in "Diary" and "Shelf" views.
-- **Wishlist Conversion:** Percentage of users who add an item to their wishlist and eventually log it.
-- **Search Content Gap:** Number of "Zero Result" searches per week to prioritize database additions.
-- **Feedback Loop:** Volume and sentiment of user-submitted feedback via the in-app portal to identify UX pain points.
+- **Wishlist Conversion**: Percentage of users who add an item to their wishlist and eventually log it.
+- **Discovery Engagement**: Interaction rate with the `WishlistDiscoveryCarousel`.
+- **Search Content Gap**: Number of "Zero Result" searches per week to prioritize database additions.
+- **Feedback Loop**: Volume and sentiment of user-submitted feedback via the in-app portal to identify UX pain points.
 
 ## 5. Target Users & Personas (Inferred)
 Based on the onboarding flow and feature structure, the target users are individuals of legal drinking age (18+).
 - **The Personal Tracker:** Inferred from features allowing users to take photos and choose contexts like "House parties" or "Bars / clubs".
 - **The Tasting Enthusiast:** Inferred from the separate personal "Review" flow, which asks for detailed taste profiles and provides a 0-5 star slider to evaluate specific alcohols.
-- **The Admin / Moderator:** Specific identified administrative accounts (`akhilsharma.ptk22@gmail.com`, `sharmakhil1704@gmail.com`) with access to global configuration toggles.
+- **The Admin / Moderator:** Specific identified administrative accounts or users with the `admin` or `moderator` role in Firestore.
 
 ## 6. Features & Requirements
 
 ### P0 (Core Implemented Features)
-- **Google Sign-In & Onboarding**
-  - **Description:** Authenticates users and sets up their initial profile.
-  - **User Story:** As a new user, I can sign in with my Google account, verify my age, and set my drink preferences and unique username so I can start logging.
-  - **Acceptance Criteria:** Validates date of birth (blocks users under 18); requires a unique username > 3 characters using a Firestore transaction; collects taste/context preferences.
+- **Premium Identity Onboarding**
+  - **Description:** Authenticates users and builds their drinking identity through a polished experience.
+  - **User Story:** As a new user, I can sign in with my Google account, confirm my legal drinking age, and build my taste profile so my experience feels personal from the first screen.
+  - **Acceptance Criteria:** 
+    - Smooth 5-step perceived flow (Legal Age, Name, Taste, Goal, Final).
+    - Identity confirmation: Users assert they are of legal drinking age (Yes/No).
+    - Blocks ineligible users with a graceful Exit screen.
+    - Requires a unique identity name (username) > 3 characters via Firestore transaction.
   - **Edge Cases:** Handles taken usernames gracefully by reverting the transaction and showing a snackbar.
 - **Private Drink Logging**
   - **Description:** Allows users to log an alcohol privately.
@@ -76,9 +81,10 @@ Based on the onboarding flow and feature structure, the target users are individ
   - **User Story:** As a user, I want to save an alcohol I've heard about so I can find and try it later.
   - **Acceptance Criteria:**
     - User can search for an alcohol from the `alcohols` database and add it to their wishlist.
-    - Each wishlist item shows the alcohol's name, type, image, and an optional personal note.
+    - **Premium Curation**: Each item is displayed as a premium 84x84 "Product Tile" (Radius 14).
+    - **Smart Discovery**: Includes a `WishlistDiscoveryCarousel` that suggests alcohols based on the user's wishlist categories.
+    - **Quick Log**: Dedicated `+ Log` button (Gold Pill) to move items from "Wish" to "Diary".
     - User can remove items from the wishlist.
-    - Wishlist is private and scoped to the authenticated user only.
     - Items already logged/reviewed by the user show a visual "Tried!" indicator.
   - **Edge Cases:** Duplicate wishlist entries for the same alcohol are prevented.
 - **Search & Discovery**
@@ -148,9 +154,9 @@ The following are NOT implemented in the codebase:
 ## 8. User Scenarios (Only Implemented Flows)
 - **Scenario 1: Account Creation & Onboarding**
   - **Context:** User downloads the app and signs in.
-  - **Step-by-step:** Tap "Continue with Google" -> Allow popup -> Select Date of Birth (must calculate to 18+) -> Select drink styles (Beer, Whisky) -> Select taste (Smooth) -> Select context (House parties) -> Select discovery style -> Type a username.
-  - **System Behavior:** Runs transaction to claim username. Saves user document to Firestore. Redirects to Home Diary.
-  - **Error States:** If DOB makes user <18, blocks progress. If username is taken, transaction fails and displays "Username already taken".
+  - **Step-by-step:** Tap "Continue with Google" -> Confirm legal age -> Select identity name -> Select taste profile -> Select drinking goals.
+  - **System Behavior:** Runs transaction to claim identity. Saves user document with `legalAge: true`. Redirects to Home.
+  - **Error States:** If user confirms they are not of legal age, show Block Screen. If identity name is taken, display "Username taken".
 - **Scenario 2: Searching and Logging a Drink**
   - **Context:** User is at a bar and wants to log a drink.
   - **Step-by-step:** Go to Search Tab -> Type drink name -> Tap Alcohol -> Tap "LOG" -> Select reaction (Loved / Liked / Nah) -> Save log.

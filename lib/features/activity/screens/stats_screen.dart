@@ -10,6 +10,7 @@ import '../../../core/widgets/custom_app_bar.dart';
 import '../../drink_logs/models/drink_model_dto.dart';
 import '../../drink_logs/providers/drink_logs_provider.dart';
 import '../../alcohol/models/alcohol_model.dart';
+import '../../../core/theme/app_spacing.dart';
 
 class StatsScreen extends ConsumerWidget {
   static const routeName = '/stats';
@@ -34,14 +35,14 @@ class StatsScreen extends ConsumerWidget {
           }
 
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: AppSpacing.pagePadding,
             children: [
               _IdentitySection(logs: logs),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xxl),
               _GlobalMetricSection(logs: logs),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xxl),
               _TasteBreakdown(logs: logs),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xxl),
               _ReflectionSection(logs: logs),
               const SizedBox(height: 100),
             ],
@@ -62,15 +63,15 @@ class _IdentitySection extends StatelessWidget {
     final favoriteSpirit = _getFavoriteCategory(logs);
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(AppSpacing.xxl),
       decoration: BoxDecoration(
         color: Colors.amber,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
       ),
       child: Column(
         children: [
           const Icon(Icons.psychology_outlined, size: 48, color: Colors.black),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           Text(
             identity.toUpperCase(),
             style: AppTextStyles.title.copyWith(
@@ -132,7 +133,7 @@ class _GlobalMetricSection extends StatelessWidget {
             icon: Icons.local_bar,
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
           child: _MetricCard(
             label: "NIGHTS LOGGED",
@@ -160,17 +161,17 @@ class _MetricCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
         color: customColors.cardBackground,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
         border: Border.all(color: customColors.borderDark),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, size: 20, color: Colors.amber),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           Text(
             value,
             style: AppTextStyles.section.copyWith(fontWeight: FontWeight.bold),
@@ -208,12 +209,12 @@ class _TasteBreakdown extends StatelessWidget {
           "TOP SELECTION",
           style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold, letterSpacing: 1.5),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           decoration: BoxDecoration(
             color: customColors.cardBackground,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
           ),
           child: Row(
             children: [
@@ -221,7 +222,7 @@ class _TasteBreakdown extends StatelessWidget {
                 width: 60,
                 height: 80,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusCompact),
                   color: Colors.black26,
                 ),
                 child: FutureBuilder<DocumentSnapshot>(
@@ -246,7 +247,7 @@ class _TasteBreakdown extends StatelessWidget {
                   },
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppSpacing.lg),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,7 +260,7 @@ class _TasteBreakdown extends StatelessWidget {
                       "Your highest rated bottle",
                       style: AppTextStyles.caption.copyWith(color: customColors.textMuted),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     Row(
                       children: List.generate(5, (index) {
                         return Icon(
@@ -295,7 +296,7 @@ class _ReflectionSection extends StatelessWidget {
           "CHRONICLES",
           style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold, letterSpacing: 1.5),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         _StatTile(
           label: "Total Entries Recorded",
           value: logs.length.toString(),
@@ -343,11 +344,11 @@ class _StatTile extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: Colors.white10,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusCompact),
             ),
             child: Icon(icon, size: 16, color: Colors.amber),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSpacing.lg),
           Text(label, style: AppTextStyles.body.copyWith(color: Colors.white70)),
           const Spacer(),
           Text(value, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold, color: Colors.white)),

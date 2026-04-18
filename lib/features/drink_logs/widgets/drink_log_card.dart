@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/app_theme.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/constants/reaction_config.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../models/drink_model_dto.dart';
@@ -39,11 +40,11 @@ class DrinkLogCard extends StatelessWidget {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.sm),
       decoration: BoxDecoration(
         color: customColors.cardBackground,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: customColors.borderDark.withOpacity(0.5), width: 1),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
+        border: Border.all(color: customColors.borderDark.withValues(alpha: 0.5), width: 1),
       ),
       child: IntrinsicHeight(
         child: Row(
@@ -52,18 +53,18 @@ class DrinkLogCard extends StatelessWidget {
             _posterImage(isHorizontal: true),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _titleRow(context),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     _metaRow(context),
                     if (log.note != null && log.note!.isNotEmpty) ...[
                       const SizedBox(height: 12),
                       _caption(context),
                     ],
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     _expressiveFeedback(context),
                   ],
                 ),
@@ -79,11 +80,11 @@ class DrinkLogCard extends StatelessWidget {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.md),
       decoration: BoxDecoration(
         color: customColors.cardBackground,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: customColors.borderDark.withOpacity(0.5), width: 1),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
+        border: Border.all(color: customColors.borderDark.withValues(alpha: 0.5), width: 1),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -91,18 +92,18 @@ class DrinkLogCard extends StatelessWidget {
         children: [
           _posterImage(isHorizontal: false),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _titleRow(context),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 _metaRow(context),
                 if (log.note != null && log.note!.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   _caption(context),
                 ],
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
                 _expressiveFeedback(context),
               ],
             ),
@@ -124,9 +125,9 @@ class DrinkLogCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF151515),
         borderRadius: BorderRadius.only(
-          topLeft: const Radius.circular(16),
-          bottomLeft: isHorizontal ? const Radius.circular(16) : Radius.zero,
-          topRight: isHorizontal ? Radius.zero : const Radius.circular(16),
+          topLeft: const Radius.circular(AppSpacing.radiusDefault),
+          bottomLeft: isHorizontal ? const Radius.circular(AppSpacing.radiusDefault) : Radius.zero,
+          topRight: isHorizontal ? Radius.zero : const Radius.circular(AppSpacing.radiusDefault),
         ),
       ),
       clipBehavior: Clip.antiAlias,
@@ -182,7 +183,7 @@ class DrinkLogCard extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, color: color, size: 14),
-        const SizedBox(width: 6),
+        const SizedBox(width: AppSpacing.xs),
         Text(
           label,
           style: AppTextStyles.caption.copyWith(

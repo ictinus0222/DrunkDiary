@@ -1,6 +1,6 @@
 # Backend Architecture & Database Structure
 
-Last Updated: 2026-04-03
+Last Updated: 2026-04-18
 
 ## 1. Architecture Overview (As Implemented)
 Architecture pattern not explicitly defined; inferred from folder organization. The application operates on a "Serverless / Backend-as-a-Service (BaaS)" architecture using Firebase directly from the Flutter client. There is no dedicated API server, Node.js/Python backend, or centralized controller layer in this repository. All database reads/writes and authentication flows are executed directly from the client application using the Firebase SDK.
@@ -19,8 +19,12 @@ Source of Truth: `lib/features/profile/models/user_model.dart` + `lib/features/a
 *   `bio`: String? (Nullable)
 *   `username`: String (Default: '')
 *   `role`: String (Default: 'user', Options: 'admin', 'moderator')
+*   `legalAge`: Boolean (Default: true. Set during onboarding after manual confirmation.)
 *   `authProvider`: String (Set once during initial Google Sign-In. Value: `'google'`)
-*   `onboardingCompleted`: Boolean (Default: false. Set to `true` after onboarding finishes. Read by `AuthGate` to route users.)
+*   `onboardingCompleted`: Boolean (Default: false. Set to `true` after onboarding finishes.)
+*   `drinkPreferences`: List<String> (Captured during onboarding Stage 3)
+*   `tasteProfile`: List<String> (Captured during onboarding Stage 4)
+*   `drinkingContext`: List<String> (Captured during onboarding Stage 4)
 
 > **Note:** `email`, `authProvider`, and `onboardingCompleted` are written directly in `google_auth_service.dart` and `onboarding_screen.dart` via raw Firestore maps. They are **not** part of `UserModel.fromFirestore()` — `onboardingCompleted` is accessed via raw map indexing in `AuthGate`.
 
@@ -48,6 +52,7 @@ Source of Truth: `lib/features/alcohol/models/alcohol_model.dart`
 *   `isVerified`: Boolean (Default: true)
 *   `isActive`: Boolean (Default: true)
 *   `searchKeywords`: List<String> (Auto-generated trigrams or words for discovery)
+*   `nameLowercase`: String (Lowercase version of name for exact match search optimization)
 *   `createdBy`: String (uid of the admin)
 *   `createdAt`: Timestamp
 
@@ -75,9 +80,10 @@ Source of Truth: `lib/features/wishlist/models/wishlist_item_model.dart`
 *   `userId`: String (Owner of the wishlist item, references `users.id`)
 *   `alcoholId`: String (References `alcohols.id`)
 *   `alcoholName`: String (Denormalized from `alcohols` for display without extra reads)
+*   `alcoholBrand`: String (Denormalized from `alcohols`)
 *   `alcoholType`: String (Denormalized from `alcohols`)
 *   `alcoholImageUrl`: String (Denormalized from `alcohols`)
-*   `note`: String? (Nullable — optional personal note, e.g., "heard about this at Jake's party")
+*   `note`: String? (Nullable — optional personal note)
 *   `addedAt`: Timestamp (When the item was added)
 
 ### Collection: `configs`
@@ -114,7 +120,7 @@ No explicit API server routes exist in this repository. All data fetching operat
 
 ## 6. Data Validation Rules (Code-Verified Only)
 Validation is implemented exclusively in the client-side `.dart` files:
-*   **Age Validation:** During onboarding, `Date of Birth` must calculate to $\ge$ 18 years compared to the device's current date.
+*   **Age Validation:** During onboarding, users must manually confirm they are of legal drinking age in their country (Yes/No choice). "No" selection triggers a hard block screen.
 *   **Username Validation:** `username` field is checked for `length >= 3`. Submissions are sanitized to lowercase and verified for uniqueness via a Firestore `runTransaction` covering the `usernames` collection.
 *   **Review Duplication Prevention:** When a user creates a public review for an alcohol, the codebase manually dictates a deterministic Document ID (`${userId}_${alcoholId}`) to natively prevent duplicate reviews per alcohol via Firestore overwrite logic.
 *   No explicit server-side content sanitization identified (relies on Firestore Security Rules which are not visible in this repository).

@@ -9,6 +9,7 @@ import 'package:drunk_diary/features/drink_logs/providers/drink_logs_provider.da
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/widgets/app_shimmer.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/app_spacing.dart';
 
 class ShelfScreen extends ConsumerStatefulWidget {
   static const routeName = '/shelf';
@@ -106,14 +107,14 @@ class _ShelfScreenState extends ConsumerState<ShelfScreen> {
               children: [
                 const SizedBox(height: 16),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
                   child: Text("${allShelfAlcohols.length} bottles in collection",
                       style: textTheme.bodyMedium?.copyWith(
                           color: customColors.textMuted)),
                 ),
                 // Top Search & Sorts
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.sm),
                   child: TextField(
                       style: textTheme.bodyMedium,
                       decoration: InputDecoration(
@@ -128,7 +129,7 @@ class _ShelfScreenState extends ConsumerState<ShelfScreen> {
                             borderSide: BorderSide.none,
                           ),
                           contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 16, vertical: 14)),
+                              const EdgeInsets.all(AppSpacing.lg)),
                       onChanged: (val) {
                         setState(() {
                           searchQuery = val;
@@ -137,17 +138,17 @@ class _ShelfScreenState extends ConsumerState<ShelfScreen> {
                 ),
                 SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.sm),
                     child: Row(children: [
                       _sortChip(context, 'Recent'),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       _sortChip(context, 'Rating'),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       _sortChip(context, 'Name'),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       _sortChip(context, 'ABV%'),
                     ])),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
               ],
             ),
           ),
@@ -181,7 +182,7 @@ class _ShelfScreenState extends ConsumerState<ShelfScreen> {
             )
           else
             SliverPadding(
-              padding: const EdgeInsets.only(bottom: 60),
+              padding: const EdgeInsets.only(bottom: 100),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
@@ -190,7 +191,7 @@ class _ShelfScreenState extends ConsumerState<ShelfScreen> {
 
                     return Column(children: [
                       Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             crossAxisAlignment: CrossAxisAlignment.end,
@@ -199,7 +200,7 @@ class _ShelfScreenState extends ConsumerState<ShelfScreen> {
                               return Expanded(
                                   child: Padding(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 16),
+                                          horizontal: AppSpacing.md),
                                       child: ShelfCard(
                                         alcohol: alcohol,
                                         logCount: item['logCount'] as int,
@@ -211,12 +212,12 @@ class _ShelfScreenState extends ConsumerState<ShelfScreen> {
                                   (_) => const Expanded(
                                       child: SizedBox()))),
                           )),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.sm),
 
                       // Glowing Shelf Divider
                       Container(
                         height: 8,
-                        margin: const EdgeInsets.symmetric(horizontal: 24),
+                        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
                         decoration: BoxDecoration(
                             color: customColors.borderDark,
                             borderRadius: BorderRadius.circular(4),
@@ -245,7 +246,7 @@ class _ShelfScreenState extends ConsumerState<ShelfScreen> {
                                   customColors.deepCardBackground
                                 ])),
                       ),
-                      const SizedBox(height: 70),
+                      const SizedBox(height: AppSpacing.hero),
                     ]);
                   },
                   childCount: shelves.length,
@@ -264,14 +265,14 @@ class _ShelfScreenState extends ConsumerState<ShelfScreen> {
     return GestureDetector(
         onTap: () => setState(() => selectedSort = title),
         child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
             decoration: BoxDecoration(
               color: isSelected ? colorScheme.primary : Colors.transparent,
               border: Border.all(
                   color: isSelected
                       ? colorScheme.primary
                       : customColors.borderDark),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
             ),
             child: Text(title,
                 style: TextStyle(

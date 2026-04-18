@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/flags/feature_flags.dart';
 import '../../../core/widgets/custom_app_bar.dart';
+import '../../../core/theme/app_spacing.dart';
 
 class AdminSettingsScreen extends ConsumerWidget {
   const AdminSettingsScreen({super.key});
@@ -16,7 +17,7 @@ class AdminSettingsScreen extends ConsumerWidget {
       appBar: const CustomAppBar(title: 'Admin Settings'),
       body: flagsAsync.when(
         data: (flags) => ListView(
-          padding: const EdgeInsets.all(16),
+          padding: AppSpacing.pagePadding,
           children: [
             // Add future flags here
           ],

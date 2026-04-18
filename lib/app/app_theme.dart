@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_text_styles.dart';
+import '../core/theme/app_spacing.dart';
 
 class AppCustomColors extends ThemeExtension<AppCustomColors> {
   final Color cardBackground;
@@ -116,8 +117,43 @@ class AppThemes {
       color: const Color(0xFF1A1A1A),
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
         side: const BorderSide(color: Color(0xFF333333), width: 1),
+      ),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: const Color(0xFF1A1A1A),
+      contentPadding: const EdgeInsets.all(AppSpacing.lg),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
+        borderSide: const BorderSide(color: Color(0xFF333333)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
+        borderSide: const BorderSide(color: Color(0xFF333333)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
+        borderSide: const BorderSide(color: Color(0xFFFFC107), width: 1.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
+        borderSide: const BorderSide(color: Colors.red, width: 1.5),
+      ),
+      hintStyle: AppTextStyles.body.copyWith(color: const Color(0xFFB0B0B0).withValues(alpha: 0.3)),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size.fromHeight(AppSpacing.buttonHeight),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
+        ),
+        backgroundColor: const Color(0xFFFFC107),
+        foregroundColor: Colors.black,
+        elevation: 0,
+        textStyle: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
       ),
     ),
     iconTheme: const IconThemeData(
@@ -180,8 +216,43 @@ class AppThemes {
       color: Colors.white,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
         side: BorderSide(color: Colors.grey.shade300, width: 1),
+      ),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: Colors.grey.shade50,
+      contentPadding: const EdgeInsets.all(AppSpacing.lg),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
+        borderSide: const BorderSide(color: Color.fromARGB(255, 255, 193, 7), width: 1.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
+        borderSide: const BorderSide(color: Colors.red, width: 1.5),
+      ),
+      hintStyle: AppTextStyles.body.copyWith(color: Colors.grey.shade400),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size.fromHeight(AppSpacing.buttonHeight),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
+        ),
+        backgroundColor: Colors.amber.shade700,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        textStyle: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
       ),
     ),
     extensions: <ThemeExtension<dynamic>>[

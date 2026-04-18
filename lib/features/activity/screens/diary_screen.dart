@@ -14,6 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/widgets/app_shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/app_spacing.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/constants/app_constants.dart';
 
@@ -61,19 +62,19 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
               const SliverToBoxAdapter(child: SizedBox(height: 36)),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                   child: Row(
                     children: [
                       AppShimmer(width: 100, height: 36, borderRadius: BorderRadius.circular(20)),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       AppShimmer(width: 80, height: 36, borderRadius: BorderRadius.circular(20)),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       AppShimmer(width: 110, height: 36, borderRadius: BorderRadius.circular(20)),
                     ],
                   ),
                 ),
               ),
-              const SliverToBoxAdapter(child: SizedBox(height: 16)),
+              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
               _DiarySliverListSkeleton(layout: _currentLayout),
             ],
           ),
@@ -103,6 +104,7 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
                         style: TextStyle(
                             color: Colors.black, fontWeight: FontWeight.bold)),
                     backgroundColor: Colors.amber,
+                    heroTag: 'diary_fab',
                   ),
             body: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
@@ -124,8 +126,7 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
                   ],
                 ),
                 const SliverToBoxAdapter(child: _WelcomeSection()),
-                const SliverToBoxAdapter(child: SizedBox(height: 12)),
-                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)), // 16 (section padding) + 8 = 24 total gap
                 SliverToBoxAdapter(
                   child: _FiltersRow(
                     selectedFilter: _selectedFilter,
@@ -142,13 +143,13 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
                     },
                   ),
                 ),
-                const SliverToBoxAdapter(child: SizedBox(height: 8)),
+                const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
                 _DiarySliverList(
                   logs: logs,
                   layout: _currentLayout,
                 ),
                 // FAB naturally floats above the list, no need for large bottom padding
-                const SliverToBoxAdapter(child: SizedBox(height: 32)),
+                const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.hero)),
               ],
             ),
           );
@@ -227,7 +228,7 @@ class _WelcomeSectionState extends State<_WelcomeSection> {
   Widget build(BuildContext context) {
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
       child: Row(
         children: [
           Expanded(
@@ -271,7 +272,7 @@ class _FiltersRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       child: Row(
         children: [
           Expanded(
@@ -284,13 +285,13 @@ class _FiltersRow extends StatelessWidget {
                     selected: selectedFilter == 'All',
                     onTap: () => onFilterChanged('All'),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.md),
                   _FilterChip(
                     label: 'Your Logs',
                     selected: selectedFilter == 'Logs',
                     onTap: () => onFilterChanged('Logs'),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.md),
                   _FilterChip(
                     label: 'Your Reviews',
                     selected: selectedFilter == 'Reviews',
@@ -300,7 +301,7 @@ class _FiltersRow extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           IconButton(
             onPressed: () {
               onLayoutChanged(
@@ -339,10 +340,10 @@ class _FilterChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
         decoration: BoxDecoration(
           color: selected ? Colors.amber : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
           border:
               Border.all(color: selected ? Colors.amber : customColors.borderDark),
         ),
@@ -387,12 +388,12 @@ class _DiarySliverList extends StatelessWidget {
 
     if (layout == DiaryLayout.gallery) {
       return SliverPadding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: AppSpacing.pagePadding.copyWith(top: 0),
         sliver: SliverGrid(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
+            crossAxisSpacing: AppSpacing.lg,
+            mainAxisSpacing: AppSpacing.lg,
             childAspectRatio: 0.85,
           ),
           delegate: SliverChildBuilderDelegate(
@@ -463,7 +464,7 @@ class _DateHeader extends StatelessWidget {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 24, 16, 8),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xxl, AppSpacing.lg, AppSpacing.sm),
       child: Text(
         dateLabel.toUpperCase(),
         style: AppTextStyles.caption.copyWith(
@@ -497,7 +498,7 @@ class _GalleryItem extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
           color: Theme.of(context).colorScheme.surface,
         ),
         clipBehavior: Clip.antiAlias,
@@ -590,7 +591,7 @@ class _WelcomeSectionSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
       child: Row(
         children: [
           Expanded(
@@ -615,17 +616,17 @@ class _DiarySliverListSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     if (layout == DiaryLayout.gallery) {
       return SliverPadding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: AppSpacing.pagePadding.copyWith(top: 0),
         sliver: SliverGrid(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
+            crossAxisSpacing: AppSpacing.lg,
+            mainAxisSpacing: AppSpacing.lg,
             childAspectRatio: 0.85,
           ),
           delegate: SliverChildBuilderDelegate(
             (context, index) => AppShimmer(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
               height: double.infinity,
             ),
             childCount: 6,
@@ -639,15 +640,15 @@ class _DiarySliverListSkeleton extends StatelessWidget {
         (context, index) {
           if (index % 4 == 0) {
             return const Padding(
-              padding: EdgeInsets.fromLTRB(20, 24, 16, 8),
+              padding: EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xxl, AppSpacing.lg, AppSpacing.sm),
               child: AppShimmer(width: 80, height: 12),
             );
           }
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
             child: AppShimmer(
               height: 140,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
             ),
           );
         },

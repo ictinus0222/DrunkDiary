@@ -1,6 +1,6 @@
 # Frontend Design System & Guidelines
 
-Last Updated: 2026-04-03
+Last Updated: 2026-04-18
 
 ## 1. Design Principles (Inferred From UI)
 *   **High Contrast Dark UI:** The primary implementation centers entirely around a dark theme with a stark black background and high-visibility amber accents.
@@ -36,8 +36,7 @@ Defined in `lib/app/app_theme.dart` as `ThemeExtension<AppCustomColors>`. Access
 *   `error`: `Colors.red`
 *   `warning`: `Color(0xFFFFC107)`
 
-### Design Tokens
-*   `APP_BAR_VISUAL_HEIGHT`: `28` (Source of truth for branding assets in AppBar)
+*   `warning`: `Color(0xFFFFC107)`
 
 ### Typography
 *   **Font Families:**
@@ -59,14 +58,26 @@ Defined in `lib/core/theme/app_text_styles.dart`. All styles use Google Fonts `I
 *   **AppBar Styling:**
     - Text: `fontSize: 22`, `letterSpacing: 2.0`, `height: 1.0`, with a `1px` downward optical shift.
 
-### Spacing System
-Spacing relies heavily on `EdgeInsets` and `SizedBox` implementations without a strict centralized scale token system.
-*   **Padding/Margin Values found:** `8`, `12`, `14`, `16`, `24`, `32`.
-*   **Gap/SizedBox Values found:** `4`, `6`, `8`, `12`, `16`, `20`, `24`, `32`.
+### Spacing System (AppSpacing Tokens)
+Defined in `lib/core/theme/app_spacing.dart`. All spacing MUST use these tokens to maintain a consistent 8pt grid.
+*   `xs`: `4` — Micro spacing
+*   `sm`: `8` — Tight spacing
+*   `md`: `12` — Compact spacing
+*   `lg`: `16` — Default component gap
+*   `xl`: `20` — Medium spacing
+*   `xxl`: `24` — Large spacing / Page gutter
+*   `hero`: `32` — Hero spacing
+
+**Standardized Layout Padding:**
+*   `pagePadding`: `EdgeInsets.symmetric(horizontal: xl, vertical: lg)`
+*   `radiusDefault`: `16` (lg)
+*   `radiusProduct`: `14` — Specific radius for bottle images and product tiles.
+*   `buttonHeight`: `56`
 
 ### Border Radius
-*   `BorderRadius.circular(12)`: Standard radius for Cards, TextFields, Buttons, and images.
-*   `BorderRadius.circular(16)`: Standard radius for Timeline stat boxes and top edges of Bottom Sheets (`Radius.circular(16)`).
+*   `BorderRadius.circular(12)`: Standard radius for TextFields and Buttons.
+*   `BorderRadius.circular(14)`: Premium radius for product/alcohol images.
+*   `BorderRadius.circular(16)`: Standard radius for Cards, Timeline stat boxes, and top edges of Bottom Sheets (`Radius.circular(16)`).
 *   `BorderRadius.circular(20)`: Specifically used for selected/unselected `ChoiceChip` containers.
 
 ### Shadows
@@ -80,10 +91,22 @@ No explicit custom shadow scales or elevation configurations identified in the i
 ## 4. Component Inventory (Only Existing Components)
 
 ### Buttons
-*   **ElevatedButton:** Often forced to `width: double.infinity` for full-width submit actions. On the Login screen, specifically hardcoded to `height: 50` with a `Colors.white` background and black text.
-    *   *States:* Disabled (when `isLoading`, passes `null` to `onPressed`), Loading (displays `CircularProgressIndicator` instead of child widget).
-*   **OutlinedButton:** Used for secondary actions (e.g., Like/Dislike).
-*   **TextButton:** Used sparsely (e.g., "Add a note" toggle).
+*   **OnboardingButton:** Primary gold sticky CTA with scale animations and "Saving..." loading state.
+*   **ElevatedButton:** Standard full-width button (Amber #FFC107).
+*   **OutlinedButton:** Used for secondary actions.
+*   **Log CTA Button:** Gold Pill shape, Height 38px, Radius 16. Used for "+ Log" primary actions in cards.
+
+### Alcohol/Product Tile (Premium Container)
+*   **Dimensions:** 84x84px (in Wishlist/Discovery).
+*   **Radius:** 14px.
+*   **Surface:** `deepCardBackground` (Color(0xFF0F0F0F)).
+*   **Image Alignment:** Centered within the container using `boxFit.contain` to ensure the whole bottle is visible.
+
+### Onboarding Components
+Located in `lib/features/auth/widgets/onboarding_components.dart`:
+*   **OnboardingProgressBar:** Horizontal segmented bar with animated fill.
+*   **OnboardingChoiceCard:** Premium tapped selection card with gold accent glow and haptic feedback.
+*   **OnboardingLayout:** Wrapper for Top (Progress), Mid (Content), and Bottom (Sticky CTA) structure.
 
 ### Input Fields
 *   **TextField:** Implemented uniformly with `filled: true` and an `OutlineInputBorder` set to `borderSide: BorderSide.none` with `borderRadius: BorderRadius.circular(12)`.

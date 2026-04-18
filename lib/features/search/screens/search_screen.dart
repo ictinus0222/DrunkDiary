@@ -12,6 +12,7 @@ import '../widgets/filter_bottom_sheet.dart';
 import '../../../core/widgets/app_empty_state.dart';
 import '../../../core/widgets/app_shimmer.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/app_spacing.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -208,14 +209,13 @@ class _SearchScreenState extends State<SearchScreen> {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 8),
+                    horizontal: AppSpacing.xl, vertical: AppSpacing.sm),
                 // Search Bar
                 child: TextField(
                   controller: _controller,
                   style: AppTextStyles.body,
                   decoration: InputDecoration(
                     hintText: 'Search alcohols, brands, types...',
-                    hintStyle: AppTextStyles.body.copyWith(color: customColors.textMuted),
                     prefixIcon:
                         Icon(Icons.search, color: customColors.textMuted),
                     suffixIcon: IconButton(
@@ -228,12 +228,6 @@ class _SearchScreenState extends State<SearchScreen> {
                             : customColors.textMuted,
                       ),
                       onPressed: _openFilterSheet,
-                    ),
-                    filled: true,
-                    fillColor: customColors.cardBackground,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
                     ),
                   ),
                   onChanged: (value) {
@@ -270,7 +264,7 @@ class _SearchScreenState extends State<SearchScreen> {
               )
             else
               SliverPadding(
-                padding: const EdgeInsets.all(16),
+                padding: AppSpacing.pagePadding.copyWith(top: 0),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
@@ -298,16 +292,16 @@ class _SearchLoadingSkeleton extends StatelessWidget {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: AppShimmer(height: 56, borderRadius: BorderRadius.circular(12)),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.sm),
+          child: AppShimmer(height: 56, borderRadius: BorderRadius.circular(AppSpacing.radiusDefault)),
         ),
         ...List.generate(
           6,
           (index) => Padding(
-            padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+            padding: const EdgeInsets.only(bottom: AppSpacing.lg, left: AppSpacing.xl, right: AppSpacing.xl),
             child: AppShimmer(
               height: 100,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
             ),
           ),
         ),

@@ -5,6 +5,7 @@ class WishlistItemModel {
   final String userId;
   final String alcoholId;
   final String alcoholName;
+  final String alcoholBrand;
   final String alcoholType;
   final String alcoholImageUrl;
   final String? note;
@@ -15,6 +16,7 @@ class WishlistItemModel {
     required this.userId,
     required this.alcoholId,
     required this.alcoholName,
+    required this.alcoholBrand,
     required this.alcoholType,
     required this.alcoholImageUrl,
     this.note,
@@ -28,6 +30,7 @@ class WishlistItemModel {
       userId: data['userId'] ?? '',
       alcoholId: data['alcoholId'] ?? '',
       alcoholName: data['alcoholName'] ?? 'Unknown',
+      alcoholBrand: data['alcoholBrand'] ?? '',
       alcoholType: data['alcoholType'] ?? 'unknown',
       alcoholImageUrl: data['alcoholImageUrl'] ?? '',
       note: data['note'],
@@ -40,6 +43,7 @@ class WishlistItemModel {
       'userId': userId,
       'alcoholId': alcoholId,
       'alcoholName': alcoholName,
+      'alcoholBrand': alcoholBrand,
       'alcoholType': alcoholType,
       'alcoholImageUrl': alcoholImageUrl,
       'note': note,

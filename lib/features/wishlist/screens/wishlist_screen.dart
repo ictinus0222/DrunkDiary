@@ -6,6 +6,7 @@ import '../../../app/app_theme.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../../alcohol/screens/alcohol_detail_screen.dart';
 import '../../../core/navigation/page_transitions.dart';
+import '../../../core/navigation/tab_change_notification.dart';
 import '../models/wishlist_item_model.dart';
 import '../repositories/wishlist_repository.dart';
 import '../widgets/add_to_wishlist_sheet.dart';
@@ -13,6 +14,10 @@ import '../widgets/wishlist_item_card.dart';
 import '../../../core/widgets/app_empty_state.dart';
 import '../../../core/widgets/app_shimmer.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../alcohol/repositories/alcohol_repository.dart';
+import '../widgets/wishlist_discovery_carousel.dart';
+import '../../drink_logs/widgets/create_log_bottom_sheet.dart';
 
 class WishlistScreen extends StatefulWidget {
   static const routeName = '/wishlist';
@@ -31,11 +36,54 @@ class _WishlistScreenState extends State<WishlistScreen> {
   Set<String> _triedAlcoholIds = {};
   bool _triedLoaded = false;
 
+  // Discovery
+  final _alcoholRepo = AlcoholRepository();
+  List<AlcoholModel> _discoveryItems = [];
+  bool _isDiscoveryLoading = false;
+  List<AlcoholModel> _allAlcohols = [];
+
   @override
   void initState() {
     super.initState();
     _userId = FirebaseAuth.instance.currentUser!.uid;
     _loadTriedIds();
+    _loadAllAlcohols();
+  }
+
+  Future<void> _loadAllAlcohols() async {
+    try {
+      final alcohols = await _alcoholRepo.getAllAlcohols();
+      if (mounted) {
+        setState(() {
+          _allAlcohols = alcohols;
+        });
+      }
+    } catch (_) {}
+  }
+
+  void _updateDiscovery(List<WishlistItemModel> items) {
+    if (_allAlcohols.isEmpty || _isDiscoveryLoading) return;
+
+    // Get categories user is interested in
+    final categories = items.map((i) => i.alcoholType).toSet();
+    final wishlistIds = items.map((i) => i.alcoholId).toSet();
+
+    // Rank alcohols
+    final ranked = List<AlcoholModel>.from(_allAlcohols)
+      ..removeWhere((a) => wishlistIds.contains(a.id))
+      ..sort((a, b) {
+        // 1. Category match
+        final aMatch = categories.contains(a.type) ? 1 : 0;
+        final bMatch = categories.contains(b.type) ? 1 : 0;
+        if (aMatch != bMatch) return bMatch.compareTo(aMatch);
+
+        // 2. Popularity (logCount)
+        return b.logCount.compareTo(a.logCount);
+      });
+
+    setState(() {
+      _discoveryItems = ranked.take(10).toList();
+    });
   }
 
   /// Loads all alcoholIds from the user's drink_logs collection
@@ -93,7 +141,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
       id: item.alcoholId,
       name: item.alcoholName,
       type: item.alcoholType,
-      brand: '',
+      brand: item.alcoholBrand,
       abv: 0,
       origin: '',
       description: '',
@@ -104,6 +152,76 @@ class _WishlistScreenState extends State<WishlistScreen> {
       FadeSlidePageRoute(
         child: AlcoholDetailScreen(
           alcoholId: item.alcoholId,
+          initialAlcohol: alcohol,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onTryItem(WishlistItemModel item) async {
+    final alcohol = await _alcoholRepo.getAlcoholById(item.alcoholId);
+    if (alcohol == null) return;
+
+    if (!mounted) return;
+    
+    final result = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => CreateLogBottomSheet(alcohol: alcohol),
+    );
+
+    if (result == true) {
+      // Success! Move from wishlist to diary
+      await _removeItem(item.id);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Moved from Wishlist to Diary 🍻',
+              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            margin: const EdgeInsets.all(AppSpacing.xl),
+          ),
+        );
+        _loadTriedIds();
+      }
+    }
+  }
+
+  void _onAddFromDiscovery(AlcoholModel alcohol) async {
+    try {
+      await _wishlistRepo.addToWishlist(
+        userId: _userId,
+        alcohol: alcohol,
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Added ${alcohol.name} to wishlist')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        final msg = e.toString().contains('already') 
+          ? 'Already in your wishlist' 
+          : 'Could not add to wishlist';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg)),
+        );
+      }
+    }
+  }
+
+  void _onTapDiscovery(AlcoholModel alcohol) {
+    Navigator.push(
+      context,
+      FadeSlidePageRoute(
+        child: AlcoholDetailScreen(
+          alcoholId: alcohol.id,
           initialAlcohol: alcohol,
         ),
       ),
@@ -161,6 +279,11 @@ class _WishlistScreenState extends State<WishlistScreen> {
           }
 
           final items = snapshot.data ?? [];
+          
+          // Trigger discovery update if we have data now
+          if (_discoveryItems.isEmpty && _allAlcohols.isNotEmpty) {
+            WidgetsBinding.instance.addPostFrameCallback((_) => _updateDiscovery(items));
+          }
 
           if (items.isEmpty) {
             return CustomScrollView(
@@ -174,14 +297,27 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 ),
                 SliverFillRemaining(
                   hasScrollBody: false,
-                  child: AppEmptyState(
-                    icon: Icons.bookmark_border,
-                    title: 'Your wishlist is empty',
-                    subtitle:
-                        'Save drinks you\'ve heard about\nand want to try later.',
-                    buttonText: 'Add Your First Drink',
-                    buttonIcon: Icons.bookmark_add,
-                    onAddTap: _openAddSheet,
+                  child: Column(
+                    children: [
+                      AppEmptyState(
+                        icon: Icons.bookmark_border,
+                        title: 'Nothing saved yet.',
+                        subtitle:
+                            'Add bottles you want to try and\nbuild your dream shelf.',
+                        buttonText: 'Discover Drinks',
+                        buttonIcon: Icons.search,
+                        onAddTap: () => TabChangeNotification(2).dispatch(context), // Jump to search
+                      ),
+                      const SizedBox(height: AppSpacing.hero),
+                      WishlistDiscoveryCarousel(
+                        recommendations: _discoveryItems.isEmpty && _allAlcohols.isNotEmpty 
+                            ? _allAlcohols.take(10).toList() 
+                            : _discoveryItems,
+                        onAdd: _onAddFromDiscovery,
+                        onTap: _onTapDiscovery,
+                      ),
+                      const SizedBox(height: 40),
+                    ],
                   ),
                 ),
               ],
@@ -192,41 +328,95 @@ class _WishlistScreenState extends State<WishlistScreen> {
             color: colorScheme.primary,
             backgroundColor: customColors.cardBackground,
             onRefresh: _loadTriedIds,
-            child: CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-              slivers: [
-                SliverAppBar(
-                  floating: true,
-                  snap: true,
-                  centerTitle: true,
-                  title: Text('WISHLIST', style: AppTextStyles.appBarTitle),
-                ),
+            child: Scaffold(
+              floatingActionButton: FloatingActionButton.extended(
+                onPressed: _openAddSheet,
+                backgroundColor: colorScheme.primary,
+                foregroundColor: Colors.black,
+                icon: const Icon(Icons.add),
+                label: const Text('Add Bottle', style: TextStyle(fontWeight: FontWeight.bold)),
+                heroTag: 'wishlist_fab',
+              ),
+              body: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                slivers: [
+                  SliverAppBar(
+                    floating: true,
+                    snap: true,
+                    centerTitle: true,
+                    title: Text('WISHLIST', style: AppTextStyles.appBarTitle),
+                  ),
                 SliverPadding(
-                  padding: const EdgeInsets.only(top: 8, bottom: 100),
+                  padding: AppSpacing.pagePadding.copyWith(top: 0),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         final item = items[index];
                         final isTried = _triedAlcoholIds.contains(item.alcoholId);
-                        return WishlistItemCard(
-                          item: item,
-                          isTried: isTried,
-                          onRemove: () => _removeItem(item.id),
-                          onTap: () => _navigateToDetail(item),
+                        
+                        return Dismissible(
+                          key: Key(item.id),
+                          direction: DismissDirection.endToStart,
+                          onDismissed: (_) => _removeItem(item.id),
+                          background: Container(
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.only(right: 24),
+                            margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+                            decoration: BoxDecoration(
+                              color: customColors.error.withOpacity(0.8),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Icon(Icons.delete_outline, color: Colors.white, size: 28),
+                          ),
+                          child: WishlistItemCard(
+                            item: item,
+                            isTried: isTried,
+                            onRemove: () => _removeItem(item.id),
+                            onTry: () => _onTryItem(item),
+                            onTap: () => _navigateToDetail(item),
+                          ),
                         );
                       },
                       childCount: items.length,
                     ),
                   ),
                 ),
+                if (items.length <= 2) ...[
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
+                      child: WishlistDiscoveryCarousel(
+                        recommendations: _discoveryItems,
+                        onAdd: _onAddFromDiscovery,
+                        onTap: _onTapDiscovery,
+                      ),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Center(
+                      child: Text(
+                        'Keep building your wishlist.',
+                        style: textTheme.bodySmall?.copyWith(
+                          color: customColors.textMuted.withOpacity(0.5),
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                ] else
+                   const SliverToBoxAdapter(child: SizedBox(height: 100)),
               ],
             ),
-          );
+          ),
+        );
         },
       ),
     );
   }
 }
+
+// Remove _Header widget as it's no longer used
 /* ----------------------------- SKELETONS ----------------------------- */
 
 class _WishlistLoadingSkeleton extends StatelessWidget {
@@ -238,10 +428,10 @@ class _WishlistLoadingSkeleton extends StatelessWidget {
       children: List.generate(
         5,
         (index) => Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.sm),
           child: AppShimmer(
             height: 90,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
           ),
         ),
       ),

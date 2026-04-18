@@ -2,7 +2,7 @@
 
 ## 1. Stack Overview
 
-Last Updated: 2026-04-03
+Last Updated: 2026-04-18
 
 Architecture Type:
 Mobile Client / Serverless Backend (Flutter application communicating directly with Firebase services).
@@ -82,6 +82,11 @@ Library: package_info_plus
 Version: ^9.0.0
 Source File Evidence: `pubspec.yaml`
 Reason: Reading application package information.
+
+Library: url_launcher
+Version: ^6.3.1
+Source File Evidence: `pubspec.yaml`
+Reason: Opening browser URLs for privacy policies and external links.
 
 ## 3. Backend Stack
 

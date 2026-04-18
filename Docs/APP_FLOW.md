@@ -1,6 +1,6 @@
 # Application Flow Documentation
 
-Last Updated: 2026-04-03
+Last Updated: 2026-04-18
 
 ## 1. Entry Points (Code-Verified Only)
 * **Primary Entry Points:** 
@@ -24,17 +24,22 @@ Last Updated: 2026-04-03
   3. `LoginScreen`: User clicks "Continue with Google".
   4. System Action: Triggers `signInWithGoogle()`. Redirects back to `AuthGate`.
   5. `AuthGate` fetches Firestore user document. If missing or `onboardingCompleted` is false, renders `OnboardingScreen`.
-  6. `OnboardingScreen` (Step 0): User selects Date of Birth.
-     * Validation Logic: Must calculate age $\ge$ 18.
-  7. `OnboardingScreen` (Steps 1-4): User selects Drink Preferences, Taste Profile, Drinking Context, and Discovery Style.
-  8. `OnboardingScreen` (Step 5): User types a username.
-     * Validation Logic: Length $\ge$ 3 characters.
-     * System Action: Debounces and checks availability against `usernames` collection.
-  9. User clicks "Finish".
-     * System Action: Firestore transaction attempts to claim username and save user profile.
+  5. `AuthGate` fetches Firestore user document. If missing or `onboardingCompleted` is false, renders `OnboardingScreen`.
+  6. `OnboardingScreen` (Step 1): Legal Age Check.
+     * Logic: "Are you of legal drinking age in your country?"
+     * Action: User selects "Yes" to proceed or "No" to view block screen.
+  7. `OnboardingScreen` (Step 2): Name.
+     * Logic: "What should the community call you?"
+     * Validation: Username > 3 chars and unique in `usernames` collection.
+  8. `OnboardingScreen` (Step 3): Taste.
+     * Logic: "What's usually in your glass?" (Alcohol preference selection).
+  9. `OnboardingScreen` (Step 4): Experience/Goal.
+     * Logic: "Why did you join DrunkDiary?" (Taste vibe and setting).
+  10. `OnboardingScreen` (Step 5): Finish.
+     * UI: "Your shelf is ready."
+     * System Action: Firestore transaction claims username and saves profile with `legalAge: true`.
      * System Action: Logs `sign_up` and `onboarding_complete` analytics events.
-     * System Action: Calls `setUserId` to link future activity to this profile.
-  10. Resulting State: `Navigator.pushNamedAndRemoveUntil('/home')`.
+  11. Resulting State: `Navigator.pushNamedAndRemoveUntil('/home')`.
 * **Error States:**
   * Trigger: Google Sign-in fails. 
     * Message: Shows caught exception message or "Something went wrong. Please try again." in red text on `LoginScreen`.
@@ -95,7 +100,7 @@ AuthGate
     │   └── StatsScreen (via action button)
     ├── Tab 1: WishlistScreen
     │   └── AlcoholDetailScreen (via tapping a wishlist item)
-    ├── Tab 2: Discover (SearchScreen - Emphasized Icon)
+    ├── Tab 2: Discover (SearchScreen - Centered Gold Action)
     │   ├── AlcoholDetailScreen
     │   │   ├── CreateLogBottomSheet (Modal)
     │   │   ├── CreateReviewBottomSheet (Modal)
@@ -104,9 +109,9 @@ AuthGate
     │   └── AlcoholDetailScreen
     └── Tab 4: ProfileScreen
         ├── SettingsDrawer (Sidebar)
-        │   ├── AdminBottleManagerScreen (via Admin Bottle Manager Tile)
+        │   ├── AdminSettingsScreen (via drawer tile)
         │   └── Logout Action
-        └── FeedbackOverlay (via Feedback Icon)
+        └── FeedbackOverlay (via Leading Action Icon)
 ```
 
 ## 4. Screen Inventory (Code-Verified)
@@ -153,9 +158,12 @@ AuthGate
 * **Screen:** `WishlistScreen`
   * **Route:** `/wishlist`
   * **Access:** Authenticated
-  * **Purpose:** Displays the user's personal wishlist of alcohols they want to try. Cross-references `drink_logs` to show a "Tried!" badge on already-logged items.
-  * **State Variants:** Loading (Skeleton UI / Shimmer), Empty (Standardized `AppEmptyState` with action to add from search).
-  * **Actions Available:** Empty state button opens `AddToWishlistSheet` (search + note), `WishlistItemCard` provides remove action, tap item → `AlcoholDetailScreen`.
+  * **Purpose:** Displays the user's personal wishlist of alcohols they want to try. Uses a standard `SliverAppBar` for consistent navigation.
+  * **State Variants:** Loading (Skeleton UI / Shimmer), Empty (Standardized `AppEmptyState` with action to discover drinks).
+  * **Actions Available:** 
+      - Gold FAB for "Add Bottle" (opens search sheet).
+      - `WishlistItemCard` provides a premium "Product Tile" preview with a `+ Log` button.
+      - `WishlistDiscoveryCarousel` (horizontal) for recommendations.
 * **Screen:** `ProfileScreen`
   * **Route:** `/profile` (if any)
   * **Access:** Authenticated
@@ -184,8 +192,8 @@ AuthGate
   * ELSE render `OnboardingScreen()`
 
 * **Onboarding Age Validation**
-  * IF `calculatedAge >= 18` THEN unlock "Continue" step
-  * ELSE render validation text "You must be of legal drinking age" and disable "Continue" button.
+  * IF "Yes" selected THEN unlock "Continue" step
+  * ELSE IF "No" selected THEN render elegant block screen "DrunkDiary is for legal-age users only" and provide "Exit" action.
 
 * **Onboarding Username Lookahead**
   * IF `username.length < 3` THEN `usernameError = 'Username must be at least 3 characters'`
@@ -210,4 +218,5 @@ AuthGate
   - `stats_alcohol_[ID]` (Stats screen)
   - `alcohol_log_[LOG_ID]` (Diary entry)
 * **`TabChangeNotification`** (`lib/core/navigation/tab_change_notification.dart`): A custom `Notification` subclass enabling child screens (Diary, Shelf) to programmatically switch the parent `HomeScreen` tab index.
+* **Onboarding Transitions**: `OnboardingScreen` uses a `PageView` with 300ms `easeInOut` curves for step transitions. Components use subtle scale and fade animations.
 * Modal bottom sheets use default Flutter slide-up transitions.

@@ -130,7 +130,7 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
         reaction: selectedReaction?.name ?? 'unknown',
       );
 
-      if (mounted) Navigator.pop(context);
+      if (mounted) Navigator.pop(context, true);
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

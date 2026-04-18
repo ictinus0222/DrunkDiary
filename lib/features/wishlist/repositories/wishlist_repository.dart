@@ -45,6 +45,7 @@ class WishlistRepository {
       userId: userId,
       alcoholId: alcohol.id,
       alcoholName: alcohol.name,
+      alcoholBrand: alcohol.brand,
       alcoholType: alcohol.type,
       alcoholImageUrl: alcohol.imageUrl,
       note: note?.isNotEmpty == true ? note : null,

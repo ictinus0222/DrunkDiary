@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../app/app_theme.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../../alcohol/repositories/alcohol_repository.dart';
 import '../../../core/widgets/custom_app_bar.dart';
@@ -173,12 +174,13 @@ class _AdminBottleManagerScreenState extends ConsumerState<AdminBottleManagerScr
         title: 'Bottle Manager',
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: AppSpacing.pagePadding,
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: AppSpacing.sm), // 8 + 16 (vertical padding) = 24 total from AppBar title/top
               // Image Picker
               GestureDetector(
                 onTap: _pickImage,
@@ -187,25 +189,25 @@ class _AdminBottleManagerScreenState extends ConsumerState<AdminBottleManagerScr
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: customColors.cardBackground,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
                     border: Border.all(color: customColors.borderDark),
                     image: selectedImage != null
                         ? DecorationImage(image: FileImage(selectedImage!), fit: BoxFit.contain)
                         : null,
                   ),
                   child: selectedImage == null
-                      ? const Column(
+                      ? Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.add_a_photo_outlined, size: 48, color: Colors.grey),
-                            SizedBox(height: 8),
-                            Text('Add Bottle Photo', style: TextStyle(color: Colors.grey)),
+                            const Icon(Icons.add_a_photo_outlined, size: 48, color: Colors.grey),
+                            const SizedBox(height: AppSpacing.sm),
+                            Text('Add Bottle Photo', style: AppTextStyles.caption.copyWith(color: Colors.grey)),
                           ],
                         )
                       : null,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xxl),
 
               _buildTextField('Bottle Name', nameController, 'Enter name', customColors),
               _buildTextField('Brand', brandController, 'Enter brand', customColors),
@@ -218,7 +220,7 @@ class _AdminBottleManagerScreenState extends ConsumerState<AdminBottleManagerScr
               Row(
                 children: [
                   Expanded(child: _buildTextField('ABV %', abvController, 'e.g. 40.0', customColors, keyboardType: TextInputType.number)),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: AppSpacing.lg),
                   Expanded(child: _buildTextField('Volume (ml)', volumeController, 'e.g. 750', customColors, keyboardType: TextInputType.number)),
                 ],
               ),
@@ -226,21 +228,16 @@ class _AdminBottleManagerScreenState extends ConsumerState<AdminBottleManagerScr
               _buildTextField('Description', descriptionController, 'Enter description', customColors, maxLines: 4),
               _buildTextField('Tags', tagsController, 'smoke, peat, oak (comma separated)', customColors, isRequired: false),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.hero),
 
               SizedBox(
                 width: double.infinity,
-                height: 56,
+                height: AppSpacing.buttonHeight,
                 child: ElevatedButton(
                   onPressed: isSaving ? null : _saveBottle,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.amber,
-                    foregroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
                   child: isSaving
                       ? const CircularProgressIndicator(color: Colors.black)
-                      : const Text('SAVE BOTTLE', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      : const Text('SAVE BOTTLE'),
                 ),
               ),
               const SizedBox(height: 50),
@@ -261,7 +258,7 @@ class _AdminBottleManagerScreenState extends ConsumerState<AdminBottleManagerScr
     bool isRequired = true,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -272,7 +269,7 @@ class _AdminBottleManagerScreenState extends ConsumerState<AdminBottleManagerScr
                 Text(' (OPTIONAL)', style: AppTextStyles.caption.copyWith(color: Colors.white24, fontSize: 10)),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.gapLabel),
           TextFormField(
             controller: controller,
             keyboardType: keyboardType,
@@ -280,26 +277,6 @@ class _AdminBottleManagerScreenState extends ConsumerState<AdminBottleManagerScr
             style: AppTextStyles.body.copyWith(color: Colors.white),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: AppTextStyles.body.copyWith(color: Colors.white24),
-              filled: true,
-              fillColor: colors.cardBackground,
-              contentPadding: const EdgeInsets.all(16),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: colors.borderDark),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: colors.borderDark),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Colors.amber, width: 1.5),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Colors.red, width: 1.5),
-              ),
             ),
             validator: (value) {
               if (isRequired && (value == null || value.isEmpty)) {
@@ -315,17 +292,17 @@ class _AdminBottleManagerScreenState extends ConsumerState<AdminBottleManagerScr
 
   Widget _buildDropdown(String label, AppCustomColors colors) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: AppTextStyles.caption.copyWith(color: Colors.white70)),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.gapLabel),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             decoration: BoxDecoration(
               color: colors.cardBackground,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
               border: Border.all(color: colors.borderDark),
             ),
             child: DropdownButtonHideUnderline(

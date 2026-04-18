@@ -6,6 +6,7 @@ import '../../alcohol/models/alcohol_model.dart';
 import '../../alcohol/repositories/alcohol_repository.dart';
 import '../repositories/wishlist_repository.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../core/theme/app_spacing.dart';
 
 class AddToWishlistSheet extends StatefulWidget {
   const AddToWishlistSheet({super.key});
@@ -119,9 +120,9 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
     return Container(
       decoration: BoxDecoration(
         color: customColors.deepCardBackground,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusDefault)),
       ),
-      padding: EdgeInsets.fromLTRB(20, 16, 20, 16 + bottomInset),
+      padding: EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.lg, AppSpacing.xl, AppSpacing.xxl + bottomInset),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,7 +132,7 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
             child: Container(
               width: 40,
               height: 4,
-              margin: const EdgeInsets.only(bottom: 20),
+              margin: const EdgeInsets.only(bottom: AppSpacing.xxl),
               decoration: BoxDecoration(
                 color: customColors.borderDark,
                 borderRadius: BorderRadius.circular(4),
@@ -144,12 +145,12 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             'Search for a drink you\'ve heard of and want to try.',
             style: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.xl),
 
           // Search field
           TextField(
@@ -200,7 +201,7 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
               constraints: const BoxConstraints(maxHeight: 200),
               decoration: BoxDecoration(
                 color: customColors.cardBackground,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
                 border: Border.all(color: customColors.borderDark),
               ),
               child: ClipRRect(
@@ -208,6 +209,7 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
                 child: ListView.separated(
                   shrinkWrap: true,
                   itemCount: _searchResults.length,
+                  padding: EdgeInsets.zero,
                   separatorBuilder: (_, __) =>
                       Divider(color: customColors.borderDark, height: 1),
                   itemBuilder: (context, index) {
@@ -265,9 +267,9 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
               margin: const EdgeInsets.only(top: 8),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
-                color: colorScheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: colorScheme.primary.withOpacity(0.4)),
+                color: colorScheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
+                border: Border.all(color: colorScheme.primary.withValues(alpha: 0.4)),
               ),
               child: Row(
                 children: [
@@ -285,7 +287,7 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
               ),
             ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
 
           // Note field
           TextField(
@@ -315,7 +317,7 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
             ),
           ],
 
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.xl),
 
           // Save button
           SizedBox(

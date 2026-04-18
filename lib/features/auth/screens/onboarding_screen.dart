@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../../../app/app_theme.dart';
+import 'package:flutter/services.dart';
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../widgets/onboarding_components.dart';
 
 class OnboardingScreen extends StatefulWidget {
   static const routeName = '/onboarding';
@@ -14,377 +16,301 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-
-  int currentStep = 0;
+  int currentStep = 1;
+  static const int totalPerceivedSteps = 5;
 
   bool isLoading = false;
+  bool isBlocking = false;
 
-  DateTime? selectedDob;
-  bool isAgeValid = false;
-
-  static const int legalAge = 18; // can be country-based later
-
-  final Set<String> selectedDrinkPreferences = {};
-  final Set<String> selectedTasteProfile = {};
-  final Set<String> selectedDrinkingContext = {};
-  final Set<String> selectedDiscoveryStyle = {};
+  // Data
+  bool? isLegalAge;
   String username = '';
   bool isUsernameAvailable = false;
   bool isCheckingUsername = false;
   String? usernameError;
 
+  final Set<String> selectedDrinkPreferences = {};
+  final Set<String> selectedTasteProfile = {};
+  final Set<String> selectedDrinkingContext = {};
+  final Set<String> selectedDiscoveryStyle = {};
 
-  static const int totalSteps = 6;
+  final PageController _pageController = PageController();
 
-  void _pickDob() async {
-    final now = DateTime.now();
-
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime(now.year - legalAge),
-      firstDate: DateTime(1900),
-      lastDate: now,
-    );
-
-    if (picked == null) return;
-
-    final age = _calculateAge(picked);
-
-    setState(() {
-      selectedDob = picked;
-      isAgeValid = age >= legalAge;
-    });
+  void _nextStep() {
+    if (currentStep < totalPerceivedSteps) {
+      setState(() => currentStep++);
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
-  int _calculateAge(DateTime dateOfBirth) {
-    final today = DateTime.now();
-    int age = today.year - dateOfBirth.year;
-
-    if (today.month < dateOfBirth.month ||
-        (today.month == dateOfBirth.month && today.day < dateOfBirth.day)) {
-      age--;
+  void _previousStep() {
+    if (currentStep > 1) {
+      if (isBlocking) {
+        setState(() {
+          isBlocking = false;
+          isLegalAge = null;
+        });
+        return;
+      }
+      setState(() => currentStep--);
+      _pageController.previousPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     }
-
-    return age;
   }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _previousStep();
+      },
       child: Scaffold(
-        body: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _progressIndicator(),
-              const SizedBox(height: 32),
-              _buildCurrentStep(),
-            ],
-          ),
-        ),
+        backgroundColor: const Color(0xFF0F0F0F),
+        body: isBlocking ? _buildBlockScreen() : _buildOnboardingFlow(),
       ),
     );
   }
 
-  Widget _buildCurrentStep() {
-    switch (currentStep) {
-      case 0:
-        return _dobStep();
-      case 1:
-        return _drinkPreferencesStep();
-      case 2:
-        return _tastePreferenceStep();
-      case 3:
-        return _drinkingContextStep();
-      case 4:
-        return _discoveryStyleStep();
-      case 5:
-        return _usernameStep();
-      default:
-        return const SizedBox.shrink();
-    }
-  }
-
-
-
-  Widget _progressIndicator() {
-    final customColors = Theme.of(context).extension<AppCustomColors>()!;
-    return Column(
+  Widget _buildOnboardingFlow() {
+    return PageView(
+      controller: _pageController,
+      physics: const NeverScrollableScrollPhysics(),
       children: [
-        Text(
-          'Step ${currentStep + 1} of $totalSteps',
-          style: TextStyle(
-            color: customColors.textMuted,
-            fontSize: 14,
-          ),
-        ),
-
-        const SizedBox(height: 8),
-
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(totalSteps, (index) {
-              final isActive = index <= currentStep;
-
-              return Container(
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isActive
-                    ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).extension<AppCustomColors>()!.borderDark,
-                ),
-              );
-            }),
-        ),
+        _ageCheckStep(),
+        _usernameStep(),
+        _tasteStep(),
+        _goalStep(),
+        _finalStep(),
       ],
     );
   }
 
-
-  Widget _dobStep() {
-    final customColors = Theme.of(context).extension<AppCustomColors>()!;
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Text(
-          'When were you born?',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+  Widget _ageCheckStep() {
+    return OnboardingLayout(
+      progress: OnboardingProgressBar(
+        currentStep: 1,
+        totalSteps: totalPerceivedSteps,
+      ),
+      title: 'Are you of legal drinking age in your country?',
+      subtitle: 'We ask this to keep DrunkDiary compliant and safe.',
+      body: Column(
+        children: [
+          OnboardingChoiceCard(
+            label: 'Yes, I am of legal age',
+            isSelected: isLegalAge == true,
+            onTap: () {
+              setState(() => isLegalAge = true);
+              HapticFeedback.lightImpact();
+              _nextStep();
+            },
           ),
-          textAlign: TextAlign.center,
-        ),
-
-        const SizedBox(height: 8),
-
-        Text(
-          'We need this to make sure you’re legally allowed to drink.',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: customColors.textMuted),
-        ),
-
-        const SizedBox(height: 32),
-
-        OutlinedButton(
-          onPressed: _pickDob,
-          child: Text(
-            selectedDob == null
-                ? 'Select date of birth'
-                : DateFormat.yMMMMd().format(selectedDob!),
+          OnboardingChoiceCard(
+            label: 'No, I am not',
+            isSelected: isLegalAge == false,
+            onTap: () {
+              setState(() => isBlocking = true);
+              HapticFeedback.mediumImpact();
+            },
           ),
-        ),
-
-        const SizedBox(height: 20),
-
-        if (selectedDob != null && !isAgeValid)
-          const Text(
-            'You must be of legal drinking age to use this app.',
-            style: TextStyle(color: Colors.red),
-            textAlign: TextAlign.center,
-          ),
-
-        const SizedBox(height: 32),
-
-        ElevatedButton(
-          onPressed: isAgeValid
-              ? () {
-            AnalyticsService().logOnboardingStep(0, 'dob_selected');
-            setState(() => currentStep = 1);
-          }
-              : null,
-          child: const Text('Continue'),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
+  Widget _buildBlockScreen() {
+    return OnboardingLayout(
+      progress: const SizedBox.shrink(),
+      title: 'DrunkDiary is for legal-age users only.',
+      subtitle: 'Come back when you\'re eligible.',
+      body: const Center(
+        child: Icon(
+          Icons.lock_person_rounded,
+          size: 80,
+          color: Colors.white24,
+        ),
+      ),
+      cta: OnboardingButton(
+        label: 'Exit',
+        onPressed: () => SystemNavigator.pop(),
+      ),
+    );
+  }
 
-  Widget _drinkPreferencesStep() {
-    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+  Widget _usernameStep() {
+    return OnboardingLayout(
+      progress: OnboardingProgressBar(
+        currentStep: 2,
+        totalSteps: totalPerceivedSteps,
+      ),
+      title: 'What should the community call you?',
+      subtitle: 'This is your unique identity on DrunkDiary.',
+      body: Column(
+        children: [
+          TextField(
+            autofocus: true,
+            style: AppTextStyles.body.copyWith(fontSize: 18),
+            onChanged: (value) {
+              setState(() {
+                username = value.toLowerCase();
+              });
+              _checkUsername(value);
+            },
+            decoration: InputDecoration(
+              hintText: 'your_name',
+              errorText: usernameError,
+              prefixText: '@ ',
+              prefixStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
+              suffixIcon: isCheckingUsername
+                  ? const Padding(
+                      padding: EdgeInsets.all(12),
+                      child: SizedBox(
+                        height: 16,
+                        width: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : isUsernameAvailable
+                      ? Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary)
+                      : null,
+            ),
+          ),
+        ],
+      ),
+      cta: OnboardingButton(
+        label: 'Continue',
+        isEnabled: isUsernameAvailable,
+        onPressed: _nextStep,
+      ),
+    );
+  }
+
+  Widget _tasteStep() {
     final options = [
       'Beer 🍺',
       'Whisky 🥃',
       'Cocktails 🍸',
       'Wine 🍷',
-      'Vodka / Gin / Rum',
-      'I just try whatever’s there',
+      'Vodka / Gin / Rum 🍸',
+      'I’m still exploring 🔎',
     ];
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            'What do you usually drink?',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-          ),
-
-          const SizedBox(height: 8),
-
-          Text(
-            'Select all that apply. This helps us tailor your experience.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: customColors.textMuted),
-          ),
-
-          const SizedBox(height: 32),
-
-          ...options.map((option) {
-            final isSelected = selectedDrinkPreferences.contains(option);
-
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: ChoiceChip(
-                label: Text(option),
-                selected: isSelected,
-                onSelected: (_) {
-                  setState(() {
-                    if (isSelected) {
-                      selectedDrinkPreferences.remove(option);
-                    } else {
-                      selectedDrinkPreferences.add(option);
-                    }
-                  });
-                },
-              ),
-            );
-          }),
-
-          const SizedBox(height: 32),
-
-          ElevatedButton(
-            onPressed: selectedDrinkPreferences.isNotEmpty
-                ? () {
-              AnalyticsService().logOnboardingStep(1, 'drink_pref_selected');
-              setState(() => currentStep = 2);
-            }
-            : null,
-            child: const Text('Continue'),
-          ),
-        ],
+    return OnboardingLayout(
+      progress: OnboardingProgressBar(
+        currentStep: 3,
+        totalSteps: totalPerceivedSteps,
+      ),
+      title: 'What’s usually in your glass?',
+      subtitle: 'Tell us your favorites so we can personalize your shelf.',
+      body: Column(
+        children: options.map((option) {
+          final isSelected = selectedDrinkPreferences.contains(option);
+          return OnboardingChoiceCard(
+            label: option,
+            isSelected: isSelected,
+            onTap: () {
+              setState(() {
+                if (isSelected) {
+                  selectedDrinkPreferences.remove(option);
+                } else {
+                  selectedDrinkPreferences.add(option);
+                }
+              });
+              HapticFeedback.selectionClick();
+            },
+          );
+        }).toList(),
+      ),
+      cta: OnboardingButton(
+        label: 'Continue',
+        isEnabled: selectedDrinkPreferences.isNotEmpty,
+        onPressed: _nextStep,
+      ),
     );
   }
 
-  Widget _tastePreferenceStep() {
-    final customColors = Theme.of(context).extension<AppCustomColors>()!;
-    final options = [
+  Widget _goalStep() {
+    final tasteOptions = [
       'Smooth & easy 🍹',
       'Strong & bold 🥃',
       'Fruity & sweet 🍓',
       'Bitter & hoppy 🍺',
       'Sour & tangy 🍋',
-      'Doesn’t matter - I drink anything! 🍻',
     ];
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Text(
-          'What kind of drinks do you enjoy?',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+    return OnboardingLayout(
+      progress: OnboardingProgressBar(
+        currentStep: 4,
+        totalSteps: totalPerceivedSteps,
+      ),
+      title: 'Why did you join DrunkDiary?',
+      subtitle: 'Select what reflects your drinking style.',
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'MY TASTE VIBE',
+            style: AppTextStyles.caption.copyWith(
+              letterSpacing: 1.2,
+              fontWeight: FontWeight.bold,
+              color: Colors.white38,
+            ),
           ),
-          textAlign: TextAlign.center,
-        ),
-
-        const SizedBox(height: 8),
-
-        Text(
-          'This helps us suggest better options.',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: customColors.textMuted),
-        ),
-
-        const SizedBox(height: 32),
-
-        ...options.map((option) {
-          final isSelected = selectedTasteProfile.contains(option);
-
-          return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: ChoiceChip(
-          label: Text(option),
-          selected: isSelected,
-          onSelected: (_) {
-            setState(() {
-              if (isSelected) {
-                selectedTasteProfile.remove(option);
-          } else {
-                selectedTasteProfile.add(option);
-              }
-          });
-            },
+          const SizedBox(height: AppSpacing.md),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: tasteOptions.map((option) {
+              final isSelected = selectedTasteProfile.contains(option);
+              return ChoiceChip(
+                label: Text(option),
+                selected: isSelected,
+                onSelected: (selected) {
+                  setState(() {
+                    if (selected) {
+                      selectedTasteProfile.add(option);
+                    } else {
+                      selectedTasteProfile.remove(option);
+                    }
+                  });
+                },
+                selectedColor: Theme.of(context).colorScheme.primary,
+                labelStyle: TextStyle(
+                  color: isSelected ? Colors.black : Colors.white,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+                backgroundColor: const Color(0xFF1A1A1A),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: isSelected ? Theme.of(context).colorScheme.primary : Colors.white10,
+                  ),
+                ),
+              );
+            }).toList(),
           ),
-        );
-        }),
-
-        const SizedBox(height: 32),
-
-        ElevatedButton(
-          onPressed: selectedTasteProfile.isNotEmpty
-              ? () {
-            AnalyticsService().logOnboardingStep(2, 'taste_pref_selected');
-            setState(() => currentStep = 3);
-          }
-          : null,
-          child: const Text('Continue'),
-        ),
-      ],
-    );
-  }
-
-  Widget _drinkingContextStep() {
-    final customColors = Theme.of(context).extension<AppCustomColors>()!;
-    final options = [
-      'House parties',
-      'Bars / clubs',
-      'Celebrations (birthdays, weddings)',
-      'Casual nights with friends',
-      'Rarely / socially',
-    ];
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Text(
-          'When do you usually drink?',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+          const SizedBox(height: AppSpacing.hero),
+          Text(
+            'PREFERRED SETTING',
+            style: AppTextStyles.caption.copyWith(
+              letterSpacing: 1.2,
+              fontWeight: FontWeight.bold,
+              color: Colors.white38,
+            ),
           ),
-          textAlign: TextAlign.center,
-        ),
-
-        const SizedBox(height: 8),
-
-        Text(
-          'Select all that apply.',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: customColors.textMuted),
-        ),
-
-        const SizedBox(height: 32),
-
-        ...options.map((option) {
-          final isSelected = selectedDrinkingContext.contains(option);
-
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: ChoiceChip(
-              label: Text(option),
-              selected: isSelected,
-              onSelected: (_) {
+          const SizedBox(height: AppSpacing.md),
+          ...['House parties 🏠', 'Bars / Clubs 🍸', 'Casual nights 🛋️', 'Celebrations ✨'].map((option) {
+            final isSelected = selectedDrinkingContext.contains(option);
+            return OnboardingChoiceCard(
+              label: option,
+              isSelected: isSelected,
+              onTap: () {
                 setState(() {
                   if (isSelected) {
                     selectedDrinkingContext.remove(option);
@@ -393,160 +319,50 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   }
                 });
               },
-            ),
-          );
-        }),
-
-        const SizedBox(height: 32),
-
-        ElevatedButton(
-          onPressed: selectedDrinkingContext.isNotEmpty
-              ? () {
-            AnalyticsService().logOnboardingStep(3, 'context_selected');
-            setState(() => currentStep = 4); // Step 5 next
-          }
-              : null,
-          child: const Text('Continue'),
-        ),
-      ],
+            );
+          }),
+        ],
+      ),
+      cta: OnboardingButton(
+        label: 'Continue',
+        isEnabled: selectedTasteProfile.isNotEmpty && selectedDrinkingContext.isNotEmpty,
+        onPressed: _nextStep,
+      ),
     );
   }
 
-  Widget _discoveryStyleStep() {
-    final customColors = Theme.of(context).extension<AppCustomColors>()!;
-    final options = [
-      'Friends’ recommendations',
-      'Price',
-      'Brand reputation',
-      'What’s available at the party/bar',
-      'Social media / hype',
-      'I just go with the moment',
-    ];
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Text(
-          'How do you usually decide what to try?',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-          textAlign: TextAlign.center,
-        ),
-
-        const SizedBox(height: 8),
-
-        Text(
-          'There’s no right answer.',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: customColors.textMuted),
-        ),
-
-        const SizedBox(height: 32),
-
-        ...options.map((option) {
-          final isSelected = selectedDiscoveryStyle.contains(option);
-
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: ChoiceChip(
-              label: Text(option),
-              selected: isSelected,
-              onSelected: (_) {
-                setState(() {
-                  if (isSelected) {
-                    selectedDiscoveryStyle.remove(option);
-                  } else {
-                    selectedDiscoveryStyle.add(option);
-                  }
-                });
-              },
-            ),
-          );
-        }),
-
-        const SizedBox(height: 32),
-
-        ElevatedButton(
-          onPressed: selectedDrinkingContext.isNotEmpty
-              ? () {
-            AnalyticsService().logOnboardingStep(4, 'discovery_style_selected');
-            setState(() => currentStep = 5); // Step 5 next
-          }
-              : null,
-          child: const Text('Continue'),
-        ),
-      ],
-    );
-  }
-
-  Widget _usernameStep() {
-    final customColors = Theme.of(context).extension<AppCustomColors>()!;
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Text(
-          'Choose a username',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-          textAlign: TextAlign.center,
-        ),
-
-        const SizedBox(height: 8),
-
-        Text(
-          'This is how others will see you.',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: customColors.textMuted),
-        ),
-
-        const SizedBox(height: 32),
-
-        TextField(
-          onChanged: (value) {
-            setState(() {
-              username = value.toLowerCase();
-            });
-            _checkUsername(value);
-          },
-          decoration: InputDecoration(
-            hintText: 'username',
-            errorText: usernameError,
-            prefixText: '@',
-            suffixIcon: isCheckingUsername
-                ? const Padding(
-              padding: EdgeInsets.all(12),
-              child: SizedBox(
-                height: 16,
-                width: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
+  Widget _finalStep() {
+    return OnboardingLayout(
+      progress: OnboardingProgressBar(
+        currentStep: 5,
+        totalSteps: totalPerceivedSteps,
+      ),
+      title: 'Your shelf is ready.',
+      subtitle: 'Let’s log your first memory.',
+      body: Center(
+        child: TweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: 0, end: 1),
+          duration: const Duration(seconds: 1),
+          curve: Curves.elasticOut,
+          builder: (context, value, child) {
+            return Transform.scale(
+              scale: value,
+              child: const Icon(
+                Icons.wine_bar_rounded,
+                size: 120,
+                color: Color(0xFFFFC107),
               ),
-            )
-                : isUsernameAvailable
-                ? const Icon(Icons.check, color: Colors.green)
-                : null,
-          ),
+            );
+          },
         ),
-
-        const SizedBox(height: 32),
-
-        ElevatedButton(
-          onPressed: isUsernameAvailable && !isLoading
-              ? _finishOnboarding
-              : null,
-          child: isLoading
-              ? const CircularProgressIndicator(strokeWidth: 2)
-              : const Text('Finish'),
-        ),
-      ],
+      ),
+      cta: OnboardingButton(
+        label: 'Enter DrunkDiary',
+        isLoading: isLoading,
+        onPressed: _finishOnboarding,
+      ),
     );
   }
-
 
   Future<void> _checkUsername(String value) async {
     final cleaned = value.trim().toLowerCase();
@@ -564,19 +380,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       usernameError = null;
     });
 
-    final doc = await FirebaseFirestore.instance
-        .collection('usernames')
-        .doc(cleaned)
-        .get();
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('usernames')
+          .doc(cleaned)
+          .get();
 
-    setState(() {
-      isCheckingUsername = false;
-      isUsernameAvailable = !doc.exists;
-      usernameError = doc.exists ? 'Username already taken' : null;
-    });
+      setState(() {
+        isCheckingUsername = false;
+        isUsernameAvailable = !doc.exists;
+        usernameError = doc.exists ? 'Username already taken' : null;
+      });
+    } catch (e) {
+      setState(() => isCheckingUsername = false);
+    }
   }
-
-
 
   Future<void> _finishOnboarding() async {
     setState(() => isLoading = true);
@@ -589,17 +407,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     final cleanedUsername = username.trim().toLowerCase();
 
-    // 🔒 Hard guard
-    if (cleanedUsername.isEmpty || cleanedUsername.length < 3) {
-      setState(() => isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please choose a valid username.'),
-        ),
-      );
-      return;
-    }
-
     final firestore = FirebaseFirestore.instance;
     final usernameRef = firestore.collection('usernames').doc(cleanedUsername);
     final userRef = firestore.collection('users').doc(user.uid);
@@ -608,25 +415,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       await firestore.runTransaction((transaction) async {
         final usernameSnap = await transaction.get(usernameRef);
 
-        // ❌ Username already exists
         if (usernameSnap.exists) {
           throw Exception('USERNAME_TAKEN');
         }
 
-        // ✅ Claim username
         transaction.set(usernameRef, {'uid': user.uid});
 
-        // ✅ Save user profile
         transaction.set(
           userRef,
           {
             'username': cleanedUsername,
-            'dob': selectedDob,
             'ageVerified': true,
+            'legalAge': true,
             'drinkPreferences': selectedDrinkPreferences.toList(),
             'tasteProfile': selectedTasteProfile.toList(),
             'drinkingContext': selectedDrinkingContext.toList(),
-            'discoveryStyle': selectedDiscoveryStyle.toList(),
             'onboardingCompleted': true,
             'createdAt': FieldValue.serverTimestamp(),
           },
@@ -634,39 +437,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         );
       });
 
-      // 🏆 Log analytics events
       await AnalyticsService().logSignUp('google');
       await AnalyticsService().logOnboardingComplete();
     } catch (e) {
       setState(() => isLoading = false);
-
-      if (e.toString().contains('USERNAME_TAKEN')) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Username already taken. Try another.'),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Something went wrong. Please try again.'),
-          ),
-        );
-      }
-
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().contains('USERNAME_TAKEN') ? 'Username taken.' : 'Error saving profile.')),
+      );
       return;
     }
 
     if (!mounted) return;
-
-    Navigator.pushNamedAndRemoveUntil(
-      context,
-      '/home',
-          (route) => false,
-    );
+    Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
   }
-
-
-
-
 }

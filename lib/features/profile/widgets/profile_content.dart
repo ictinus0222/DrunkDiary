@@ -5,6 +5,7 @@ import '../../../app/app_theme.dart';
 import '../../../core/constants/reaction_config.dart';
 import '../models/stats_model.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../models/user_model.dart';
 
 class ProfileContent extends StatelessWidget {
@@ -22,25 +23,25 @@ class ProfileContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: AppSpacing.pagePadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Main Profile Card
           _buildProfileCard(context),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.hero),
 
           // Public Shelf Section
           _buildPublicShelf(context),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.hero),
 
           // Recent Activity Section
           _buildRecentActivity(context),
 
           if (footer.isNotEmpty) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.xxl),
             ...footer,
           ]
         ],
@@ -53,10 +54,10 @@ class ProfileContent extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
         color: customColors.cardBackground,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
       ),
       child: Column(
         children: [
@@ -72,7 +73,7 @@ class ProfileContent extends StatelessWidget {
                     ? Icon(Icons.person, size: 32, color: colorScheme.onPrimary)
                     : null,
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppSpacing.lg),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,7 +84,7 @@ class ProfileContent extends StatelessWidget {
                             color: colorScheme.onSurface,
                           ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       'My Personal Shelf',
                       style: AppTextStyles.body.copyWith(
@@ -95,7 +96,7 @@ class ProfileContent extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xxl),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,10 +149,10 @@ class ProfileContent extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
         if (userStats.recentAlcohols.isEmpty)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
             child: Center(
               child: Text(
                 "Shelf is empty",
@@ -165,14 +166,14 @@ class ProfileContent extends StatelessWidget {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: userStats.recentAlcohols.length,
-              separatorBuilder: (context, index) => const SizedBox(width: 12),
+              separatorBuilder: (context, index) => const SizedBox(width: AppSpacing.md),
               itemBuilder: (context, index) {
                 final alcohol = userStats.recentAlcohols[index];
                 return Container(
                   width: 100,
                   decoration: BoxDecoration(
                     color: customColors.cardBackground,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: alcohol.imageUrl.isNotEmpty
@@ -207,10 +208,10 @@ class ProfileContent extends StatelessWidget {
             color: colorScheme.onSurface,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
         if (userStats.recentLogs.isEmpty)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
             child: Center(
               child: Text(
                 "No recent activity",
@@ -226,11 +227,11 @@ class ProfileContent extends StatelessWidget {
             itemBuilder: (context, index) {
               final log = userStats.recentLogs[index];
               return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
                   color: customColors.cardBackground,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
                 ),
                 child: Row(
                   children: [
@@ -239,7 +240,7 @@ class ProfileContent extends StatelessWidget {
                       height: 48,
                       decoration: BoxDecoration(
                         color: customColors.deepCardBackground,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusCompact),
                       ),
                       clipBehavior: Clip.antiAlias,
                       child: log.photoUrl != null
@@ -253,7 +254,7 @@ class ProfileContent extends StatelessWidget {
                             )
                           : Icon(Icons.wine_bar, color: colorScheme.primary),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: AppSpacing.lg),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -267,7 +268,7 @@ class ProfileContent extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: AppSpacing.xs),
                           Text(
                             log.alcoholType,
                             style: AppTextStyles.caption.copyWith(
@@ -281,7 +282,7 @@ class ProfileContent extends StatelessWidget {
                       Row(
                         children: [
                           Icon(Icons.star, color: colorScheme.primary, size: 18),
-                          const SizedBox(width: 4),
+                          const SizedBox(width: AppSpacing.xs),
                           Text(
                             log.rating!.toStringAsFixed(1).replaceAll('.0', ''),
                             style: AppTextStyles.body.copyWith(
@@ -327,7 +328,7 @@ class _StatItem extends StatelessWidget {
       child: Column(
         children: [
           Icon(icon, color: colorScheme.primary, size: 28),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             value,
             textAlign: TextAlign.center,
@@ -338,7 +339,7 @@ class _StatItem extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             label,
             textAlign: TextAlign.center,
