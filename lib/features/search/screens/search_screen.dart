@@ -118,7 +118,9 @@ class _SearchScreenState extends State<SearchScreen> {
           .where((item) =>
               item.alcohol.name.toLowerCase().contains(lowerQuery) ||
               item.alcohol.brand.toLowerCase().contains(lowerQuery) ||
-              item.alcohol.type.toLowerCase().contains(lowerQuery))
+              item.alcohol.type.toLowerCase().contains(lowerQuery) ||
+              (item.alcohol.subType?.toLowerCase().contains(lowerQuery) ?? false) ||
+              item.alcohol.tags.any((tag) => tag.toLowerCase().contains(lowerQuery)))
           .toList();
     }
 

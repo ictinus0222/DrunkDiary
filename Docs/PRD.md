@@ -109,6 +109,14 @@ Based on the onboarding flow and feature structure, the target users are individ
     - Captures a screenshot of the current screen.
     - Sends feedback via configured email client using `flutter_email_sender`.
     - Handles "No email client found" gracefully with a SnackBar.
+- **Admin Bottle Management**
+  - **Description:** In-app tool for admins to add new alcohols to the global database.
+  - **User Story:** As an admin, I want to add new bottles directly from my phone so the catalog stays up to date without manual Firestore entry.
+  - **Acceptance Criteria:**
+    - Restricted to users with `role: admin`.
+    - Supports image upload to Firebase Storage (`bottles/` path).
+    - Auto-generates `searchKeywords` for discovery.
+    - Validates required fields (Name, Brand, ABV, Type).
 - **Feature Flags & Admin Settings (A/B Testing)**
   - **Description:** A system for controlling visibility of new features globally or per segment.
   - **User Story:** As an admin, I want to toggle experimental features on or off for all users from within the app.

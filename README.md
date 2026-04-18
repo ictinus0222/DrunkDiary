@@ -41,7 +41,7 @@ AuthGate
     │   └── AlcoholDetailScreen
     └── Tab 4: ProfileScreen
         ├── SettingsDrawer (Sidebar)
-        │   ├── AdminSettingsScreen (via Admin Toggle)
+        │   ├── AdminBottleManagerScreen (via Admin Bottle Manager Tile)
         │   └── Logout Action
         └── FeedbackOverlay (via Feedback Icon)
 ```

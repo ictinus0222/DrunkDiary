@@ -9,15 +9,30 @@ class AlcoholRepository {
 
     final lowerQuery = query.toLowerCase();
 
+    // Strategy: Search in the searchKeywords array
     final snapshot = await _firestore
         .collection('alcohols')
-        .orderBy('nameLowercase')
-        .startAt([lowerQuery])
-        .endAt(['$lowerQuery\uf8ff'])
+        .where('searchKeywords', arrayContains: lowerQuery)
         .limit(20)
         .get();
 
+    // Fallback if no exact keyword match, use prefix search on name
+    if (snapshot.docs.isEmpty) {
+      final prefixSnapshot = await _firestore
+          .collection('alcohols')
+          .orderBy('nameLowercase')
+          .startAt([lowerQuery])
+          .endAt(['$lowerQuery\uf8ff'])
+          .limit(20)
+          .get();
+      return prefixSnapshot.docs.map((doc) => AlcoholModel.fromFirestore(doc)).toList();
+    }
+
     return snapshot.docs.map((doc) => AlcoholModel.fromFirestore(doc)).toList();
+  }
+
+  Future<void> createAlcohol(AlcoholModel alcohol) async {
+    await _firestore.collection('alcohols').add(alcohol.toMap());
   }
 
   Future<List<AlcoholModel>> getAllAlcohols() async {

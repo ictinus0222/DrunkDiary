@@ -18,6 +18,7 @@ Source of Truth: `lib/features/profile/models/user_model.dart` + `lib/features/a
 *   `createdAt`: Timestamp (Mapped to DateTime)
 *   `bio`: String? (Nullable)
 *   `username`: String (Default: '')
+*   `role`: String (Default: 'user', Options: 'admin', 'moderator')
 *   `authProvider`: String (Set once during initial Google Sign-In. Value: `'google'`)
 *   `onboardingCompleted`: Boolean (Default: false. Set to `true` after onboarding finishes. Read by `AuthGate` to route users.)
 
@@ -33,11 +34,22 @@ Source of Truth: `lib/features/alcohol/models/alcohol_model.dart`
 *   `id`: String (Document ID)
 *   `name`: String
 *   `type`: String
+*   `subType`: String (e.g., "Single Malt")
 *   `brand`: String
 *   `abv`: Number (Mapped to double)
-*   `origin`: String
+*   `country`: String (Replacing `origin` for mapping consistency)
+*   `volumeMl`: Number
 *   `description`: String
 *   `imageUrl`: String
+*   `tags`: List<String>
+*   `avgRating`: Number (Default: 0.0)
+*   `ratingCount`: Number (Default: 0)
+*   `logCount`: Number (Default: 0)
+*   `isVerified`: Boolean (Default: true)
+*   `isActive`: Boolean (Default: true)
+*   `searchKeywords`: List<String> (Auto-generated trigrams or words for discovery)
+*   `createdBy`: String (uid of the admin)
+*   `createdAt`: Timestamp
 
 ### Collection: `drink_logs`
 Source of Truth: `lib/features/drink_logs/models/drink_model_dto.dart`

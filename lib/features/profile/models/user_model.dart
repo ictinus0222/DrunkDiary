@@ -9,6 +9,7 @@ class UserModel {
   // Profile
   final String? bio;
   final String username;
+  final String role;
 
   UserModel({
     required this.id,
@@ -19,6 +20,7 @@ class UserModel {
     // Profile
     this.bio,
     required this.username,
+    this.role = 'user',
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot userDoc) {
@@ -34,6 +36,7 @@ class UserModel {
       // Profile
       bio: userData['bio'],
       username: userData['username'] ?? '',
+      role: userData['role'] ?? 'user',
     );
   }
 
@@ -46,6 +49,7 @@ class UserModel {
       // Profile
       'bio': bio,
       'username': username,
+      'role': role,
     };
   }
 }

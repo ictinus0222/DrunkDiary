@@ -4,7 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../app/app_theme.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../auth/services/google_auth_service.dart';
+import '../models/profile_data_model.dart';
 import '../providers/profile_providers.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class SettingsDrawer extends ConsumerWidget {
   const SettingsDrawer({super.key});
@@ -58,7 +61,21 @@ class SettingsDrawer extends ConsumerWidget {
             const Divider(indent: 24, endIndent: 24),
 
             // 🔹 Admin Settings (Conditional)
-            _buildAdminTile(context),
+            _buildAdminTiles(context, ref, profileAsync.value),
+
+            const Divider(indent: 24, endIndent: 24),
+
+            // 🔹 Legal Tiles
+            ListTile(
+              leading: Icon(Icons.privacy_tip_outlined, color: customColors.textMuted),
+              title: Text('Privacy Policy', style: AppTextStyles.body),
+              onTap: () => _launchURL('https://www.drunkdiary.com/privacy'),
+            ),
+            ListTile(
+              leading: Icon(Icons.child_care_outlined, color: customColors.textMuted),
+              title: Text('Child Safety Policy', style: AppTextStyles.body),
+              onTap: () => _launchURL('https://www.drunkdiary.com/child-safety'),
+            ),
 
             // 🔹 Spacer to push Logout to bottom
             const Spacer(),
@@ -78,30 +95,62 @@ class SettingsDrawer extends ConsumerWidget {
                 onTap: () => _showLogoutConfirmation(context),
               ),
             ),
+
+            // 🔹 Version Info
+            FutureBuilder<PackageInfo>(
+              future: PackageInfo.fromPlatform(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: Text(
+                      'v${snapshot.data!.version}+${snapshot.data!.buildNumber}',
+                      style: AppTextStyles.caption.copyWith(color: customColors.textMuted),
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAdminTile(BuildContext context) {
+  Future<void> _launchURL(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw Exception('Could not launch $url');
+    }
+  }
+
+  Widget _buildAdminTiles(BuildContext context, WidgetRef ref, ProfileDataModel? profile) {
     final user = FirebaseAuth.instance.currentUser;
     final adminEmails = [
       'akhilsharma.ptk22@gmail.com',
       'sharmakhil1704@gmail.com',
     ];
 
-    if (user != null && adminEmails.contains(user.email)) {
-      return ListTile(
-        leading: const Icon(Icons.admin_panel_settings_outlined),
-        title: Text('Admin Settings', style: AppTextStyles.body),
-        onTap: () {
-          Navigator.pop(context); // Close drawer
-          Navigator.pushNamed(context, '/adminSettings');
-        },
-      );
+    final isAuthorized = (profile?.userData.role == 'admin') || 
+                         (user != null && adminEmails.contains(user.email));
+
+    if (!isAuthorized) {
+      return const SizedBox.shrink();
     }
-    return const SizedBox.shrink();
+
+    return Column(
+      children: [
+        ListTile(
+          leading: const Icon(Icons.add_business_outlined),
+          title: Text('Admin Bottle Manager', style: AppTextStyles.body),
+          onTap: () {
+            Navigator.pop(context); // Close drawer
+            Navigator.pushNamed(context, '/adminBottleManager');
+          },
+        ),
+      ],
+    );
   }
 
   void _showLogoutConfirmation(BuildContext context) {

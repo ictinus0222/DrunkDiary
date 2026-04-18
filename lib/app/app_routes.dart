@@ -13,4 +13,5 @@ class AppRoutes {
   static const search = '/search';
   static const stats = '/stats';
   static const adminSettings = '/adminSettings';
+  static const adminBottleManager = '/adminBottleManager';
 }
