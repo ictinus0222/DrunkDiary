@@ -13,10 +13,10 @@ The application solves the problem of tracking and remembering one's experiences
 
 ## 3. Goals & Objectives (Current State Only)
 - Authenticate users securely into the ecosystem and enforce a safe user environment via a global Age Gate.
-- Allow users to quickly capture a "Drink Log" (capturing a reaction — loved/liked/nah, photo, tags, and context). These are the only entries counted as "Personal Logs".
-- Allow users to write personal "Reviews" for alcohols on a 0-5 scale. Reviews are formally distinct from logs and do not increment log counts.
+- Allow users to quickly capture a "Drink Log" (capturing a reaction — loved/liked/nah, photo, and note). **Unified Logging** supports both catalog bottles and custom drinks (mocktails, cocktails, or any unlisted drink).
+- Allow users to write personal "Reviews" for catalog alcohols on a 0-5 scale. Reviews are formally distinct from logs and do not increment log counts.
 - Aggregate user logs into a personal "Shelf" that showcases their history and average ratings.
-- Enable discovery of alcohols via an integrated search mechanism (emphasized as the central app action).
+- Enable discovery of alcohols via an integrated **Discover** hub, with logging as the primary global action (center `+` button).
 - **Premium UX**: Utilize Skeleton UI (Shimmer) for all primary data-driven screens to provide stable and polished loading states.
 - Manage global app features via a feature flag system to enable A/B testing and controlled rollouts.
 
@@ -49,10 +49,15 @@ Based on the onboarding flow and feature structure, the target users are individ
     - Blocks ineligible users with a graceful Exit screen.
     - Requires a unique identity name (username) > 3 characters via Firestore transaction.
   - **Edge Cases:** Handles taken usernames gracefully by reverting the transaction and showing a snackbar.
-- **Private Drink Logging**
-  - **Description:** Allows users to log an alcohol privately.
-  - **User Story:** As a user, I want to log what I briefly drank with friends.
-  - **Acceptance Criteria:** User can select a reaction (Loved / Liked / Nah via `DrinkReaction` enum), write a note, and attach a photo (from camera/gallery). Data saves to Firestore with `logKind: LogKind.log`.
+- **Unified Drink Logging**
+  - **Description:** Allows users to log any drink, whether it's a specific bottle from the catalog or a custom concoction (cocktail, mocktail, etc.).
+  - **User Story:** As a user, I want to log what I'm drinking even if it's not in the app's database, so my diary remains a complete record of my night.
+  - **Acceptance Criteria:** 
+    - User can log a custom name (e.g., "Espresso Martini").
+    - User can optionally "Select a bottle" from the global catalog.
+    - User can select a reaction (Loved / Liked / Nah), write a note, and attach a photo.
+    - **Photo Capture**: User is prompted to choose between Camera or Gallery source.
+    - Data saves to Firestore with `isCustom: true` for unbottled drinks.
   - **Edge Cases:** Missing photo or note resolves to null.
 - **Personal Drink Reviewing**
   - **Description:** Allows users to formally rate and review an alcohol for personal use.
@@ -174,9 +179,13 @@ The following are NOT implemented in the codebase:
   - **System Behavior:** Runs transaction to claim identity. Saves user document with `legalAge: true`. Redirects to Home.
   - **Error States:** If user confirms they are not of legal age, show Block Screen. If identity name is taken, display "Username taken".
 - **Scenario 2: Searching and Logging a Drink**
-  - **Context:** User is at a bar and wants to log a drink.
-  - **Step-by-step:** Go to Search Tab -> Type drink name -> Tap Alcohol -> Tap "LOG" -> Select reaction (Loved / Liked / Nah) -> Save log.
-  - **System Behavior:** Bottom sheet closes, log is pushed to `drink_logs` collection, and diary immediately refreshes via StreamBuilder.
+  - **Context:** User is at a bar and wants to log a specific catalog drink.
+  - **Step-by-step:** Tap center `+` button -> Tap "Select a bottle" -> Type drink name -> Select Alcohol -> Select reaction -> Save log.
+  - **System Behavior:** Unified Logging screen closes, log is pushed to `drink_logs` collection with `alcoholId`, and diary immediately refreshes.
+- **Scenario 3: Logging a Custom Cocktail**
+  - **Context:** User is drinking a custom cocktail not in the catalog.
+  - **Step-by-step:** Tap center `+` button -> Type "Old Fashioned" in the name field -> Take a photo -> Select reaction -> Save log.
+  - **System Behavior:** Log is saved with `isCustom: true` and `alcoholId: null`.
 
 ## 9. Dependencies & Constraints
 - **External APIs/SDKs:** Firebase Authentication, Cloud Firestore, Firebase Storage.

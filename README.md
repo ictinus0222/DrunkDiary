@@ -5,8 +5,8 @@ DrunkDiary is a Flutter-based mobile application that allows legal-age users to 
 ## 🚀 Overview
 <!-- SYNC_OVERVIEW_START -->
 - Authenticate users securely into the ecosystem and enforce a safe user environment via a global Age Gate.
-- Allow users to quickly capture a "Drink Log" (capturing a reaction — loved/liked/nah, photo, tags, and context). These are the only entries counted as "Personal Logs".
-- Allow users to write personal "Reviews" for alcohols on a 0-5 scale. Reviews are formally distinct from logs and do not increment log counts.
+- Allow users to quickly capture a "Drink Log" (capturing a reaction — loved/liked/nah, photo, and note). **Unified Logging** supports both catalog bottles and custom drinks (mocktails, cocktails, or any unlisted drink).
+- Allow users to write personal "Reviews" for catalog alcohols on a 0-5 scale. Reviews are formally distinct from logs and do not increment log counts.
 - Aggregate user logs into a personal "Shelf" that showcases their history and average ratings.
 <!-- SYNC_OVERVIEW_END -->
 
@@ -30,13 +30,13 @@ AuthGate
 └── HomeScreen (BottomNavigationBar)
     ├── Tab 0: DiaryScreen
     │   └── StatsScreen (via action button)
-    ├── Tab 1: WishlistScreen
-    │   └── AlcoholDetailScreen (via tapping a wishlist item)
-    ├── Tab 2: Discover (SearchScreen - Centered Gold Action)
-    │   ├── AlcoholDetailScreen
-    │   │   ├── CreateLogBottomSheet (Modal)
-    │   │   ├── CreateReviewBottomSheet (Modal)
-    │   │   └── EditReviewBottomSheet (Modal)
+    ├── Tab 1: Discover (SearchScreen)
+    │   ├── WishlistScreen (via AppBar icon)
+    │   │   └── AlcoholDetailScreen
+    │   └── AlcoholDetailScreen
+    ├── Tab 2: Unified Logging (UnifiedLoggingScreen - Centered +)
+    │   ├── BottleSelectionScreen (Catalog selection)
+    │   └── (Saves Log)
     ├── Tab 3: ShelfScreen
     │   └── AlcoholDetailScreen
     └── Tab 4: ProfileScreen
@@ -63,6 +63,7 @@ DrunkDiary uses a **Serverless (BaaS)** architecture based on Firebase:
 *   **High Contrast Dark UI:** The primary implementation centers entirely around a dark theme with a stark black background and high-visibility amber accents.
 *   **Timeline-based Activity:** Content is organized chronologically using a two-column timeline layout, removing the previous card-based grouping for a more premium, scannable feed.
 *   **Modal-Driven Input:** Complex user interactions (e.g., logging a drink, writing a review, tagging people) are isolated in bottom-sheet modals to preserve context.
+*   **Source-Aware Capture:** All photo-capture actions must provide a choice between **Camera** and **Gallery** via a standardized bottom sheet.
 <!-- SYNC_DESIGN_END -->
 
 ## 📜 Documentation Governance

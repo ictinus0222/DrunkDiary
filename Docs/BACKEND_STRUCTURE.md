@@ -60,7 +60,10 @@ Source of Truth: `lib/features/alcohol/models/alcohol_model.dart`
 Source of Truth: `lib/features/drink_logs/models/drink_model_dto.dart`
 *   `id`: String (Document ID)
 *   `userId`: String (Default: '')
-*   `alcoholId`: String (Default: '')
+*   `alcoholId`: String? (Nullable. Null if `isCustom` is true)
+*   `isCustom`: Boolean (Default: false. True if logged without a catalog bottle.)
+*   `customName`: String? (Name entered by user for custom drinks)
+*   `customImageUrl`: String? (Storage URL for custom drink photo if no catalog bottle is linked)
 *   `username`: String (Default: 'Unknown')
 *   `userPhotoUrl`: String? (Nullable)
 *   `alcoholName`: String (Default: 'Unknown drink')

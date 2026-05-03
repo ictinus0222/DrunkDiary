@@ -49,16 +49,34 @@ Last Updated: 2026-04-18
 
 ### Flow: Search and View Item
 * **Goal:** Discover and view an alcohol item.
-* **Entry Point:** `SearchScreen` (Tab index 2).
+* **Entry Point:** `SearchScreen` (Tab index 1).
 * **Happy Path:**
   1. `SearchScreen`: Opens on a "Discover" view displaying all database alcohols as rich cards.
-  2. User Action (Optional): Taps the filter icon to open the `FilterBottomSheet` to select Sort Order and Alcohol Type.
-  3. User Action (Optional): Types a query in `TextField`.
-  4. System Action: Fetches matching documents from `alcohols` collection applying sort, filter, and text criteria, while checking the user's `drink_logs` for indicators.
-  5. UI Elements: Renders matched cards showing global ratings and user logging status.
-  6. **System Action**: If search returns no results, logs `zero_search_results` with the query string.
-  7. User Action: Taps an alcohol card.
-  8. Resulting State: `Navigator.push(AlcoholDetailScreen)`.
+  2. User Action (Optional): Taps the bookmark icon in the AppBar to visit the `WishlistScreen`.
+  3. User Action (Optional): Taps the filter icon to open the `FilterBottomSheet` to select Sort Order and Alcohol Type.
+  4. User Action (Optional): Types a query in `TextField`.
+  5. System Action: Fetches matching documents from `alcohols` collection applying sort, filter, and text criteria, while checking the user's `drink_logs` for indicators.
+  6. UI Elements: Renders matched cards showing global ratings and user logging status.
+  7. **System Action**: If search returns no results, logs `zero_search_results` with the query string.
+  8. User Action: Taps an alcohol card.
+  9. Resulting State: `Navigator.push(AlcoholDetailScreen)`.
+
+### Flow: Unified Drink Logging (Custom & Catalog)
+* **Goal:** Record a drink interaction, optionally selecting a catalog bottle.
+* **Entry Point:** Center "+" button on the `HomeScreen` (Tab index 2).
+* **Happy Path:**
+  1. User taps the "+" button.
+  2. System Action: Opens `UnifiedLoggingScreen`.
+  3. **Option A (Catalog Log)**:
+     - User taps "Select a bottle" → Opens `BottleSelectionScreen`.
+     - User selects an alcohol from the catalog.
+     - Alcohol details are populated in the log.
+  4. **Option B (Custom Log)**:
+     - User types a name (e.g., "Margarita") or leaves as "Custom Drink".
+  5. User interacts with Reaction selector, Note text field, and Photo picker (Choice of Camera/Gallery).
+  6. User Action: Taps "Log this drink".
+  7. System Action: Uploads photo (if selected) and creates document in `drink_logs` with `isCustom` flag and optional `alcoholId`.
+  8. Resulting State: Returns to `HomeScreen`.
 
 ### Flow: Log a Drink / Write a Review
 * **Goal:** Record an interaction with an alcohol.
@@ -113,13 +131,13 @@ AuthGate
 └── HomeScreen (BottomNavigationBar)
     ├── Tab 0: DiaryScreen
     │   └── StatsScreen (via action button)
-    ├── Tab 1: WishlistScreen
-    │   └── AlcoholDetailScreen (via tapping a wishlist item)
-    ├── Tab 2: Discover (SearchScreen - Centered Gold Action)
-    │   ├── AlcoholDetailScreen
-    │   │   ├── CreateLogBottomSheet (Modal)
-    │   │   ├── CreateReviewBottomSheet (Modal)
-    │   │   └── EditReviewBottomSheet (Modal)
+    ├── Tab 1: Discover (SearchScreen)
+    │   ├── WishlistScreen (via AppBar icon)
+    │   │   └── AlcoholDetailScreen
+    │   └── AlcoholDetailScreen
+    ├── Tab 2: Unified Logging (UnifiedLoggingScreen - Centered +)
+    │   ├── BottleSelectionScreen (Catalog selection)
+    │   └── (Saves Log)
     ├── Tab 3: ShelfScreen
     │   └── AlcoholDetailScreen
     └── Tab 4: ProfileScreen
@@ -156,11 +174,20 @@ AuthGate
   * **State Variants:** Loading (Skeleton UI / Shimmer), Empty (Standardized `AppEmptyState` with action to log a drink), Layouts (Timeline vs. Gallery).
   * **Actions Available:** Switch between Timeline Layout (detailed list) and Gallery Layout (photo grid). Working filter chips for Log/Review types.
 * **Screen:** `SearchScreen`
-  * **Route:** `/search`
+  * **Route:** `/search` (Tab 1)
   * **Access:** Authenticated
-  * **Purpose:** Queries Firestore for drinks.
-  * **State Variants:** Empty ("Start typing to search" / "No results found"), Loading (CircularProgressIndicator).
-  * **Actions Available:** Tap Alcohol -> `AlcoholDetailScreen`.
+  * **Purpose:** Acts as the "Discover" hub for browsing and searching the alcohol catalog.
+  * **State Variants:** Empty ("No results found"), Loading (Skeleton UI).
+  * **Actions Available:** Tap Alcohol -> `AlcoholDetailScreen`, Tap Bookmark -> `WishlistScreen`.
+* **Screen:** `UnifiedLoggingScreen`
+  * **Route:** None (Fullscreen Dialog)
+  * **Access:** Authenticated
+  * **Purpose:** Central logging interface for both custom drinks and catalog bottles.
+  * **Features:** Custom name entry, bottle selection, photo capture (Camera/Gallery), reaction selector.
+* **Screen:** `BottleSelectionScreen`
+  * **Route:** None (Pushed from UnifiedLogging)
+  * **Access:** Authenticated
+  * **Purpose:** Filterable list for selecting a specific bottle from the catalog during the logging flow.
 * **Screen:** `AlcoholDetailScreen`
   * **Route:** `/alcoholDetail`
   * **Access:** Authenticated

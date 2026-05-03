@@ -6,6 +6,7 @@ Last Updated: 2026-05-03
 *   **High Contrast Dark UI:** The primary implementation centers entirely around a dark theme with a stark black background and high-visibility amber accents.
 *   **Timeline-based Activity:** Content is organized chronologically using a two-column timeline layout, removing the previous card-based grouping for a more premium, scannable feed.
 *   **Modal-Driven Input:** Complex user interactions (e.g., logging a drink, writing a review, tagging people) are isolated in bottom-sheet modals to preserve context.
+*   **Source-Aware Capture:** All photo-capture actions must provide a choice between **Camera** and **Gallery** via a standardized bottom sheet.
 
 ## 2. Design Tokens (Extracted, Not Generated)
 
@@ -115,13 +116,13 @@ Located in `lib/features/auth/widgets/onboarding_components.dart`:
     *   **Timeline Structure**: A two-column grid.
         *   **Left Column (56px)**: Date anchor (Large day number, Small-caps month abbreviation).
         *   **Right Column**: Content stream (Identity, Activity, Summary).
-    *   **Horizontal Log Scroll**: `SizedBox(height: 220)` + `ListView.separated(Axis.horizontal)` of `LogMiniCard` widgets.
+    *   **Horizontal Log Scroll**: `SizedBox(height: 120)` + `ListView.separated(Axis.horizontal)` of `LogMiniCard` widgets.
     *   **Edge-to-Edge Bleed**: The scroll area is unconstrained, allowing media to scroll across the entire screen width while maintaining grid alignment.
     *   **Footer**: "X LOGS" label + Interaction buttons (More, Share).
     *   **Spacing**: 24px vertical padding between day groups (`xxl`).
     *   **Separation**: Hairline `Divider` (thickness: 1.0, height: 8.0) after each day group.
 *   **LogMiniCard** (used inside DayActivityCard scroll row):
-    *   **Dimensions**: `width: 170`, `height: 190` (image).
+    *   **Dimensions**: `width: 170`, `height: 120`.
     *   **Background**: `deepCardBackground` (#0F0F0F), `radius: radiusProduct` (14px), `borderDark` border.
     *   **Top Badge**: Reaction icon (log) OR `⭐ + numeric rating` (review) in top-left.
     *   **Center**: `alcoholName` bold, max 2 lines, `TextOverflow.ellipsis`.
@@ -149,7 +150,7 @@ Located in `lib/features/auth/widgets/onboarding_components.dart`:
       - "Logout" (list tile with `Icons.logout`).
     - **Interaction:** Opens when the user taps the settings icon in the Profile AppBar.
 
-*   **Centered Action Icon:** The central navigation item (Index 2) is specifically highlighted as a circular action button with a golden glow/shadow and amber opacity background to denote it as the "Core Discovery Action."
+*   **Centered Action Icon:** The central navigation item (Index 2) is a specialized circular action button (`+`) that opens the `UnifiedLoggingScreen` as a fullscreen dialog.
 
 ### State Indicators
 *   **Loading Spinner:** Relies on default `CircularProgressIndicator()`. Embedded inside buttons during async actions, sometimes passing `strokeWidth: 2`.
@@ -190,8 +191,15 @@ A complete `lightTheme` and `lightCustomColors` definition exists in `app_theme.
 No explicit responsive differentiation implemented beyond default framework behavior. Viewports scale linearly.
 
 ## 8. Performance Guidelines
-*   **Image Handling:** The repository imports `cached_network_image` in `pubspec.yaml`, though some screens still use fundamental `Image.network` loading.
-*   No explicit frontend performance optimizations beyond native Flutter tree rendering identifiable.
+*   **Image Handling:**
+    - Use `cached_network_image` for all network images.
+    - **Memory Optimization**: Always specify `memCacheWidth` (and/or `memCacheHeight`) in `CachedNetworkImage`. This prevents high-resolution images from being decoded at full size into RAM, which is the #1 cause of scrolling jank.
+*   **List Scrolling**:
+    - Avoid `IntrinsicHeight` inside large lists/grids. Use fixed heights or `SliverLayoutBuilder` if dynamic height is required but must be performant.
+    - **Riverpod Caching**: Use the `alcoholCacheProvider` to avoid redundant Firestore `.get()` calls during scroll frames.
+*   **Rebuild Optimization**:
+    - Use `const` constructors where possible.
+    - Prefer `ConsumerWidget` for leaf nodes that depend on state to minimize parent rebuilds.
 
 ## 9. Browser Support
-Browser support policy not explicitly documented (Primary deployment architecture targets native mobile compilation).
+*   Targeting mobile platforms primarily. Web support is experimental.
