@@ -6,6 +6,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../app/app_theme.dart';
 import '../../alcohol/repositories/alcohol_repository.dart';
 import '../../drink_logs/models/drink_model_dto.dart';
+import '../../wishlist/screens/wishlist_screen.dart';
 import '../models/discover_item_model.dart';
 import '../widgets/discover_alcohol_card.dart';
 import '../widgets/filter_bottom_sheet.dart';
@@ -193,6 +194,18 @@ class _SearchScreenState extends State<SearchScreen> {
             snap: true,
             centerTitle: true,
             title: Text('DISCOVER', style: AppTextStyles.appBarTitle),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.bookmark_outline),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const WishlistScreen()),
+                  );
+                },
+                tooltip: 'Wishlist',
+              ),
+            ],
           ),
           if (_isLoading)
             const SliverToBoxAdapter(
@@ -215,7 +228,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   controller: _controller,
                   style: AppTextStyles.body,
                   decoration: InputDecoration(
-                    hintText: 'Search alcohols, brands, types...',
+                    hintText: 'Discover alcohols, brands, types...',
                     prefixIcon:
                         Icon(Icons.search, color: customColors.textMuted),
                     suffixIcon: IconButton(

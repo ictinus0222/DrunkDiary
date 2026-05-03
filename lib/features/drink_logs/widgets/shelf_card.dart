@@ -62,6 +62,7 @@ class ShelfCard extends StatelessWidget {
                   child: CachedNetworkImage(
                     imageUrl: alcohol.imageUrl,
                     fit: BoxFit.cover,
+                    memCacheWidth: 300, // Cards are small on the shelf
                     placeholder: (context, url) => const AppShimmer(),
                     errorWidget: (context, url, error) => Container(
                       color: customColors.cardBackground,

@@ -13,8 +13,18 @@ import '../../alcohol/models/alcohol_model.dart';
 import '../models/drink_model_dto.dart';
 
 class CreateLogBottomSheet extends StatefulWidget {
-  final AlcoholModel alcohol;
-  const CreateLogBottomSheet({super.key, required this.alcohol});
+  final AlcoholModel? alcohol;
+  final bool isCustom;
+  final String? customName;
+  final String? customImageUrl;
+
+  const CreateLogBottomSheet({
+    super.key,
+    this.alcohol,
+    this.isCustom = false,
+    this.customName,
+    this.customImageUrl,
+  });
 
   @override
   State<CreateLogBottomSheet> createState() => _CreateLogBottomSheetState();
@@ -33,8 +43,96 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
   final ImagePicker _picker = ImagePicker();
 
   // =====================
-  // PHOTO PICKER
+  // SAVE LOG
   // =====================
+  Future<void> saveLog() async {
+    if (isSaving) return;
+
+    final user = FirebaseAuth.instance.currentUser!;
+    setState(() => isSaving = true);
+
+    try {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      final log = DrinkLogModel(
+        id: '',
+        userId: user.uid,
+        alcoholId: widget.isCustom ? null : widget.alcohol?.id,
+        username: userDoc['username'] ?? 'Unknown',
+        userPhotoUrl: userDoc['photoUrl'],
+        alcoholName: widget.isCustom ? (widget.customName ?? 'Custom Drink') : widget.alcohol!.name,
+        alcoholType: widget.isCustom ? 'Custom' : widget.alcohol!.type,
+        isCustom: widget.isCustom,
+        customName: widget.isCustom ? widget.customName : null,
+        customImageUrl: widget.customImageUrl,
+        rating: null,
+        reaction: selectedReaction,
+        note: noteController.text.isNotEmpty ? noteController.text : null,
+        logKind: LogKind.log,
+        createdAt: DateTime.now(),
+      );
+
+      final logRef = await FirebaseFirestore.instance
+          .collection('drink_logs')
+          .add(log.toMap());
+
+      if (selectedPhoto != null) {
+        await _uploadPhoto(logRef, user.uid);
+      }
+
+      // 🏆 Log analytics event
+      await AnalyticsService().logCreateDrinkLog(
+        logKind: 'log',
+        alcoholType: widget.isCustom ? 'Custom' : widget.alcohol!.type,
+        reaction: selectedReaction?.name ?? 'unknown',
+      );
+
+      if (mounted) Navigator.pop(context, true);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not save log', style: TextStyle(color: Theme.of(context).colorScheme.onError)),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => isSaving = false);
+    }
+  }
+
+  Future<void> _uploadPhoto(
+    DocumentReference logRef,
+    String userId,
+  ) async {
+    try {
+      setState(() => isUploadingPhoto = true);
+
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child('drink_logs')
+          .child(userId)
+          .child('${logRef.id}.jpg');
+
+      await ref.putFile(selectedPhoto!);
+
+      final url = await ref.getDownloadURL();
+
+      await logRef.update({
+        'photoUrl': url,
+        'photoUploadedAt': FieldValue.serverTimestamp(),
+      });
+    } finally {
+      if (mounted) {
+        setState(() => isUploadingPhoto = false);
+      }
+    }
+  }
+
   Future<void> pickPhoto(BuildContext context) async {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     showModalBottomSheet(
@@ -86,94 +184,6 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
   }
 
   // =====================
-  // SAVE LOG
-  // =====================
-  Future<void> saveLog() async {
-    if (isSaving) return;
-
-    final user = FirebaseAuth.instance.currentUser!;
-    setState(() => isSaving = true);
-
-    try {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-
-      final log = DrinkLogModel(
-        id: '',
-        userId: user.uid,
-        alcoholId: widget.alcohol.id,
-        username: userDoc['username'] ?? 'Unknown',
-        userPhotoUrl: userDoc['photoUrl'],
-        alcoholName: widget.alcohol.name,
-        alcoholType: widget.alcohol.type,
-        rating: null,
-        reaction: selectedReaction,
-        note: noteController.text.isNotEmpty ? noteController.text : null,
-        logKind: LogKind.log,
-        createdAt: DateTime.now(),
-      );
-
-      final logRef = await FirebaseFirestore.instance
-          .collection('drink_logs')
-          .add(log.toMap());
-
-      if (selectedPhoto != null) {
-        await _uploadPhoto(logRef, user.uid);
-      }
-
-      // 🏆 Log analytics event
-      await AnalyticsService().logCreateDrinkLog(
-        logKind: 'log',
-        alcoholType: widget.alcohol.type,
-        reaction: selectedReaction?.name ?? 'unknown',
-      );
-
-      if (mounted) Navigator.pop(context, true);
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Could not save log', style: TextStyle(color: Theme.of(context).colorScheme.onError)),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => isSaving = false);
-    }
-  }
-
-  Future<void> _uploadPhoto(
-    DocumentReference logRef,
-    String userId,
-  ) async {
-    try {
-      setState(() => isUploadingPhoto = true);
-
-      final ref = FirebaseStorage.instance
-          .ref()
-          .child('drink_logs')
-          .child(userId)
-          .child('${logRef.id}.jpg');
-
-      await ref.putFile(selectedPhoto!);
-
-      final url = await ref.getDownloadURL();
-
-      await logRef.update({
-        'photoUrl': url,
-        'photoUploadedAt': FieldValue.serverTimestamp(),
-      });
-    } finally {
-      if (mounted) {
-        setState(() => isUploadingPhoto = false);
-      }
-    }
-  }
-
-  // =====================
   // UI
   // =====================
   @override
@@ -211,7 +221,7 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
               ),
             ),
             Text(
-              'Log ${widget.alcohol.name}',
+              'Log ${widget.isCustom ? (widget.customName ?? "Drink") : widget.alcohol!.name}',
               style: textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),

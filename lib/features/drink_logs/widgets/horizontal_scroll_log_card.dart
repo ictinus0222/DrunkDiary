@@ -11,6 +11,8 @@ import 'log_detail_bottom_sheet.dart';
 import '../../../core/widgets/app_shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/drink_logs_provider.dart';
 
 /// Image-first compact card for the [DayActivityCard] horizontal scroll row.
 ///
@@ -23,13 +25,13 @@ import 'package:google_fonts/google_fonts.dart';
 /// │  Bombay Sapphire  ⭐ 3.5 │
 /// │  3:24 PM                 │
 /// └──────────────────────────┘
-class LogMiniCard extends StatelessWidget {
+class LogMiniCard extends ConsumerWidget {
   final DrinkLogModel log;
 
   const LogMiniCard({super.key, required this.log});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
       onTap: () {
         showModalBottomSheet(
@@ -100,12 +102,12 @@ class LogMiniCard extends StatelessWidget {
 
 // ── Image layer ───────────────────────────────────────────────────────────────
 
-class _ImageLayer extends StatelessWidget {
+class _ImageLayer extends ConsumerWidget {
   final DrinkLogModel log;
   const _ImageLayer({required this.log});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
 
     // Prefer the user's captured photo
@@ -118,27 +120,19 @@ class _ImageLayer extends StatelessWidget {
       );
     }
 
-    // Fall back to bottle image from the alcohols collection
-    return FutureBuilder<DocumentSnapshot>(
-      future: FirebaseFirestore.instance
-          .collection('alcohols')
-          .doc(log.alcoholId)
-          .get(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data!.exists) {
-          final alcohol = AlcoholModel.fromFirestore(snapshot.data!);
-          return CachedNetworkImage(
-            imageUrl: alcohol.imageUrl,
-            fit: BoxFit.cover,
-            placeholder: (_, __) => const AppShimmer(),
-            errorWidget: (_, __, ___) => _FallbackBackground(customColors: customColors),
-          );
-        }
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const AppShimmer();
-        }
-        return _FallbackBackground(customColors: customColors);
+    return ref.watch(alcoholCacheProvider(log.alcoholId!)).when(
+      data: (alcohol) {
+        if (alcohol == null) return _FallbackBackground(customColors: customColors);
+        return CachedNetworkImage(
+          imageUrl: alcohol.imageUrl,
+          fit: BoxFit.cover,
+          memCacheWidth: 250, // Mini cards are small
+          placeholder: (_, __) => const AppShimmer(),
+          errorWidget: (_, __, ___) => _FallbackBackground(customColors: customColors),
+        );
       },
+      loading: () => const AppShimmer(),
+      error: (_, __) => _FallbackBackground(customColors: customColors),
     );
   }
 }

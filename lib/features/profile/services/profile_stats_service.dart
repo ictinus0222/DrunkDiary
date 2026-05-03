@@ -35,10 +35,10 @@ class ProfileStatsService {
         recentLogs.add(log);
       }
 
-      if (!uniqueAlcohols.contains(log.alcoholId)) {
-        uniqueAlcohols.add(log.alcoholId);
+      if (log.alcoholId != null && !uniqueAlcohols.contains(log.alcoholId!)) {
+        uniqueAlcohols.add(log.alcoholId!);
         if (recentAlcoholIds.length < 10) {
-          recentAlcoholIds.add(log.alcoholId);
+          recentAlcoholIds.add(log.alcoholId!);
         }
       }
 

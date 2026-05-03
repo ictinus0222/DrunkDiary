@@ -40,6 +40,10 @@ class _LogDetailBottomSheetState extends ConsumerState<LogDetailBottomSheet> {
   }
 
   Future<void> _fetchAlcohol() async {
+    if (_log.alcoholId == null) {
+      if (mounted) setState(() => _isLoadingAlcohol = false);
+      return;
+    }
     try {
       final doc = await FirebaseFirestore.instance
           .collection('alcohols')

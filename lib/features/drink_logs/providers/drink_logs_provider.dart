@@ -37,17 +37,29 @@ final shelfAlcoholsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) a
   
   if (logs.isEmpty) return [];
 
-  // 1. Group logs by alcoholId
+  // 1. Group logs by alcoholId (cataloged bottles only)
   final Map<String, List<DrinkLogModel>> grouped = {};
   for (var log in logs) {
-    grouped.putIfAbsent(log.alcoholId, () => []).add(log);
+    if (log.alcoholId != null) {
+      grouped.putIfAbsent(log.alcoholId!, () => []).add(log);
+    }
   }
 
-  // 2. Fetch/Resolve Alcohol Models for each ID
+  // 2. Fetch/Resolve Alcohol Models for each ID in parallel
+  final List<String> alcoholIds = grouped.keys.toList();
+  
+  // Use ref.read for the futures to avoid excessive rebuilds inside the async body
+  // and gather them all at once
+  final List<AlcoholModel?> alcohols = await Future.wait(
+    alcoholIds.map((id) => ref.read(alcoholCacheProvider(id).future))
+  );
+
   final List<Map<String, dynamic>> shelfItems = [];
   
-  for (final alcoholId in grouped.keys) {
-    final alcohol = await ref.watch(alcoholCacheProvider(alcoholId).future);
+  for (int i = 0; i < alcoholIds.length; i++) {
+    final alcoholId = alcoholIds[i];
+    final alcohol = alcohols[i];
+    
     if (alcohol != null) {
       final alcoholLogs = grouped[alcoholId]!;
       
@@ -63,7 +75,7 @@ final shelfAlcoholsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) a
         'alcohol': alcohol,
         'logCount': standardLogs.length,
         'avgRating': avgRating,
-        'lastInteraction': alcoholLogs.first.createdAt, // logs are descending
+        'lastInteraction': alcoholLogs.first.createdAt, // logs are already sorted descending
       });
     }
   }

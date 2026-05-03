@@ -12,13 +12,16 @@ import '../../../core/widgets/app_shimmer.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 
-class DrinkLogCard extends StatelessWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/drink_logs_provider.dart';
+
+class DrinkLogCard extends ConsumerWidget {
   final DrinkLogModel log;
 
   const DrinkLogCard({super.key, required this.log});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final hasPhoto = log.photoUrl != null && log.photoUrl!.isNotEmpty;
 
     return GestureDetector(
@@ -32,25 +35,25 @@ class DrinkLogCard extends StatelessWidget {
           builder: (_) => LogDetailBottomSheet(log: log),
         );
       },
-      child: hasPhoto ? _buildVerticalLayout(context) : _buildHorizontalLayout(context),
+      child: hasPhoto ? _buildVerticalLayout(context, ref) : _buildHorizontalLayout(context, ref),
     );
   }
 
-  Widget _buildHorizontalLayout(BuildContext context) {
+  Widget _buildHorizontalLayout(BuildContext context, WidgetRef ref) {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.sm),
+      height: 120, // Fixed height for horizontal cards to improve performance
       decoration: BoxDecoration(
         color: customColors.cardBackground,
         borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
         border: Border.all(color: customColors.borderDark.withValues(alpha: 0.5), width: 1),
       ),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _posterImage(isHorizontal: true),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _posterImage(isHorizontal: true, ref: ref),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.lg),
@@ -72,11 +75,10 @@ class DrinkLogCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 
-  Widget _buildVerticalLayout(BuildContext context) {
+  Widget _buildVerticalLayout(BuildContext context, WidgetRef ref) {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     
     return Container(
@@ -90,7 +92,7 @@ class DrinkLogCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _posterImage(isHorizontal: false),
+          _posterImage(isHorizontal: false, ref: ref),
           Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
@@ -116,7 +118,7 @@ class DrinkLogCard extends StatelessWidget {
   //* ----------------------------
   // POSTER IMAGE (Bottle or Photo)
   // ----------------------------
-  Widget _posterImage({required bool isHorizontal}) {
+  Widget _posterImage({required bool isHorizontal, required WidgetRef ref}) {
     final hasPhoto = log.photoUrl != null && log.photoUrl!.isNotEmpty;
 
     return Container(
@@ -141,32 +143,29 @@ class DrinkLogCard extends StatelessWidget {
                 errorWidget: (context, url, error) => const Icon(Icons.error),
               ),
             )
-          : FutureBuilder<DocumentSnapshot>(
-              future: FirebaseFirestore.instance
-                  .collection('alcohols')
-                  .doc(log.alcoholId)
-                  .get(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData && snapshot.data!.exists) {
-                  final alcohol = AlcoholModel.fromFirestore(snapshot.data!);
-                  return Hero(
-                    tag: 'alcohol_log_${log.id}',
-                    child: CachedNetworkImage(
-                      imageUrl: alcohol.imageUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => const AppShimmer(),
-                      errorWidget: (context, url, error) => const Center(
-                        child: Icon(Icons.local_bar, color: Colors.white24, size: 30),
+          : (log.alcoholId == null 
+              ? const Center(child: Icon(Icons.local_bar, color: Colors.white24, size: 30))
+              : ref.watch(alcoholCacheProvider(log.alcoholId!)).when(
+                  data: (alcohol) {
+                    if (alcohol == null) {
+                      return const Center(child: Icon(Icons.local_bar, color: Colors.white24, size: 30));
+                    }
+                    return Hero(
+                      tag: 'alcohol_log_${log.id}',
+                      child: CachedNetworkImage(
+                        imageUrl: alcohol.imageUrl,
+                        fit: BoxFit.cover,
+                        memCacheWidth: 200, // Optimize image memory
+                        placeholder: (context, url) => const AppShimmer(),
+                        errorWidget: (context, url, error) => const Center(
+                          child: Icon(Icons.local_bar, color: Colors.white24, size: 30),
+                        ),
                       ),
-                    ),
-                  );
-                }
-                return const AppShimmer(
-                  height: double.infinity,
-                  width: double.infinity,
-                );
-              },
-            ),
+                    );
+                  },
+                  loading: () => const AppShimmer(height: double.infinity, width: double.infinity),
+                  error: (_, __) => const Center(child: Icon(Icons.local_bar, color: Colors.white24, size: 30)),
+                )),
     );
   }
 

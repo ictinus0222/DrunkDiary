@@ -96,19 +96,6 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
           }).toList();
 
           return Scaffold(
-            floatingActionButton: allLogs.isEmpty
-                ? null
-                : FloatingActionButton.extended(
-                    onPressed: () {
-                      const TabChangeNotification(2).dispatch(context);
-                    },
-                    icon: const Icon(Icons.add, color: Colors.black),
-                    label: const Text('Log a Drink',
-                        style: TextStyle(
-                            color: Colors.black, fontWeight: FontWeight.bold)),
-                    backgroundColor: Colors.amber,
-                    heroTag: 'diary_fab',
-                  ),
             body: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
               slivers: [
@@ -471,12 +458,12 @@ class ActivityGroup {
 
 
 
-class _GalleryItem extends StatelessWidget {
+class _GalleryItem extends ConsumerWidget {
   final DrinkLogModel log;
   const _GalleryItem({required this.log});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     return GestureDetector(
       onTap: () {
@@ -509,36 +496,42 @@ class _GalleryItem extends StatelessWidget {
                         errorWidget: (context, url, error) => const Icon(Icons.error),
                       ),
                     )
-                  : FutureBuilder<DocumentSnapshot>(
-                      future: FirebaseFirestore.instance
-                          .collection('alcohols')
-                          .doc(log.alcoholId)
-                          .get(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData && snapshot.data!.exists) {
-                          final alcohol =
-                              AlcoholModel.fromFirestore(snapshot.data!);
-                          return Hero(
-                            tag: 'alcohol_log_${log.id}',
-                            child: CachedNetworkImage(
-                              imageUrl: alcohol.imageUrl,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => const AppShimmer(),
-                              errorWidget: (context, url, error) => Container(
+                      : (log.alcoholId == null
+                          ? Container(
+                              color: customColors.borderDark,
+                              child: const Icon(Icons.local_bar, color: Colors.white24),
+                            )
+                          : ref.watch(alcoholCacheProvider(log.alcoholId!)).when(
+                              data: (alcohol) {
+                                if (alcohol == null) {
+                                  return Container(
+                                    color: customColors.borderDark,
+                                    child: const Icon(Icons.local_bar, color: Colors.white24),
+                                  );
+                                }
+                                return Hero(
+                                  tag: 'alcohol_log_${log.id}',
+                                  child: CachedNetworkImage(
+                                    imageUrl: alcohol.imageUrl,
+                                    fit: BoxFit.cover,
+                                    memCacheWidth: 300, // Gallery items are roughly 1/2 screen width
+                                    placeholder: (context, url) => const AppShimmer(),
+                                    errorWidget: (context, url, error) => Container(
+                                      color: customColors.borderDark,
+                                      child: const Icon(Icons.local_bar, color: Colors.white24),
+                                    ),
+                                  ),
+                                );
+                              },
+                              loading: () => Container(
                                 color: customColors.borderDark,
-                                child: const Icon(Icons.local_bar,
-                                    color: Colors.white24),
+                                child: const Center(child: AppShimmer()),
                               ),
-                            ),
-                          );
-                        }
-                        return Container(
-                          color: customColors.borderDark,
-                          child:
-                              const Center(child: AppShimmer()),
-                        );
-                      },
-                    ),
+                              error: (_, __) => Container(
+                                color: customColors.borderDark,
+                                child: const Icon(Icons.local_bar, color: Colors.white24),
+                              ),
+                            )),
             ),
 
             // Gradient Overlay for visibility

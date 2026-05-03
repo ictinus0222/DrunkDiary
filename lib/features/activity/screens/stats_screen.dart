@@ -225,11 +225,13 @@ class _TasteBreakdown extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppSpacing.radiusCompact),
                   color: Colors.black26,
                 ),
-                child: FutureBuilder<DocumentSnapshot>(
-                  future: FirebaseFirestore.instance
-                      .collection('alcohols')
-                      .doc(highestRated.alcoholId)
-                      .get(),
+                child: highestRated.alcoholId == null
+                    ? const Icon(Icons.star, color: Colors.amber)
+                    : FutureBuilder<DocumentSnapshot>(
+                        future: FirebaseFirestore.instance
+                            .collection('alcohols')
+                            .doc(highestRated.alcoholId)
+                            .get(),
                   builder: (context, snapshot) {
                     if (snapshot.hasData && snapshot.data!.exists) {
                       final alcohol = AlcoholModel.fromFirestore(snapshot.data!);

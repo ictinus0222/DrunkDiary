@@ -64,6 +64,7 @@ class DiscoverAlcoholCard extends StatelessWidget {
                           child: CachedNetworkImage(
                             imageUrl: item.alcohol.imageUrl,
                             fit: BoxFit.contain,
+                            memCacheWidth: 250, // Card width is 110, so 250 is plenty for quality
                             placeholder: (context, url) => const AppShimmer(),
                             errorWidget: (context, url, error) => Icon(Icons.error, color: customColors.textMuted, size: 40),
                           ),
