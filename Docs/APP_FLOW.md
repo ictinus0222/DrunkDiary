@@ -26,8 +26,8 @@ Last Updated: 2026-04-18
   5. `AuthGate` fetches Firestore user document. If missing or `onboardingCompleted` is false, renders `OnboardingScreen`.
   5. `AuthGate` fetches Firestore user document. If missing or `onboardingCompleted` is false, renders `OnboardingScreen`.
   6. `OnboardingScreen` (Step 1): Legal Age Check.
-     * Logic: "Are you of legal drinking age in your country?"
-     * Action: User selects "Yes" to proceed or "No" to view block screen.
+     * Logic: "Are you of legal drinking age?"
+     * Action: User selects "YES" to proceed or "NO" to view block screen.
   7. `OnboardingScreen` (Step 2): Name.
      * Logic: "What should the community call you?"
      * Validation: Username > 3 chars and unique in `usernames` collection.
@@ -84,9 +84,24 @@ Last Updated: 2026-04-18
     4. User Action: Taps submit.
     5. System Action: Triggers `FeedbackHandler`. Uses `flutter_email_sender` to launch the device's default email client with the screenshot as an attachment.
     6. Resulting State: Device email composer opens.
-  * **Error States:**
-    * Trigger: No email client configured on device (PlatformException).
-    * Message: SnackBar displays "No email client found. Please configure an email account."
+  * Message: SnackBar displays "No email client found. Please configure an email account."
+
+### Flow: Profile Flow (V1)
+* **Goal:** View personal identity and activity timeline.
+* **Entry Point:** `ProfileScreen` (Tab index 4).
+* **Happy Path:**
+  1. **Entry**: User taps "Profile" tab in bottom navigation.
+  2. **Identity View**:
+     - Cover image + avatar
+     - Name, username, optional bio
+     - "Days Logged" stat
+  3. **Activity Timeline**:
+     - Scrollable feed using `DayActivityCard` (Timeline Layout)
+     - Logs grouped by date (Left-column anchor)
+     - Matches Diary layout exactly
+  4. **Edit (UI Placeholder)**:
+     - Edit button present
+     - No functional editing in V1
 
 ## 3. Navigation Map (Actual Structure Only)
 
@@ -165,10 +180,12 @@ AuthGate
       - `WishlistItemCard` provides a premium "Product Tile" preview with a `+ Log` button.
       - `WishlistDiscoveryCarousel` (horizontal) for recommendations.
 * **Screen:** `ProfileScreen`
-  * **Route:** `/profile` (if any)
+  * **Route:** `/profile`
   * **Access:** Authenticated
-  * **Purpose:** Displays the user's personal profile including basic info (avatar, username), dynamic statistics (Drinks Tried, Favorite Type, Top Rated), a horizontal "Public Shelf" showcasing recently logged alcohols, and a "Recent Activity" vertical feed of individual drink logs. Contains a settings action in the app bar.
-  * **Actions Available:** Tapping the Settings icon opens the `SettingsDrawer`.
+  * **Purpose:** Displays the user's personal identity (Cover, Avatar, Bio) and an "Activity" feed that mirrors the Diary timeline. Reuses `DayActivityCard` and `LogMiniCard` for consistency.
+  * **Actions Available:** 
+      - Tapping the Settings icon opens the `SettingsDrawer`.
+      - "Edit" button (UI Placeholder).
 * **Component:** `SettingsDrawer`
   * **Purpose:** Provides a right-aligned sidebar for account settings and logout functionality.
   * **Admin Logic:** Includes an entry point for `AdminSettingsScreen` if the authenticated account matches authorized admin emails.

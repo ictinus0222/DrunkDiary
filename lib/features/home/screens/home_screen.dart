@@ -50,8 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
         unselectedItemColor: Colors.grey.shade600,
         showSelectedLabels: true,
         showUnselectedLabels: true,
-        selectedFontSize: 12,
-        unselectedFontSize: 12,
         items: [
           const BottomNavigationBarItem(
             icon: Icon(Icons.menu_book_outlined),

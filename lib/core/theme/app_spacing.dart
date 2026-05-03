@@ -12,7 +12,7 @@ class AppSpacing {
 
   // 🔹 Standardized Page Padding
   static const EdgeInsets pagePadding = EdgeInsets.symmetric(
-    horizontal: xl, // 20
+    horizontal: lg, // 16
     vertical: lg,   // 16
   );
 

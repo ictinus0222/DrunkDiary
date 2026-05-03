@@ -4,6 +4,7 @@ class UserModel {
   final String id;
   final String displayName;
   final String? photoUrl;
+  final String? coverUrl;
   final bool ageVerified;
   final DateTime createdAt;
   // Profile
@@ -15,6 +16,7 @@ class UserModel {
     required this.id,
     required this.displayName,
     this.photoUrl,
+    this.coverUrl,
     required this.ageVerified,
     required this.createdAt,
     // Profile
@@ -30,6 +32,7 @@ class UserModel {
       id: userDoc.id,
       displayName: userData['displayName'] ?? '',
       photoUrl: userData['photoUrl'],
+      coverUrl: userData['coverUrl'],
       ageVerified: userData['ageVerified'] ?? false,
       createdAt:
           (userData['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
@@ -44,6 +47,7 @@ class UserModel {
     return {
       'displayName': displayName,
       'photoUrl': photoUrl,
+      'coverUrl': coverUrl,
       'ageVerified': ageVerified,
       'createdAt': Timestamp.fromDate(createdAt),
       // Profile
@@ -52,4 +56,5 @@ class UserModel {
       'role': role,
     };
   }
+
 }

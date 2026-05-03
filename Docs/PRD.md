@@ -45,7 +45,7 @@ Based on the onboarding flow and feature structure, the target users are individ
   - **User Story:** As a new user, I can sign in with my Google account, confirm my legal drinking age, and build my taste profile so my experience feels personal from the first screen.
   - **Acceptance Criteria:** 
     - Smooth 5-step perceived flow (Legal Age, Name, Taste, Goal, Final).
-    - Identity confirmation: Users assert they are of legal drinking age (Yes/No).
+    - Identity confirmation: Users assert they are of legal drinking age via Yes/No interaction.
     - Blocks ineligible users with a graceful Exit screen.
     - Requires a unique identity name (username) > 3 characters via Firestore transaction.
   - **Edge Cases:** Handles taken usernames gracefully by reverting the transaction and showing a snackbar.
@@ -59,9 +59,9 @@ Based on the onboarding flow and feature structure, the target users are individ
   - **User Story:** As a user, I want to review an alcohol so I can see my rating later.
   - **Acceptance Criteria:** User uses a 0-5 slider, provides text, and an optional photo. Saves with `logKind: LogKind.review`. Uses a deterministic ID (`{userId}_{alcoholId}`) to prevent duplicates.
   - **Edge Cases:** Attempting to review the same drink twice overwrites the existing review.
-- **Diary (formerly User Timeline)**
+- **Diary (Timeline)**
   - **Description:** Chronological feed of the user's previous logs, acting as the primary diary. Support for multiple view layouts:
-    - **Timeline Layout:** A list-based view showing full log cards with details (Note, Context, Tags).
+    - **Timeline Layout:** A structured grid showing a fixed-width date anchor on the left and a content stream on the right.
     - **Gallery Layout:** A grid-based view showing only closeups of the drink photos.
   - **User Story:** As a user, I want to see my logs in order in my diary, and be able to switch to a visual gallery of my drinks.
   - **Acceptance Criteria:** 
@@ -98,15 +98,31 @@ Based on the onboarding flow and feature structure, the target users are individ
   - **Description:** Displays alcohol information, personal logs, and global community stats.
   - **User Story:** As a user, I can view details of a drink, see my personal logs (excluding reviews), and view community statistics like total global logs, global average rating, and a global reaction distribution.
   - **Acceptance Criteria:** Queries all logs for the specified alcohol to calculate global total logs, personal total logs (logKind: log only), average community rating, and the global reaction distribution. Provides a view of the user's history with the alcohol.
-- **Stats & Taste Identity Page**
-  - **Description:** A dedicated space for deep reflection on drinking habits and taste profile.
-  - **User Story:** As a user, I want a dedicated space to see my "Taste Identity" and deeper metrics that focus on exploration and memory rather than consumption count.
-  - **Acceptance Criteria:** 
-    - Displays unique bottles logged vs total entries.
-    - Calculates favorite spirit and highest rated bottle.
-    - Shows exploration stats (nights recorded, countries explored).
-    - Derives taste identity (e.g., "Whisky Explorer").
-    - Clean, premium, journal-like UI.
+- **Profile Screen (V1 – Identity + Activity Mirror)**
+  - **Description**: A personal profile screen focused on identity and activity, acting as a mirror of the user's Diary timeline.
+  - **User Story**: As a user, I want to view my profile with my identity (photo, name, bio) and my activity timeline, so I can reflect on my drinking history in a cohesive and premium interface.
+  - **Acceptance Criteria**:
+    - **Hero Area**:
+      - Full-width cover image (~200 height)
+      - Overlapping circular avatar (radius 40–50)
+      - Display name (bold) and @username (subtle)
+      - Optional bio (hidden if empty)
+    - **Stats**:
+      - Show only: "X DAYS LOGGED"
+      - Derived from unique days with logs
+    - **Activity Mirror**:
+      - Reuse existing `DayActivityCard` and `LogMiniCard`
+      - Same grouping logic as Diary (by date)
+      - No UI deviation from Diary feed
+    - **Edit Interaction (UI only)**:
+      - Edit button visible
+      - No backend integration in V1
+  - **Out of Scope (V1)**:
+    - Followers / Friends
+    - Stats tab
+    - Badges / Achievements
+    - Profile customization backend
+
 - **In-App Feedback System**
   - **Description:** Allows users to submit screenshots and text feedback directly from their profile.
   - **User Story:** As a user, I want to easily report bugs or suggest features without leaving the app.

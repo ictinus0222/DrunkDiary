@@ -1,10 +1,10 @@
 # Frontend Design System & Guidelines
 
-Last Updated: 2026-04-18
+Last Updated: 2026-05-03
 
 ## 1. Design Principles (Inferred From UI)
 *   **High Contrast Dark UI:** The primary implementation centers entirely around a dark theme with a stark black background and high-visibility amber accents.
-*   **Card-based Grouping:** Content (logs, shelf items, stats) is primarily grouped and elevated visually using distinct dark-grey surface containers.
+*   **Timeline-based Activity:** Content is organized chronologically using a two-column timeline layout, removing the previous card-based grouping for a more premium, scannable feed.
 *   **Modal-Driven Input:** Complex user interactions (e.g., logging a drink, writing a review, tagging people) are isolated in bottom-sheet modals to preserve context.
 
 ## 2. Design Tokens (Extracted, Not Generated)
@@ -36,18 +36,15 @@ Defined in `lib/app/app_theme.dart` as `ThemeExtension<AppCustomColors>`. Access
 *   `error`: `Colors.red`
 *   `warning`: `Color(0xFFFFC107)`
 
-*   `warning`: `Color(0xFFFFC107)`
-
 ### Typography
 *   **Font Families:**
     - `CategoriesElegant`: Primary branding font (AppBar titles).
-    - `Inter`: Primary body font (via `google_fonts` and `AppTextStyles`).
-    - `DMSans`: Secondary UI font.
+    - `DMSans`: Primary UI font for both Heading and Body (via `google_fonts` and `AppTextStyles`).
     - `GiveYouGlory`: Decorative font for greetings.
 *   **Font Weights:** Regular (`w400`), `FontWeight.w500`, `FontWeight.w600`, `FontWeight.w700` (bold).
 
 ### AppTextStyles (Centralized Type Scale)
-Defined in `lib/core/theme/app_text_styles.dart`. All styles use Google Fonts `Inter` unless noted.
+Defined in `lib/core/theme/app_text_styles.dart`. All styles use Google Fonts `DM Sans`.
 *   `caption`: `12px`, `w400`, grey — Metadata, timestamps
 *   `body`: `14px`, `w500` — Default text
 *   `title`: `16px`, `w600`, `height: 1.2` — Card titles (alcohol names)
@@ -55,8 +52,8 @@ Defined in `lib/core/theme/app_text_styles.dart`. All styles use Google Fonts `I
 *   `section`: `20px`, `w700` — Section headings ("Taste Identity", "Recent Activity")
 *   `appBarTitle`: `22px`, `letterSpacing: 2.0`, `height: 1.0` — Uses `CategoriesElegant` font family
 
-*   **AppBar Styling:**
-    - Text: `fontSize: 22`, `letterSpacing: 2.0`, `height: 1.0`, with a `1px` downward optical shift.
+**AppBar Styling:**
+- Text: `fontSize: 22`, `letterSpacing: 2.0`, `height: 1.0`, with a `1px` downward optical shift.
 
 ### Spacing System (AppSpacing Tokens)
 Defined in `lib/core/theme/app_spacing.dart`. All spacing MUST use these tokens to maintain a consistent 8pt grid.
@@ -69,7 +66,7 @@ Defined in `lib/core/theme/app_spacing.dart`. All spacing MUST use these tokens 
 *   `hero`: `32` — Hero spacing
 
 **Standardized Layout Padding:**
-*   `pagePadding`: `EdgeInsets.symmetric(horizontal: xl, vertical: lg)`
+*   `pagePadding`: `EdgeInsets.symmetric(horizontal: lg, vertical: lg)` (16px)
 *   `radiusDefault`: `16` (lg)
 *   `radiusProduct`: `14` — Specific radius for bottle images and product tiles.
 *   `buttonHeight`: `56`
@@ -114,9 +111,28 @@ Located in `lib/features/auth/widgets/onboarding_components.dart`:
 
 ### Cards
 *   Implemented primarily using `Container` widgets wrapped with `decoration: BoxDecoration(color: Colors.grey.shade900, borderRadius: BorderRadius.circular(12/16))`.
-*   **Card Differentiation (Logs vs Reviews):** 
-    *   Log Cards: Subtle grey border or flatter background (`Colors.grey.shade900`). Focus on icon indicator (thumbs up/down).
-    *   Review Cards: Slightly elevated or distinct subtle accent (e.g. faint amber border/gradient or different shade of grey `Colors.grey.shade800`) to highlight a formal rating constraint.
+*   **DayActivityCard** (Diary/Profile → Timeline Layout):
+    *   **Timeline Structure**: A two-column grid.
+        *   **Left Column (56px)**: Date anchor (Large day number, Small-caps month abbreviation).
+        *   **Right Column**: Content stream (Identity, Activity, Summary).
+    *   **Horizontal Log Scroll**: `SizedBox(height: 220)` + `ListView.separated(Axis.horizontal)` of `LogMiniCard` widgets.
+    *   **Edge-to-Edge Bleed**: The scroll area is unconstrained, allowing media to scroll across the entire screen width while maintaining grid alignment.
+    *   **Footer**: "X LOGS" label + Interaction buttons (More, Share).
+    *   **Spacing**: 24px vertical padding between day groups (`xxl`).
+    *   **Separation**: Hairline `Divider` (thickness: 1.0, height: 8.0) after each day group.
+*   **LogMiniCard** (used inside DayActivityCard scroll row):
+    *   **Dimensions**: `width: 170`, `height: 190` (image).
+    *   **Background**: `deepCardBackground` (#0F0F0F), `radius: radiusProduct` (14px), `borderDark` border.
+    *   **Top Badge**: Reaction icon (log) OR `⭐ + numeric rating` (review) in top-left.
+    *   **Center**: `alcoholName` bold, max 2 lines, `TextOverflow.ellipsis`.
+    *   **Subtext**: `⭐ X.X` (review) OR reaction label string (log) in `textMuted`.
+    *   **Bottom**: Formatted time string (e.g. `3:24 PM`) in muted caption.
+    *   **Tap**: Opens `LogDetailBottomSheet`.
+*   **Interaction Placeholders**:
+    *   **Username**: Prefixed with `@` (e.g., `@sharmakhil`).
+    *   **More Menu**: `Icons.more_horiz` in the top-right header.
+    *   **Share Button**: `Icons.ios_share` in the bottom-right footer.
+    *   **Feedback**: All buttons trigger a "Coming Soon" SnackBar.
 
 ### App Bar
 *   **CustomAppBar:** All secondary screens utilize the `CustomAppBar` component which implements the project's branding standards:

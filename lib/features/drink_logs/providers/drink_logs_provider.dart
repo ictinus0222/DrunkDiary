@@ -16,6 +16,12 @@ final drinkLogsProvider = StreamProvider<List<DrinkLogModel>>((ref) {
   return repository.watchLogsForUser(userId);
 });
 
+/// Global stream of all logs ever (Global Feed)
+final allDrinkLogsProvider = StreamProvider<List<DrinkLogModel>>((ref) {
+  final repository = ref.watch(drinkLogRepositoryProvider);
+  return repository.watchAllLogs();
+});
+
 /// Map of Alcohol IDs to Alcohol Models (simulating local cache)
 final alcoholCacheProvider = FutureProvider.family<AlcoholModel?, String>((ref, id) async {
   final doc = await FirebaseFirestore.instance.collection('alcohols').doc(id).get();

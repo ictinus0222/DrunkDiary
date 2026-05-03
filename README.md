@@ -61,7 +61,7 @@ DrunkDiary uses a **Serverless (BaaS)** architecture based on Firebase:
 ## 🎨 Design System
 <!-- SYNC_DESIGN_START -->
 *   **High Contrast Dark UI:** The primary implementation centers entirely around a dark theme with a stark black background and high-visibility amber accents.
-*   **Card-based Grouping:** Content (logs, shelf items, stats) is primarily grouped and elevated visually using distinct dark-grey surface containers.
+*   **Timeline-based Activity:** Content is organized chronologically using a two-column timeline layout, removing the previous card-based grouping for a more premium, scannable feed.
 *   **Modal-Driven Input:** Complex user interactions (e.g., logging a drink, writing a review, tagging people) are isolated in bottom-sheet modals to preserve context.
 <!-- SYNC_DESIGN_END -->
 

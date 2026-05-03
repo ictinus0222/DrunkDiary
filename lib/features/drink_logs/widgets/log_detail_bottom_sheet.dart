@@ -3,14 +3,18 @@ import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../app/app_theme.dart';
+import '../../../core/theme/app_text_styles.dart';
 import '../../../core/constants/reaction_config.dart';
 import '../models/drink_model_dto.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../../drink_logs/widgets/edit_review_bottom_sheet.dart';
 import '../../../core/widgets/app_shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../../core/providers/common_providers.dart';
 
-class LogDetailBottomSheet extends StatefulWidget {
+class LogDetailBottomSheet extends ConsumerStatefulWidget {
   final DrinkLogModel log;
 
   const LogDetailBottomSheet({
@@ -19,10 +23,10 @@ class LogDetailBottomSheet extends StatefulWidget {
   });
 
   @override
-  State<LogDetailBottomSheet> createState() => _LogDetailBottomSheetState();
+  ConsumerState<LogDetailBottomSheet> createState() => _LogDetailBottomSheetState();
 }
 
-class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
+class _LogDetailBottomSheetState extends ConsumerState<LogDetailBottomSheet> {
   bool isDeleting = false;
   late DrinkLogModel _log;
   AlcoholModel? _alcohol;
@@ -105,6 +109,9 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
 
     final bool isReview = _log.logKind == LogKind.review;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    
+    final currentUserId = ref.watch(userIdProvider);
+    final bool isOwner = currentUserId == _log.userId;
 
     return Container(
       decoration: BoxDecoration(
@@ -192,7 +199,7 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
                         // Title
                         Text(
                           _log.alcoholName,
-                          style: textTheme.headlineSmall?.copyWith(
+                          style: AppTextStyles.section.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -320,7 +327,7 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
                         const SizedBox(height: 24),
 
                         // Edit Button (if review)
-                        if (isReview && _alcohol != null)
+                        if (isReview && _alcohol != null && isOwner)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 12),
                             child: SizedBox(
@@ -348,15 +355,17 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
                                 },
                                 icon: const Icon(Icons.edit, size: 20),
                                 label: Text('Edit Review',
-                                    style: textTheme.titleMedium?.copyWith(
+                                    style: GoogleFonts.dmSans(
                                         color: colorScheme.onPrimary,
-                                        fontWeight: FontWeight.bold)),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16)),
                               ),
                             ),
                           ),
 
                         // Delete Button
-                        SizedBox(
+                        if (isOwner)
+                          SizedBox(
                           width: double.infinity,
                           child: TextButton(
                             style: TextButton.styleFrom(
@@ -374,9 +383,10 @@ class _LogDetailBottomSheetState extends State<LogDetailBottomSheet> {
                                     child: CircularProgressIndicator(
                                         color: colorScheme.error, strokeWidth: 2))
                                 : Text('Delete Entry',
-                                    style: textTheme.titleMedium?.copyWith(
+                                    style: GoogleFonts.dmSans(
                                         color: colorScheme.error,
-                                        fontWeight: FontWeight.bold)),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16)),
                           ),
                         ),
                       ],

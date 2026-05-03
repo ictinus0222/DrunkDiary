@@ -4,6 +4,7 @@ import 'package:drunk_diary/features/drink_logs/models/drink_model_dto.dart';
 import 'package:flutter/material.dart';
 
 import '../../drink_logs/widgets/drink_log_card.dart';
+import '../../drink_logs/widgets/day_section.dart';
 import '../../drink_logs/widgets/log_detail_bottom_sheet.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../../../core/widgets/app_empty_state.dart';
@@ -34,7 +35,9 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final logsAsync = ref.watch(drinkLogsProvider);
+    final logsAsync = _selectedFilter == 'All' 
+        ? ref.watch(allDrinkLogsProvider) 
+        : ref.watch(drinkLogsProvider);
 
     return SafeArea(
       child: logsAsync.when(
@@ -228,7 +231,7 @@ class _WelcomeSectionState extends State<_WelcomeSection> {
   Widget build(BuildContext context) {
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
       child: Row(
         children: [
           Expanded(
@@ -272,7 +275,7 @@ class _FiltersRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Row(
         children: [
           Expanded(
@@ -404,78 +407,69 @@ class _DiarySliverList extends StatelessWidget {
       );
     }
 
-    // Group logs by date
-    final groupedLogs = _groupLogsByDate(logs);
+    // Group logs by date and user
+    final activityGroups = _groupLogsByDateAndUser(logs);
 
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, index) {
-          final item = groupedLogs[index];
-          if (item is String) {
-            return _DateHeader(dateLabel: item);
-          } else {
-            return DrinkLogCard(log: item as DrinkLogModel);
-          }
+          final group = activityGroups[index];
+          return DayActivityCard(
+            date: group.date,
+            logs: group.logs,
+          );
         },
-        childCount: groupedLogs.length,
+        childCount: activityGroups.length,
       ),
     );
   }
 
-  List<Object> _groupLogsByDate(List<DrinkLogModel> logs) {
-    final List<Object> items = [];
-    String? lastDate;
+  List<ActivityGroup> _groupLogsByDateAndUser(List<DrinkLogModel> logs) {
+    final Map<String, List<DrinkLogModel>> grouped = {};
 
     for (final log in logs) {
-      final dateLabel = _formatHeaderDate(log.createdAt);
-      if (dateLabel != lastDate) {
-        items.add(dateLabel);
-        lastDate = dateLabel;
+      final date = log.createdAt.toLocal();
+      final dayStart = DateTime(date.year, date.month, date.day);
+      // Create a unique key for each user per day
+      final key = "${dayStart.toIso8601String()}_${log.userId}";
+      
+      if (!grouped.containsKey(key)) {
+        grouped[key] = [];
       }
-      items.add(log);
+      grouped[key]!.add(log);
     }
-    return items;
-  }
+    
+    final groups = grouped.values.map((logsInGroup) {
+      final firstLog = logsInGroup.first;
+      final date = firstLog.createdAt.toLocal();
+      final dayStart = DateTime(date.year, date.month, date.day);
+      return ActivityGroup(
+        date: dayStart,
+        userId: firstLog.userId,
+        logs: logsInGroup,
+      );
+    }).toList();
 
-  String _formatHeaderDate(DateTime date) {
-    final now = DateTime.now();
-    if (date.year == now.year && date.month == now.month && date.day == now.day) {
-      return "Today";
-    }
-    final yesterday = now.subtract(const Duration(days: 1));
-    if (date.year == yesterday.year && date.month == yesterday.month && date.day == yesterday.day) {
-      return "Yesterday";
-    }
-
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    return '${date.day} ${months[date.month - 1]}';
+    // Sort by date descending
+    groups.sort((a, b) => b.date.compareTo(a.date));
+      
+    return groups;
   }
 }
 
-class _DateHeader extends StatelessWidget {
-  final String dateLabel;
-  const _DateHeader({required this.dateLabel});
+class ActivityGroup {
+  final DateTime date;
+  final String userId;
+  final List<DrinkLogModel> logs;
 
-  @override
-  Widget build(BuildContext context) {
-    final customColors = Theme.of(context).extension<AppCustomColors>()!;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xxl, AppSpacing.lg, AppSpacing.sm),
-      child: Text(
-        dateLabel.toUpperCase(),
-        style: AppTextStyles.caption.copyWith(
-          color: customColors.textMuted,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 2.0,
-        ),
-      ),
-    );
-  }
+  ActivityGroup({
+    required this.date,
+    required this.userId,
+    required this.logs,
+  });
 }
+
+
 
 class _GalleryItem extends StatelessWidget {
   final DrinkLogModel log;
@@ -591,7 +585,7 @@ class _WelcomeSectionSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
       child: Row(
         children: [
           Expanded(
@@ -640,7 +634,7 @@ class _DiarySliverListSkeleton extends StatelessWidget {
         (context, index) {
           if (index % 4 == 0) {
             return const Padding(
-              padding: EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xxl, AppSpacing.lg, AppSpacing.sm),
+              padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xxl, AppSpacing.lg, AppSpacing.sm),
               child: AppShimmer(width: 80, height: 12),
             );
           }
