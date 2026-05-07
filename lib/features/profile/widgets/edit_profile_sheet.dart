@@ -167,7 +167,9 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
 
       await repo.updateProfile(widget.user.id, {
         'displayName': _nameController.text.trim(),
+        'displayNameLowercase': _nameController.text.trim().toLowerCase(),
         'username': newUsername,
+        'usernameLowercase': newUsername,
         'instagram': _instagramController.text.trim(),
         'bio': _bioController.text.trim(),
         'photoUrl': photoUrl,

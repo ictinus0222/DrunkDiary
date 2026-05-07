@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/app_theme.dart';
@@ -50,49 +51,153 @@ class ProfileScreen extends ConsumerWidget {
     if (profile == null) return const Center(child: Text('No profile found'));
 
     final userData = profile.userData;
-    final isPrivate = userData.isPrivate;
-    final showFullProfile = isMe || !isPrivate;
+    
+    // Self-heal: If user is viewing their own profile and normalized fields are missing, update them.
+    if (isMe && (userData.usernameLowercase.isEmpty || userData.displayNameLowercase.isEmpty)) {
+      _selfHealUser(userData);
+    }
 
-    if (!showFullProfile) {
-      return _buildPrivateProfileView(context, userData);
+    // For now, isFriend is false as the social graph isn't implemented.
+    const isFriend = false;
+    final isLocked = userData.isPrivate && !isMe && !isFriend;
+
+    if (isLocked) {
+      return _buildLockedProfileView(context, ref, userData);
     }
 
     return _buildFullProfile(context, ref, profile, isMe);
   }
 
-  Widget _buildPrivateProfileView(BuildContext context, dynamic userData) {
+  void _selfHealUser(dynamic user) {
+    FirebaseFirestore.instance.collection('users').doc(user.id).update({
+      'usernameLowercase': user.username.toLowerCase(),
+      'displayNameLowercase': user.displayName.toLowerCase(),
+    }).catchError((e) => print('Self-heal failed: $e'));
+  }
+
+  Widget _buildLockedProfileView(BuildContext context, WidgetRef ref, dynamic userData) {
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
           child: _ProfileHeader(
             profile: userData,
-            uniqueDays: 0, // Hide stats for private profiles
+            uniqueDays: 0, // Gated
             isMe: false,
+            isLocked: true,
           ),
         ),
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.lock_outline, size: 64, color: Colors.white24),
-              const SizedBox(height: 16),
-              Text(
-                'This profile is private',
-                style: AppTextStyles.subtitle.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+        
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
+
+        // Premium Locked Content UI
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              // Centered Lock Icon & Message
+              Center(
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(AppSpacing.xl),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.05),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.lock_person_rounded,
+                        size: 64,
+                        color: Colors.amber,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    Text(
+                      'Private Profile',
+                      style: AppTextStyles.subtitle.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 22,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      'Become friends to view diary entries,\nratings, shelf activity, and reviews.',
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.body.copyWith(
+                        color: Colors.white54,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                    
+                    // Add Friend CTA
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          // TODO: Implement friend request logic
+                        },
+                        icon: const Icon(Icons.person_add_rounded),
+                        label: const Text('Add Friend to Unlock'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.amber,
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          textStyle: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                'This user has hidden their activity and diary.',
-                style: AppTextStyles.body.copyWith(color: Colors.white54),
-              ),
-            ],
+              
+              const SizedBox(height: AppSpacing.hero),
+              
+              // Blurred placeholders to create "Mystery"
+              _buildBlurredPlaceholderSection('ACTIVITY'),
+              const SizedBox(height: AppSpacing.lg),
+              _buildBlurredPlaceholderCard(),
+              _buildBlurredPlaceholderCard(),
+            ]),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildBlurredPlaceholderSection(String title) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: AppTextStyles.caption.copyWith(
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
+            color: Colors.white24,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(height: 2, width: 40, color: Colors.white12),
+      ],
+    );
+  }
+
+  Widget _buildBlurredPlaceholderCard() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      height: 100,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.03),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+      ),
+      child: Center(
+        child: Icon(Icons.blur_on_rounded, color: Colors.white10, size: 32),
+      ),
     );
   }
 
@@ -100,6 +205,8 @@ class ProfileScreen extends ConsumerWidget {
     final effectiveUserId = userId ?? ref.watch(userIdProvider);
     if (effectiveUserId == null) return const Center(child: Text('User ID missing'));
 
+    // HARD GATING: logs provider is only watched here if the profile is NOT locked
+    // (buildFullProfile is only called if isLocked is false)
     final logsAsync = ref.watch(userDrinkLogsProvider(effectiveUserId));
     
     return logsAsync.when(
@@ -206,11 +313,13 @@ class _ProfileHeader extends StatelessWidget {
   final dynamic profile;
   final int uniqueDays;
   final bool isMe;
+  final bool isLocked;
 
   const _ProfileHeader({
     required this.profile,
     required this.uniqueDays,
     this.isMe = true,
+    this.isLocked = false,
   });
 
   @override

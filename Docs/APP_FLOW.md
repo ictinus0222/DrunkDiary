@@ -47,19 +47,20 @@ Last Updated: 2026-04-18
   * Trigger: General failure at final onboarding stage.
     * Message: SnackBar displays "Something went wrong. Please try again."
 
-### Flow: Search and View Item
-* **Goal:** Discover and view an alcohol item.
+### Flow: Unified Search and Discovery
+* **Goal:** Discover community members and alcohols through a single surface.
 * **Entry Point:** `SearchScreen` (Tab index 1).
 * **Happy Path:**
-  1. `SearchScreen`: Opens on a "Discover" view displaying all database alcohols as rich cards.
-  2. User Action (Optional): Taps the bookmark icon in the AppBar to visit the `WishlistScreen`.
-  3. User Action (Optional): Taps the filter icon to open the `FilterBottomSheet` to select Sort Order and Alcohol Type.
-  4. User Action (Optional): Types a query in `TextField`.
-  5. System Action: Fetches matching documents from `alcohols` collection applying sort, filter, and text criteria, while checking the user's `drink_logs` for indicators.
-  6. UI Elements: Renders matched cards showing global ratings and user logging status.
-  7. **System Action**: If search returns no results, logs `zero_search_results` with the query string.
-  8. User Action: Taps an alcohol card.
-  9. Resulting State: `Navigator.push(AlcoholDetailScreen)`.
+  1. `SearchScreen`: Opens on a "Discover" view displaying a random feed of alcohols.
+  2. User Action: Types a query in the unified `TextField` (e.g., "John" or "IPA").
+  3. System Action: Triggers parallel debounced searches (300ms) for users and alcohols.
+  4. UI Elements: Results appear in distinct "People" and "Bottles" sections.
+  5. **People Search**: Matches on `usernameLowercase` and `displayNameLowercase`.
+  6. **Bottle Search**: Matches on catalog name and brand.
+  7. User Action: Taps a search result.
+  8. Resulting State: 
+     - Alcohol -> `AlcoholDetailScreen`.
+     - User -> `ProfileScreen` (If private and not a friend, renders as "Locked").
 
 ### Flow: Unified Drink Logging (Custom & Catalog)
 * **Goal:** Record a drink interaction, optionally selecting a catalog bottle.
@@ -104,26 +105,20 @@ Last Updated: 2026-04-18
     6. Resulting State: Device email composer opens.
   * Message: SnackBar displays "No email client found. Please configure an email account."
 
-### Flow: Profile Flow (V1)
-* **Goal:** View personal identity and activity timeline.
-* **Entry Point:** `ProfileScreen` (Tab index 4).
-* **Happy Path:**
-  1. **Entry**: User taps "Profile" tab in bottom navigation.
-  2. **Identity View**:
-     - Cover image + avatar
-     - Name, username, optional bio
-     - "Days Logged" stat
-  3. **Activity Timeline**:
-     - Scrollable feed using `DayActivityCard` (Timeline Layout)
-     - Logs grouped by date (Left-column anchor)
-     - Matches Diary layout exactly
-  4. **Privacy Management**:
-     - User toggles "Private Profile" switch in Settings.
-     - System Action: Updates user document and all associated logs with `isPrivate` status.
-     - UI Logic: Logs immediately vanish/appear in the community "All Activity" feed.
-  5. **Edit (UI Placeholder)**:
-     - Edit button present
-     - No functional editing in V1
+### Flow: Profile Flow (V1 + Social Privacy)
+* **Goal:** View identity and activity.
+* **Entry Point:** `ProfileScreen` (Tab index 4) or Search results.
+* **Happy Path (Public/Me)**:
+  1. User views their own profile or a public user's profile.
+  2. Displays hero area, "Days Logged" stats, and the full activity timeline.
+  3. **Self-Heal**: If viewing own profile and search indices are missing, system silently updates Firestore.
+* **Happy Path (Locked)**:
+  1. User views a private profile they are not friends with.
+  2. System Action: Gating logic triggers. `userDrinkLogsProvider` is not queried.
+  3. UI Elements: Displays "Locked Profile" UI with blurred placeholders and "Add Friend to Unlock" CTA.
+* **Privacy Management**:
+  1. User toggles "Private Profile" in Settings.
+  2. System Action: Updates user document. Search remains enabled, but profile content becomes gated for others.
 
 ## 3. Navigation Map (Actual Structure Only)
 
@@ -137,8 +132,8 @@ AuthGate
     │   ├── Notifications (NotificationsScreen via AppBar badge)
     │   └── Activity Viewer (ActivityDetailViewer via Card Body tap)
     ├── Tab 1: Discover (SearchScreen)
+    │   ├── Unified Search (People + Bottles)
     │   ├── WishlistScreen (via AppBar icon)
-    │   │   └── AlcoholDetailScreen
     │   └── AlcoholDetailScreen
     ├── Tab 2: Unified Logging (UnifiedLoggingScreen - Centered +)
     │   ├── BottleSelectionScreen (Catalog selection)
@@ -146,9 +141,10 @@ AuthGate
     ├── Tab 3: ShelfScreen
     │   └── AlcoholDetailScreen
     └── Tab 4: ProfileScreen
-        ├── SettingsDrawer (Sidebar)
-        │   ├── AdminSettingsScreen (via drawer tile)
-        │   └── Logout Action
+        ├── View Variant: Public (Full Activity)
+        ├── View Variant: Locked (Private Gated)
+        ├── SettingsScreen (via AppBar icon)
+        │   └── Logout Action (Clears Nav Stack)
         └── FeedbackOverlay (via Leading Action Icon)
 ```
 

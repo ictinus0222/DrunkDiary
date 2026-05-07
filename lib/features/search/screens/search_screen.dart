@@ -15,14 +15,20 @@ import '../../../core/widgets/app_shimmer.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_spacing.dart';
 
-class SearchScreen extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../profile/screens/profile_screen.dart';
+import '../../profile/widgets/user_search_tile.dart';
+import '../providers/discover_search_provider.dart';
+import '../widgets/search_result_section.dart';
+
+class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
 
   @override
-  State<SearchScreen> createState() => _SearchScreenState();
+  ConsumerState<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen> {
+class _SearchScreenState extends ConsumerState<SearchScreen> {
   final _controller = TextEditingController();
   final _alcoholRepo = AlcoholRepository();
 
@@ -33,8 +39,7 @@ class _SearchScreenState extends State<SearchScreen> {
   List<DiscoverItemModel> _filteredAlcohols = [];
   List<String> _availableTypes = [];
 
-  // Filter & Sort State
-  String _searchQuery = '';
+  // Filter & Sort State (Used for default discovery)
   DiscoverSortOption _selectedSort = DiscoverSortOption.random;
   String? _selectedType;
 
@@ -56,7 +61,7 @@ class _SearchScreenState extends State<SearchScreen> {
           .where('isPrivate', isEqualTo: false)
           .get();
       
-      // Also fetch current user's logs (even if private) to show their history
+      // Also fetch current user's logs
       final myLogsSnapshot = await FirebaseFirestore.instance.collection('drink_logs')
           .where('userId', isEqualTo: user.uid)
           .get();
@@ -66,7 +71,6 @@ class _SearchScreenState extends State<SearchScreen> {
         ...myLogsSnapshot.docs.map(DrinkLogModel.fromFirestore),
       ];
 
-      // De-duplicate if needed (though userId == currentUid and isPrivate == false overlap)
       final logsMap = {for (var log in rawLogs) log.id: log};
       final logs = logsMap.values.toList();
 
@@ -102,7 +106,6 @@ class _SearchScreenState extends State<SearchScreen> {
         ));
       }
 
-      // Shuffle initially for random
       items.shuffle();
 
       if (mounted) {
@@ -127,26 +130,11 @@ class _SearchScreenState extends State<SearchScreen> {
   void _applyFilters() {
     var result = List<DiscoverItemModel>.from(_allAlcohols);
 
-    // Apply Text Query
-    if (_searchQuery.isNotEmpty) {
-      final lowerQuery = _searchQuery.toLowerCase();
-      result = result
-          .where((item) =>
-              item.alcohol.name.toLowerCase().contains(lowerQuery) ||
-              item.alcohol.brand.toLowerCase().contains(lowerQuery) ||
-              item.alcohol.type.toLowerCase().contains(lowerQuery) ||
-              (item.alcohol.subType?.toLowerCase().contains(lowerQuery) ?? false) ||
-              item.alcohol.tags.any((tag) => tag.toLowerCase().contains(lowerQuery)))
-          .toList();
-    }
-
-    // Apply Type Filter
     if (_selectedType != null) {
       result =
           result.where((item) => item.alcohol.type == _selectedType).toList();
     }
 
-    // Apply Sort
     switch (_selectedSort) {
       case DiscoverSortOption.aToZ:
         result.sort((a, b) => a.alcohol.name.compareTo(b.alcohol.name));
@@ -158,18 +146,12 @@ class _SearchScreenState extends State<SearchScreen> {
         result.sort((a, b) => b.reviewCount.compareTo(a.reviewCount));
         break;
       case DiscoverSortOption.random:
-        // Already shuffled initially. Don't reshuffle to prevent jumpy view.
         break;
     }
 
     setState(() {
       _filteredAlcohols = result;
     });
-
-    // 🏆 Log analytics if search returns zero results
-    if (result.isEmpty && _searchQuery.length > 2) {
-      AnalyticsService().logZeroResults(_searchQuery);
-    }
   }
 
   void _openFilterSheet() {
@@ -198,6 +180,7 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     final colorScheme = Theme.of(context).colorScheme;
+    final searchState = ref.watch(discoverSearchProvider);
 
     return Scaffold(
       body: CustomScrollView(
@@ -221,7 +204,49 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
             ],
           ),
-          if (_isLoading)
+          
+          // Unified Search Bar
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xl, vertical: AppSpacing.sm),
+              child: TextField(
+                controller: _controller,
+                style: AppTextStyles.body,
+                decoration: InputDecoration(
+                  hintText: 'Search bottles or people',
+                  prefixIcon:
+                      Icon(Icons.search, color: customColors.textMuted),
+                  suffixIcon: _controller.text.isNotEmpty 
+                    ? IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          _controller.clear();
+                          ref.read(searchQueryControllerProvider).add('');
+                        },
+                      )
+                    : IconButton(
+                        icon: Icon(
+                          Icons.tune,
+                          color: (_selectedType != null ||
+                                  _selectedSort !=
+                                      DiscoverSortOption.random)
+                              ? colorScheme.primary
+                              : customColors.textMuted,
+                        ),
+                        onPressed: _openFilterSheet,
+                      ),
+                ),
+                onChanged: (value) {
+                  ref.read(searchQueryControllerProvider).add(value);
+                },
+              ),
+            ),
+          ),
+
+          if (searchState.showResults)
+            ..._buildSearchResults(searchState)
+          else if (_isLoading)
             const SliverToBoxAdapter(
               child: _SearchLoadingSkeleton(),
             )
@@ -232,79 +257,156 @@ class _SearchScreenState extends State<SearchScreen> {
                     style: AppTextStyles.body.copyWith(color: colorScheme.error)),
               ),
             )
-          else ...[
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xl, vertical: AppSpacing.sm),
-                // Search Bar
-                child: TextField(
-                  controller: _controller,
-                  style: AppTextStyles.body,
-                  decoration: InputDecoration(
-                    hintText: 'Discover alcohols, brands, types...',
-                    prefixIcon:
-                        Icon(Icons.search, color: customColors.textMuted),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        Icons.tune,
-                        color: (_selectedType != null ||
-                                _selectedSort !=
-                                    DiscoverSortOption.random)
-                            ? colorScheme.primary
-                            : customColors.textMuted,
-                      ),
-                      onPressed: _openFilterSheet,
-                    ),
-                  ),
-                  onChanged: (value) {
-                    _searchQuery = value.trim();
-                    _applyFilters();
-                    
-                    // 🏆 Log analytics event (only for terms > 2 chars to avoid noise)
-                    if (_searchQuery.length > 2) {
-                      AnalyticsService().logSearch(_searchQuery);
-                    }
-                  },
-                ),
-              ),
-            ),
-            if (_filteredAlcohols.isEmpty)
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: AppEmptyState(
-                  icon: Icons.search_off_outlined,
-                  title: 'No results found',
-                  subtitle:
-                      'Try searching for something else\nor clearing your filters.',
-                  buttonText: 'Clear Search',
-                  onAddTap: () {
-                    _controller.clear();
-                    setState(() {
-                      _searchQuery = '';
-                      _selectedType = null;
-                      _selectedSort = DiscoverSortOption.random;
-                    });
-                    _applyFilters();
-                  },
-                ),
-              )
-            else
-              SliverPadding(
-                padding: AppSpacing.pagePadding.copyWith(top: 0),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      return DiscoverAlcoholCard(
-                        item: _filteredAlcohols[index],
-                      );
-                    },
-                    childCount: _filteredAlcohols.length,
-                  ),
-                ),
-              ),
-          ],
+          else
+            _buildDiscoveryFeed(),
         ],
+      ),
+    );
+  }
+
+  List<Widget> _buildSearchResults(DiscoverSearchState state) {
+    if (state.isSearching) {
+      return [
+        const SliverToBoxAdapter(child: _SearchLoadingSkeleton()),
+      ];
+    }
+
+    if (state.isEmpty) {
+      return [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: AppEmptyState(
+            icon: Icons.search_off_outlined,
+            title: 'No people or bottles found',
+            subtitle: 'Try searching for something else.',
+            buttonText: 'Clear Search',
+            onAddTap: () {
+              _controller.clear();
+              ref.read(searchQueryControllerProvider).add('');
+            },
+          ),
+        ),
+      ];
+    }
+
+    // Smart Ordering: Whichever section has the highest score match appears first
+    final topPeopleScore = state.peopleResults.isEmpty ? 0 : state.peopleResults.first.score;
+    final topBottleScore = state.bottleResults.isEmpty ? 0 : state.bottleResults.first.score;
+
+    final List<Widget> sections = [];
+
+    final peopleSection = SliverToBoxAdapter(
+      child: SearchResultSection(
+        title: 'People',
+        children: state.peopleResults.map((res) => UserSearchTile(
+          user: res.user,
+          onTap: () {
+             Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ProfileScreen(userId: res.user.id),
+              ),
+            );
+          },
+        )).toList(),
+      ),
+    );
+
+    final bottleSection = SliverPadding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            if (index == 0) {
+              return SearchResultSection(
+                title: 'Bottles',
+                children: const [], // Section header is handled by wrapper
+              );
+            }
+            // We wrap the list in a single SliverList, but need a header
+            // Actually let's use SearchResultSection for the header and then the list
+            return const SizedBox.shrink();
+          },
+          childCount: 1,
+        ),
+      ),
+    );
+
+    // Re-evaluating section building for Sliver compatibility
+    final List<Widget> resultSlivers = [];
+
+    if (topPeopleScore >= topBottleScore) {
+      if (state.peopleResults.isNotEmpty) resultSlivers.add(peopleSection);
+      if (state.bottleResults.isNotEmpty) {
+        resultSlivers.add(SliverToBoxAdapter(child: SearchResultSection(title: 'Bottles', children: const [])));
+        resultSlivers.add(_buildBottleResultsList(state));
+      }
+    } else {
+      if (state.bottleResults.isNotEmpty) {
+        resultSlivers.add(SliverToBoxAdapter(child: SearchResultSection(title: 'Bottles', children: const [])));
+        resultSlivers.add(_buildBottleResultsList(state));
+      }
+      if (state.peopleResults.isNotEmpty) resultSlivers.add(peopleSection);
+    }
+
+    return resultSlivers;
+  }
+
+  Widget _buildBottleResultsList(DiscoverSearchState state) {
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final alcohol = state.bottleResults[index].alcohol;
+            // Map to DiscoverItemModel for consistent UI
+            // In a real app, this should be cached or fetched properly
+            final item = DiscoverItemModel(
+              alcohol: alcohol,
+              globalRating: 0,
+              reviewCount: 0,
+              hasUserLogged: false,
+              hasUserReviewed: false,
+            );
+            return DiscoverAlcoholCard(item: item);
+          },
+          childCount: state.bottleResults.length,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDiscoveryFeed() {
+    if (_filteredAlcohols.isEmpty) {
+      return SliverFillRemaining(
+        hasScrollBody: false,
+        child: AppEmptyState(
+          icon: Icons.wine_bar_outlined,
+          title: 'Nothing here yet',
+          subtitle: 'Try adjusting your filters.',
+          buttonText: 'Reset Filters',
+          onAddTap: () {
+            setState(() {
+              _selectedType = null;
+              _selectedSort = DiscoverSortOption.random;
+            });
+            _applyFilters();
+          },
+        ),
+      );
+    }
+
+    return SliverPadding(
+      padding: AppSpacing.pagePadding.copyWith(top: 0),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            return DiscoverAlcoholCard(
+              item: _filteredAlcohols[index],
+            );
+          },
+          childCount: _filteredAlcohols.length,
+        ),
       ),
     );
   }

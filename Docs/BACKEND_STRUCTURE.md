@@ -12,20 +12,10 @@ The application uses Cloud Firestore (NoSQL). The schema below is inferred exact
 Source of Truth: `lib/features/profile/models/user_model.dart` + `lib/features/auth/services/google_auth_service.dart`
 *   `id`: String (Document ID)
 *   `email`: String (Set once during initial Google Sign-In, sourced from `FirebaseAuth.user.email`)
-*   `displayName`: String (Default: '')
-*   `photoUrl`: String? (Nullable)
-*   `ageVerified`: Boolean (Default: false)
-*   `createdAt`: Timestamp (Mapped to DateTime)
-*   `bio`: String? (Nullable)
-*   `username`: String (Default: '')
-*   `role`: String (Default: 'user', Options: 'admin', 'moderator')
-*   `legalAge`: Boolean (Default: true. Set during onboarding after manual confirmation.)
-*   `authProvider`: String (Set once during initial Google Sign-In. Value: `'google'`)
-*   `onboardingCompleted`: Boolean (Default: false. Set to `true` after onboarding finishes.)
-*   `drinkPreferences`: List<String> (Captured during onboarding Stage 3)
-*   `tasteProfile`: List<String> (Captured during onboarding Stage 4)
-*   `drinkingContext`: List<String> (Captured during onboarding Stage 4)
-*   `isPrivate`: Boolean (Default: false. Global privacy toggle.)
+*   **displayNameLowercase**: String (Search index, auto-generated)
+*   **usernameLowercase**: String (Search index, auto-generated)
+*   **isPrivate**: Boolean (Default: false. Global privacy toggle.)
+*   **friendState**: String (Default: 'none', Options: 'pendingSent', 'pendingReceived', 'friends')
 *   **Subcollection: `notifications`**
     *   Source of Truth: `lib/features/activity/models/notification_model.dart`
     *   `id`: String (Document ID)
@@ -176,6 +166,12 @@ reaction: data['reaction'] != null
         : (data['isLiked'] == false ? DrinkReaction.nah : null)),
 ```
 This converts old `isLiked: true` → `DrinkReaction.liked` and `isLiked: false` → `DrinkReaction.nah` at read time. New documents write the `reaction` field as a string (`'loved'`, `'liked'`, `'nah'`) and do not write `isLiked`.
+
+### Active Migration: Search Index Self-Heal
+The `ProfileScreen` implements a **Self-Healing Migration** for existing users who lack the `usernameLowercase` and `displayNameLowercase` indices.
+- **Trigger**: When the current user views their own profile.
+- **Logic**: Checks if `usernameLowercase` is missing.
+- **Action**: Silently updates the Firestore `users` document with normalized lowercase fields to enable them for the Unified Search discovery.
 
 ## 12. Backup & Recovery
 Backup strategy not documented in repository.

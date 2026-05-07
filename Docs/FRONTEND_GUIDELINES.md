@@ -6,6 +6,7 @@ Last Updated: 2026-05-06
 *   **High Contrast Dark UI:** The primary implementation centers entirely around a dark theme with a stark black background and high-visibility amber accents.
 *   **Timeline-based Activity:** Content is organized chronologically using a two-column timeline layout, removing the previous card-based grouping for a more premium, scannable feed.
 *   **Modal-Driven Input:** Complex user interactions (e.g., logging a drink, writing a review, tagging people) are isolated in bottom-sheet modals to preserve context.
+*   **Social-Centric Privacy:** Private accounts are discoverable to foster community growth, but their activity remains strictly "Hard-Gated" behind friendship status.
 *   **Source-Aware Capture:** All photo-capture actions must provide a choice between **Camera** and **Gallery** via a standardized bottom sheet.
 
 ## 2. Design Tokens (Extracted, Not Generated)
@@ -104,6 +105,10 @@ No explicit custom shadow scales or elevation configurations identified in the i
     - **Visual**: 🥂 icon + count.
     - **Interaction**: Scale-pop animation on tap.
     - **Logic**: Optimistic UI updates count immediately.
+*   **UserSearchTile**:
+    - **Visual**: Leading avatar, title (Display Name), subtext (@username).
+    - **Indicator**: Privacy lock icon if `isPrivate` is true.
+    - **Action**: Navigates to `ProfileScreen`.
 
 ### Alcohol/Product Tile (Premium Container)
 *   **Dimensions:** 84x84px (in Wishlist/Discovery).
@@ -164,7 +169,9 @@ Located in `lib/features/auth/widgets/onboarding_components.dart`:
 
 *   **Centered Action Icon:** The central navigation item (Index 2) is a specialized circular action button (`+`) that opens the `UnifiedLoggingScreen` as a fullscreen dialog.
 
-### State Indicators
+*   **LockedProfileView**:
+    - **Visual**: Used when a private profile is viewed by a non-friend.
+    - **Structure**: Blurred activity placeholders + large central Lock icon + "Private Account" message + "Add Friend" primary CTA.
 *   **Loading Spinner:** Relies on default `CircularProgressIndicator()`. Embedded inside buttons during async actions, sometimes passing `strokeWidth: 2`.
 *   **Empty States:** A standardized `AppEmptyState` component used across all primary screens.
     *   **Visual Structure:** Centered Column with a circular icon container (low-opacity amber background), a headline (`fontSize: 20`, bold), a descriptive subtext (`fontSize: 14`, grey), and an optional primary action button (amber).
@@ -218,6 +225,10 @@ No explicit responsive differentiation implemented beyond default framework beha
 *   **Rebuild Optimization**:
     - Use `const` constructors where possible.
     - Prefer `ConsumerWidget` for leaf nodes that depend on state to minimize parent rebuilds.
+*   **Search Performance**:
+    - Use `StreamProvider` for real-time query handling.
+    - Implement a **300ms debounce** to prevent Firestore burst-billing during rapid typing.
+    - Partition "People" and "Bottles" searches into parallel `FutureProviders` for maximum responsiveness.
 
 ## 9. Browser Support
 *   Targeting mobile platforms primarily. Web support is experimental.

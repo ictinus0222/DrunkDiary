@@ -3,7 +3,7 @@
 ## 1. Product Overview
 Project Title: DrunkDiary
 Version: 1.0.6+8
-Last Updated: 2026-04-18
+Last Updated: 2026-05-07
 Owner: Not explicitly identified in the repository metadata.
 
 DrunkDiary is a Flutter-based mobile application that allows legal-age users to log or review the alcoholic beverages they consume for personal tracking. It securely authenticates users via Google, ensures they are 18+, and acts as a digital diary and tracking shelf for their drinking journey. The app provides a timeline of past drinks, aggregates statistics (like favorite drinks and average ratings) in a "Shelf" view, and enables discovery of beverages via a centralized search architecture.
@@ -16,7 +16,8 @@ The application solves the problem of tracking and remembering one's experiences
 - Allow users to quickly capture a "Drink Log" (capturing a reaction — loved/liked/nah, photo, and note). **Unified Logging** supports both catalog bottles and custom drinks (mocktails, cocktails, or any unlisted drink).
 - Allow users to write personal "Reviews" for catalog alcohols on a 0-5 scale. Reviews are formally distinct from logs and do not increment log counts.
 - Aggregate user logs into a personal "Shelf" that showcases their history and average ratings.
-- Enable discovery of alcohols via an integrated **Discover** hub.
+- Enable discovery of alcohols and community members via a unified **Discover** hub.
+- **Social Graph & Privacy**: Private profiles are discoverable in search to enable friend discovery, but their content (logs, reviews, shelf) remains strictly locked behind a friendship requirement.
 - **Notifications & Cheers (Social Interaction)**: Consolidate social feedback into a centralized Notifications system triggered by 🥂 Cheers interactions.
 - **Premium UX**: Utilize Skeleton UI (Shimmer) for all primary data-driven screens to provide stable and polished loading states.
 - **Privacy Controls**: Empower users to hide their profile and activity from the global feed via a "Private Profile" toggle.
@@ -114,13 +115,15 @@ Based on the onboarding flow and feature structure, the target users are individ
     - User can remove items from the wishlist.
     - Items already logged/reviewed by the user show a visual "Tried!" indicator.
   - **Edge Cases:** Duplicate wishlist entries for the same alcohol are prevented.
-- **Search & Discovery**
-  - **Description:** Offers a "Discover" feed of all available alcohols with sorting/filtering capabilities and text-based search.
-  - **User Story:** As a user, I can browse a random discover feed of alcohols, filter them by type, sort them by rating or review count, or explicitly search for an alcohol's name. I can also see if I've previously logged an alcohol directly from the list.
+- **Unified Search & Discovery**
+  - **Description:** A single, high-performance search surface for both the alcohol catalog and the DrunkDiary community.
+  - **User Story:** As a user, I can search for "Whisky" to find bottles or "@alex" to find a friend, all from one search bar.
   - **Acceptance Criteria:** 
-    - Default state queries all `alcohols` in random order.
-    - Items are displayed as rich cards showing image, type, global rating, and a checkmark if logged/reviewed by the user.
-    - Search bar includes a filter button, which opens a bottom sheet allowing sorting (A-Z, High-Low Rating, Most Reviewed) and type filtering (e.g. Whisky, Rum, Vodka).
+    - Real-time debounced search (300ms) using a reactive Stream-based architecture.
+    - Results partitioned into "People" and "Bottles" sections.
+    - **Weighted Ranking**: Prioritizes exact username matches first, then partial display name matches.
+    - **Data Gating**: Private profiles appear in search results but navigate to a "Locked" view state.
+    - Search bar includes a filter button for bottle-specific sorting and type filtering.
 - **Alcohol Details**
   - **Description:** Displays alcohol information, personal logs, and global community stats.
   - **User Story:** As a user, I can view details of a drink, see my personal logs (excluding reviews), and view community statistics like total global logs, global average rating, and a global reaction distribution.

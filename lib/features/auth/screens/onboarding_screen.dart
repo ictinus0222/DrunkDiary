@@ -425,6 +425,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           userRef,
           {
             'username': cleanedUsername,
+            'usernameLowercase': cleanedUsername,
+            'displayName': user.displayName ?? '',
+            'displayNameLowercase': (user.displayName ?? '').toLowerCase(),
             'ageVerified': true,
             'legalAge': true,
             'drinkPreferences': selectedDrinkPreferences.toList(),

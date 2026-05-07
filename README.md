@@ -32,8 +32,8 @@ AuthGate
     │   ├── Notifications (NotificationsScreen via AppBar badge)
     │   └── Activity Viewer (ActivityDetailViewer via Card Body tap)
     ├── Tab 1: Discover (SearchScreen)
+    │   ├── Unified Search (People + Bottles)
     │   ├── WishlistScreen (via AppBar icon)
-    │   │   └── AlcoholDetailScreen
     │   └── AlcoholDetailScreen
     ├── Tab 2: Unified Logging (UnifiedLoggingScreen - Centered +)
     │   ├── BottleSelectionScreen (Catalog selection)
@@ -41,9 +41,10 @@ AuthGate
     ├── Tab 3: ShelfScreen
     │   └── AlcoholDetailScreen
     └── Tab 4: ProfileScreen
-        ├── SettingsDrawer (Sidebar)
-        │   ├── AdminSettingsScreen (via drawer tile)
-        │   └── Logout Action
+        ├── View Variant: Public (Full Activity)
+        ├── View Variant: Locked (Private Gated)
+        ├── SettingsScreen (via AppBar icon)
+        │   └── Logout Action (Clears Nav Stack)
         └── FeedbackOverlay (via Leading Action Icon)
 ```
 <!-- SYNC_FLOW_END -->
@@ -65,6 +66,7 @@ DrunkDiary uses a **Serverless (BaaS)** architecture based on Firebase:
 *   **High Contrast Dark UI:** The primary implementation centers entirely around a dark theme with a stark black background and high-visibility amber accents.
 *   **Timeline-based Activity:** Content is organized chronologically using a two-column timeline layout, removing the previous card-based grouping for a more premium, scannable feed.
 *   **Modal-Driven Input:** Complex user interactions (e.g., logging a drink, writing a review, tagging people) are isolated in bottom-sheet modals to preserve context.
+*   **Social-Centric Privacy:** Private accounts are discoverable to foster community growth, but their activity remains strictly "Hard-Gated" behind friendship status.
 *   **Source-Aware Capture:** All photo-capture actions must provide a choice between **Camera** and **Gallery** via a standardized bottom sheet.
 <!-- SYNC_DESIGN_END -->
 

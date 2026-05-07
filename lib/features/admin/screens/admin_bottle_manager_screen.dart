@@ -12,9 +12,9 @@ import '../../alcohol/models/alcohol_model.dart';
 import '../../alcohol/repositories/alcohol_repository.dart';
 import '../../../core/widgets/custom_app_bar.dart';
 import '../repositories/admin_repository.dart';
+import '../../alcohol/providers/alcohol_providers.dart';
 
 final adminRepositoryProvider = Provider((ref) => AdminRepository());
-final alcoholRepositoryProvider = Provider((ref) => AlcoholRepository());
 
 class AdminBottleManagerScreen extends ConsumerStatefulWidget {
   const AdminBottleManagerScreen({super.key});

@@ -171,8 +171,20 @@ class SettingsScreen extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () async {
+              // 1. Close dialog
               Navigator.pop(context);
+              
+              // 2. Perform sign-out
               await signOutGoogle();
+              
+              // 3. Clear the entire navigation stack and go back to AuthGate
+              // This ensures the user lands on the LoginScreen immediately.
+              if (context.mounted) {
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/', // Go back to the root (AuthGate)
+                  (route) => false,
+                );
+              }
             },
             child: const Text('Sign Out', style: TextStyle(color: Colors.redAccent)),
           ),
