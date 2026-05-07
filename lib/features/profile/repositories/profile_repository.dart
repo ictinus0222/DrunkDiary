@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/profile_data_model.dart';
 import '../models/user_model.dart';
+import '../models/stats_model.dart';
 
 class ProfileRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -14,6 +15,7 @@ class ProfileRepository {
 
     return ProfileDataModel(
       userData: userData,
+      userStats: ProfileStatsModel.empty(),
     );
   } // Checked ☑️
 
