@@ -1,5 +1,4 @@
 import 'package:drunk_diary/features/drink_logs/providers/drink_logs_provider.dart';
-import 'package:drunk_diary/features/drink_logs/models/drink_model_dto.dart';
 import 'package:drunk_diary/features/profile/models/profile_data_model.dart';
 import 'package:drunk_diary/features/profile/models/user_model.dart';
 import 'package:drunk_diary/features/profile/repositories/profile_repository.dart';
@@ -10,9 +9,6 @@ import '../../../core/providers/common_providers.dart';
 
 import '../repositories/friendship_repository.dart';
 import '../models/friend_request_model.dart';
-import '../models/stats_model.dart';
-import '../../alcohol/repositories/alcohol_repository.dart';
-import '../../alcohol/models/alcohol_model.dart';
 
 final profileRepositoryProvider = Provider((ref) => ProfileRepository());
 final friendshipRepositoryProvider = Provider((ref) => FriendshipRepository());
@@ -42,16 +38,13 @@ final profileDataProvider = FutureProvider<ProfileDataModel?>((ref) async {
   final logsAsync = ref.watch(drinkLogsProvider);
   final logs = logsAsync.value ?? [];
 
-  // Fetch basic user data
+  // Fetch basic user data once (or could also be a stream if needed)
   final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
   final userData = UserModel.fromFirestore(userDoc);
-
-  // Compute stats
-  final stats = await _computeStats(ref, userId, logs);
+  print('Loaded profile for ${userData.id}. Friends: ${userData.friends.length}');
 
   return ProfileDataModel(
     userData: userData,
-    userStats: stats,
   );
 });
 
@@ -77,56 +70,7 @@ final otherProfileDataProvider = FutureProvider.family<ProfileDataModel?, String
   final reviews = await repository.fetchReviewsForUser(userId);
   final allLogs = [...logs, ...reviews]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-  final stats = await _computeStats(ref, userId, allLogs);
-
   return ProfileDataModel(
     userData: userData,
-    userStats: stats,
   );
 });
-
-/// Internal helper to compute profile stats
-Future<ProfileStatsModel> _computeStats(Ref ref, String userId, List<DrinkLogModel> allLogs) async {
-  if (allLogs.isEmpty) return ProfileStatsModel.empty();
-
-  // 1. Total Logs
-  final totalLogs = allLogs.length;
-
-  // 2. Favorite Type & Top Rated
-  final Map<String, int> typeCounts = {};
-  String? topRatedAlcohol;
-  double maxRating = -1;
-
-  for (final log in allLogs) {
-    typeCounts[log.alcoholType] = (typeCounts[log.alcoholType] ?? 0) + 1;
-    if (log.rating != null && log.rating! > maxRating) {
-      maxRating = log.rating!;
-      topRatedAlcohol = log.alcoholName;
-    }
-  }
-
-  final favoriteType = typeCounts.isEmpty 
-      ? null 
-      : typeCounts.entries.reduce((a, b) => a.value > b.value ? a : b).key;
-
-  // 3. Recent Alcohols (Unique Bottles)
-  final uniqueAlcoholIds = allLogs
-      .map((l) => l?.alcoholId)
-      .whereType<String>()
-      .toSet()
-      .take(10)
-      .toList();
-
-  final alcoholRepo = AlcoholRepository();
-  final recentAlcohols = await Future.wait(
-    uniqueAlcoholIds.map((id) => alcoholRepo.getAlcoholById(id))
-  );
-
-  return ProfileStatsModel(
-    totalLogs: totalLogs,
-    favoriteType: favoriteType,
-    topRatedAlcohol: topRatedAlcohol,
-    recentAlcohols: recentAlcohols.whereType<AlcoholModel>().toList(),
-    recentLogs: allLogs.take(5).toList(),
-  );
-}
