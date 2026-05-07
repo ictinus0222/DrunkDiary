@@ -31,6 +31,8 @@ class DrinkLogModel {
   final String? photoUrl;
   final DateTime? photoUploadedAt;
 
+  final bool isPrivate;
+
   DrinkLogModel({
     required this.id,
     required this.userId,
@@ -50,6 +52,7 @@ class DrinkLogModel {
     this.consumedAt,
     this.photoUrl,
     this.photoUploadedAt,
+    this.isPrivate = false,
   });
 
   factory DrinkLogModel.fromFirestore(DocumentSnapshot doc) {
@@ -86,6 +89,7 @@ class DrinkLogModel {
       consumedAt: (data['consumedAt'] as Timestamp?)?.toDate(),
       photoUrl: data['photoUrl'] as String?,
       photoUploadedAt: (data['photoUploadedAt'] as Timestamp?)?.toDate(),
+      isPrivate: data['isPrivate'] as bool? ?? false,
     );
   }
 
@@ -108,6 +112,7 @@ class DrinkLogModel {
       'consumedAt': consumedAt != null ? Timestamp.fromDate(consumedAt!) : null,
       'photoUrl': photoUrl,
       'photoUploadedAt': photoUploadedAt,
+      'isPrivate': isPrivate,
     };
   }
 
@@ -125,6 +130,7 @@ class DrinkLogModel {
     String? alcoholId,
     String? alcoholName,
     String? alcoholType,
+    bool? isPrivate,
   }) {
     return DrinkLogModel(
       id: id,
@@ -145,6 +151,7 @@ class DrinkLogModel {
       consumedAt: consumedAt,
       photoUrl: photoUrl,
       photoUploadedAt: photoUploadedAt,
+      isPrivate: isPrivate ?? this.isPrivate,
     );
   }
 }

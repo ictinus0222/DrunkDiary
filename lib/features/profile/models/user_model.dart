@@ -9,8 +9,10 @@ class UserModel {
   final DateTime createdAt;
   // Profile
   final String? bio;
+  final String? instagram;
   final String username;
   final String role;
+  final bool isPrivate;
 
   UserModel({
     required this.id,
@@ -21,8 +23,10 @@ class UserModel {
     required this.createdAt,
     // Profile
     this.bio,
+    this.instagram,
     required this.username,
     this.role = 'user',
+    this.isPrivate = false,
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot userDoc) {
@@ -38,8 +42,10 @@ class UserModel {
           (userData['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       // Profile
       bio: userData['bio'],
+      instagram: userData['instagram'],
       username: userData['username'] ?? '',
       role: userData['role'] ?? 'user',
+      isPrivate: userData['isPrivate'] ?? false,
     );
   }
 
@@ -52,9 +58,37 @@ class UserModel {
       'createdAt': Timestamp.fromDate(createdAt),
       // Profile
       'bio': bio,
+      'instagram': instagram,
       'username': username,
       'role': role,
+      'isPrivate': isPrivate,
     };
   }
 
+  UserModel copyWith({
+    String? displayName,
+    String? photoUrl,
+    String? coverUrl,
+    bool? ageVerified,
+    DateTime? createdAt,
+    String? bio,
+    String? instagram,
+    String? username,
+    String? role,
+    bool? isPrivate,
+  }) {
+    return UserModel(
+      id: id,
+      displayName: displayName ?? this.displayName,
+      photoUrl: photoUrl ?? this.photoUrl,
+      coverUrl: coverUrl ?? this.coverUrl,
+      ageVerified: ageVerified ?? this.ageVerified,
+      createdAt: createdAt ?? this.createdAt,
+      bio: bio ?? this.bio,
+      instagram: instagram ?? this.instagram,
+      username: username ?? this.username,
+      role: role ?? this.role,
+      isPrivate: isPrivate ?? this.isPrivate,
+    );
+  }
 }

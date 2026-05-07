@@ -16,14 +16,18 @@ The application solves the problem of tracking and remembering one's experiences
 - Allow users to quickly capture a "Drink Log" (capturing a reaction — loved/liked/nah, photo, and note). **Unified Logging** supports both catalog bottles and custom drinks (mocktails, cocktails, or any unlisted drink).
 - Allow users to write personal "Reviews" for catalog alcohols on a 0-5 scale. Reviews are formally distinct from logs and do not increment log counts.
 - Aggregate user logs into a personal "Shelf" that showcases their history and average ratings.
-- Enable discovery of alcohols via an integrated **Discover** hub, with logging as the primary global action (center `+` button).
+- Enable discovery of alcohols via an integrated **Discover** hub.
+- **Notifications & Cheers (Social Interaction)**: Consolidate social feedback into a centralized Notifications system triggered by 🥂 Cheers interactions.
 - **Premium UX**: Utilize Skeleton UI (Shimmer) for all primary data-driven screens to provide stable and polished loading states.
+- **Privacy Controls**: Empower users to hide their profile and activity from the global feed via a "Private Profile" toggle.
 - Manage global app features via a feature flag system to enable A/B testing and controlled rollouts.
 
 ## 4. Success Metrics
 Core user engagement and feature usage are tracked via Firebase Analytics to measure retention and discover popular alcohols. Key metrics include:
-- **Onboarding Completion:** Percentage of users who finish the 6-step perceived onboarding funnel and claim a unique identity.
+- **Onboarding Completion:** Percentage of users who finish the onboarding funnel and claim a unique identity.
 - **Logging Velocity:** Average number of logs/reviews created per user per week.
+- **Notification Engagement:** Percentage of users who open the notification center and mark alerts as read.
+- **Cheers Interaction Rate:** Number of 🥂 Cheers given per active user.
 - **Search Intent:** Most searched alcohol types and brands.
 - **Session Duration:** Active time spent in "Diary" and "Shelf" views.
 - **Wishlist Conversion**: Percentage of users who add an item to their wishlist and eventually log it.
@@ -72,9 +76,27 @@ Based on the onboarding flow and feature structure, the target users are individ
   - **Acceptance Criteria:** 
     - Fetches `drink_logs` for `userId`, calculates Total, Avg Rating, and Favorite category dynamically.
     - **Branding:** Uses the standardized `drunk_diary_logo.svg` in the AppBar.
+    - **Notifications**: Includes a persistent Notification button in the AppBar with a dynamic unread badge.
     - **Layouts:** Includes a layout switcher button that toggles between Timeline and Gallery views.
     - **Filtering:** Includes "All Activity", "Your Logs", and "Your Reviews" chips with full query logic.
+    - **Social Interaction (Cheers)**: Each daily group can receive 🥂 Cheers from the community.
   - **Edge Cases:** Empty state shows a prompt to "log your first drink".
+- **Notifications System**
+  - **Description**: A centralized feed for social interactions (Cheers) that rewards user activity and fosters community.
+  - **User Story**: As a user, I want to see when people cheer my nights so I feel encouraged to keep logging.
+  - **Acceptance Criteria**:
+    - High-visibility entry point (AppBar button) with a numeric unread badge.
+    - Real-time stream of notifications (Firestore-backed).
+    - Supports "Cheers" notifications (e.g., "Akhil cheered your activity 🥂").
+    - "Mark as read" functionality (individual tap or "Mark all as read" button).
+    - Empty state with clear onboarding messaging.
+- **Cheers (Social Reaction)**
+  - **Description**: A session-based social reaction system (🥂 Cheers) that allows users to react to daily activity cards.
+  - **User Story**: As a user, I want to cheer other people's drinking sessions to show support and celebrate their night.
+  - **Acceptance Criteria**:
+    - Tap Cheers button to toggle (Optimistic UI).
+    - Logic: Grouped by session ID (`{userId}_{yyyy-MM-dd}`).
+    - **Triggers**: Toggling a cheer creates/removes a notification for the recipient.
 - **The Shelf**
   - **Description:** Aggregates all user logs and groups them by `alcoholId`.
   - **User Story:** As a user, I want to see every unique alcohol I have tried and my average rating for it.
@@ -119,6 +141,9 @@ Based on the onboarding flow and feature structure, the target users are individ
       - Reuse existing `DayActivityCard` and `LogMiniCard`
       - Same grouping logic as Diary (by date)
       - No UI deviation from Diary feed
+    - **Privacy Toggle**:
+      - A dedicated switch to set the profile as "Private".
+      - **Global Impact**: Setting a profile to private hides all associated logs from the community "All Activity" feed.
     - **Edit Interaction (UI only)**:
       - Edit button visible
       - No backend integration in V1
@@ -164,6 +189,16 @@ Based on the onboarding flow and feature structure, the target users are individ
     - **Intent Funnel:** Tracks `add_to_wishlist` events to measure purchase/trial interest.
     - **Catalog Health:** Tracks `zero_search_results` to identify missing alcohols in the database.
     - **Core Loops:** Instrumented events for Sign-In, Drink Logging, and Alcohol Searches.
+
+- **Immersive Activity Detail Viewer**
+  - **Description**: Full-screen, media-first storytelling experience for viewing day activity clusters.
+  - **User Story**: As a user, I want to view my activity in an immersive way so I can relive the memory of the night.
+  - **Acceptance Criteria**: 
+    - Pitch-black background with edge-to-edge media.
+    - Horizontal PageView for multiple logs/images.
+    - Interactive zoom/pan for images.
+    - Floating translucent top bar and social footer.
+    - Optimistic Cheers interaction.
 
 ### P2 (Minor or Utility Features Already Present)
 

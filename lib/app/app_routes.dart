@@ -11,7 +11,8 @@ class AppRoutes {
   static const profile = '/profile'; //checking
   static const shelf = '/shelf';
   static const search = '/search';
-  static const stats = '/stats';
+  static const notifications = '/notifications';
   static const adminSettings = '/adminSettings';
   static const adminBottleManager = '/adminBottleManager';
+  static const settings = '/settings';
 }

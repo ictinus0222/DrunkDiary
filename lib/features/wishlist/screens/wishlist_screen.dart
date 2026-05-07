@@ -163,7 +163,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
     if (alcohol == null) return;
 
     if (!mounted) return;
-    
+
     final result = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
@@ -174,17 +174,20 @@ class _WishlistScreenState extends State<WishlistScreen> {
     if (result == true) {
       // Success! Move from wishlist to diary
       await _removeItem(item.id);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               'Moved from Wishlist to Diary 🍻',
-              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                  fontWeight: FontWeight.bold),
             ),
             backgroundColor: Theme.of(context).colorScheme.primary,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             margin: const EdgeInsets.all(AppSpacing.xl),
           ),
         );
@@ -206,9 +209,9 @@ class _WishlistScreenState extends State<WishlistScreen> {
       }
     } catch (e) {
       if (mounted) {
-        final msg = e.toString().contains('already') 
-          ? 'Already in your wishlist' 
-          : 'Could not add to wishlist';
+        final msg = e.toString().contains('already')
+            ? 'Already in your wishlist'
+            : 'Could not add to wishlist';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(msg)),
         );
@@ -241,7 +244,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
           if (snapshot.connectionState == ConnectionState.waiting ||
               !_triedLoaded) {
             return CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+              physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics()),
               slivers: [
                 SliverAppBar(
                   floating: true,
@@ -258,7 +262,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
           if (snapshot.hasError) {
             return CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+              physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics()),
               slivers: [
                 SliverAppBar(
                   floating: true,
@@ -270,7 +275,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   child: Center(
                     child: Text(
                       'Something went wrong.',
-                      style: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
+                      style: textTheme.bodyMedium
+                          ?.copyWith(color: customColors.textMuted),
                     ),
                   ),
                 ),
@@ -279,15 +285,17 @@ class _WishlistScreenState extends State<WishlistScreen> {
           }
 
           final items = snapshot.data ?? [];
-          
+
           // Trigger discovery update if we have data now
           if (_discoveryItems.isEmpty && _allAlcohols.isNotEmpty) {
-            WidgetsBinding.instance.addPostFrameCallback((_) => _updateDiscovery(items));
+            WidgetsBinding.instance
+                .addPostFrameCallback((_) => _updateDiscovery(items));
           }
 
           if (items.isEmpty) {
             return CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+              physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics()),
               slivers: [
                 SliverAppBar(
                   floating: true,
@@ -306,13 +314,15 @@ class _WishlistScreenState extends State<WishlistScreen> {
                             'Add bottles you want to try and\nbuild your dream shelf.',
                         buttonText: 'Discover Drinks',
                         buttonIcon: Icons.search,
-                        onAddTap: () => TabChangeNotification(2).dispatch(context), // Jump to search
+                        onAddTap: () => TabChangeNotification(2)
+                            .dispatch(context), // Jump to search
                       ),
                       const SizedBox(height: AppSpacing.hero),
                       WishlistDiscoveryCarousel(
-                        recommendations: _discoveryItems.isEmpty && _allAlcohols.isNotEmpty 
-                            ? _allAlcohols.take(10).toList() 
-                            : _discoveryItems,
+                        recommendations:
+                            _discoveryItems.isEmpty && _allAlcohols.isNotEmpty
+                                ? _allAlcohols.take(10).toList()
+                                : _discoveryItems,
                         onAdd: _onAddFromDiscovery,
                         onTap: _onTapDiscovery,
                       ),
@@ -334,11 +344,13 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 backgroundColor: colorScheme.primary,
                 foregroundColor: Colors.black,
                 icon: const Icon(Icons.add),
-                label: const Text('Add Bottle', style: TextStyle(fontWeight: FontWeight.bold)),
+                label: const Text('Add Bottle',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
                 heroTag: 'wishlist_fab',
               ),
               body: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics()),
                 slivers: [
                   SliverAppBar(
                     floating: true,
@@ -346,70 +358,74 @@ class _WishlistScreenState extends State<WishlistScreen> {
                     centerTitle: true,
                     title: Text('WISHLIST', style: AppTextStyles.appBarTitle),
                   ),
-                SliverPadding(
-                  padding: AppSpacing.pagePadding.copyWith(top: 0),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final item = items[index];
-                        final isTried = _triedAlcoholIds.contains(item.alcoholId);
-                        
-                        return Dismissible(
-                          key: Key(item.id),
-                          direction: DismissDirection.endToStart,
-                          onDismissed: (_) => _removeItem(item.id),
-                          background: Container(
-                            alignment: Alignment.centerRight,
-                            padding: const EdgeInsets.only(right: 24),
-                            margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-                            decoration: BoxDecoration(
-                              color: customColors.error.withOpacity(0.8),
-                              borderRadius: BorderRadius.circular(20),
+                  SliverPadding(
+                    padding: AppSpacing.pagePadding.copyWith(top: 0),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final item = items[index];
+                          final isTried =
+                              _triedAlcoholIds.contains(item.alcoholId);
+
+                          return Dismissible(
+                            key: Key(item.id),
+                            direction: DismissDirection.endToStart,
+                            onDismissed: (_) => _removeItem(item.id),
+                            background: Container(
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.only(right: 24),
+                              margin:
+                                  const EdgeInsets.only(bottom: AppSpacing.lg),
+                              decoration: BoxDecoration(
+                                color: customColors.error.withOpacity(0.8),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Icon(Icons.delete_outline,
+                                  color: Colors.white, size: 28),
                             ),
-                            child: const Icon(Icons.delete_outline, color: Colors.white, size: 28),
-                          ),
-                          child: WishlistItemCard(
-                            item: item,
-                            isTried: isTried,
-                            onRemove: () => _removeItem(item.id),
-                            onTry: () => _onTryItem(item),
-                            onTap: () => _navigateToDetail(item),
-                          ),
-                        );
-                      },
-                      childCount: items.length,
-                    ),
-                  ),
-                ),
-                if (items.length <= 2) ...[
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
-                      child: WishlistDiscoveryCarousel(
-                        recommendations: _discoveryItems,
-                        onAdd: _onAddFromDiscovery,
-                        onTap: _onTapDiscovery,
+                            child: WishlistItemCard(
+                              item: item,
+                              isTried: isTried,
+                              onRemove: () => _removeItem(item.id),
+                              onTry: () => _onTryItem(item),
+                              onTap: () => _navigateToDetail(item),
+                            ),
+                          );
+                        },
+                        childCount: items.length,
                       ),
                     ),
                   ),
-                  SliverToBoxAdapter(
-                    child: Center(
-                      child: Text(
-                        'Keep building your wishlist.',
-                        style: textTheme.bodySmall?.copyWith(
-                          color: customColors.textMuted.withOpacity(0.5),
-                          fontStyle: FontStyle.italic,
+                  if (items.length <= 2) ...[
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: AppSpacing.xxl),
+                        child: WishlistDiscoveryCarousel(
+                          recommendations: _discoveryItems,
+                          onAdd: _onAddFromDiscovery,
+                          onTap: _onTapDiscovery,
                         ),
                       ),
                     ),
-                  ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 100)),
-                ] else
-                   const SliverToBoxAdapter(child: SizedBox(height: 100)),
-              ],
+                    SliverToBoxAdapter(
+                      child: Center(
+                        child: Text(
+                          'Keep building your wishlist.',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: customColors.textMuted.withOpacity(0.5),
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                  ] else
+                    const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                ],
+              ),
             ),
-          ),
-        );
+          );
         },
       ),
     );
@@ -428,7 +444,8 @@ class _WishlistLoadingSkeleton extends StatelessWidget {
       children: List.generate(
         5,
         (index) => Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.sm),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xl, vertical: AppSpacing.sm),
           child: AppShimmer(
             height: 90,
             borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),

@@ -5,6 +5,9 @@ import 'package:drunk_diary/features/drink_logs/models/drink_model_dto.dart';
 import 'package:drunk_diary/features/drink_logs/repositories/drink_log_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:drunk_diary/features/profile/models/user_model.dart';
+import 'package:drunk_diary/features/profile/providers/profile_providers.dart';
+
 final drinkLogRepositoryProvider = Provider((ref) => DrinkLogRepository());
 
 /// Central stream of all user logs (Logs + Reviews)
@@ -16,10 +19,29 @@ final drinkLogsProvider = StreamProvider<List<DrinkLogModel>>((ref) {
   return repository.watchLogsForUser(userId);
 });
 
-/// Global stream of all logs ever (Global Feed)
+/// Global stream of all logs ever (Global Feed - Unfiltered)
 final allDrinkLogsProvider = StreamProvider<List<DrinkLogModel>>((ref) {
   final repository = ref.watch(drinkLogRepositoryProvider);
   return repository.watchAllLogs();
+});
+
+/// Filtered Global Feed (Option B - Denormalized)
+/// Watches allDrinkLogsProvider and filters out logs from private users using the denormalized field.
+final filteredAllDrinkLogsProvider = Provider<AsyncValue<List<DrinkLogModel>>>((ref) {
+  final logsAsync = ref.watch(allDrinkLogsProvider);
+  final currentUserId = ref.watch(userIdProvider);
+
+  return logsAsync.whenData((allLogs) {
+    if (allLogs.isEmpty) return [];
+
+    return allLogs.where((log) {
+      // 1. Owners see their own logs
+      if (log.userId == currentUserId) return true;
+      
+      // 2. Others only see non-private logs
+      return !log.isPrivate;
+    }).toList();
+  });
 });
 
 /// Map of Alcohol IDs to Alcohol Models (simulating local cache)
@@ -81,4 +103,20 @@ final shelfAlcoholsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) a
   }
 
   return shelfItems;
+});
+
+/// Stream of logs for a specific user, filtered by privacy if viewed by others.
+final userDrinkLogsProvider = StreamProvider.family<List<DrinkLogModel>, String>((ref, userId) {
+  final currentUserId = ref.watch(userIdProvider);
+  final repository = ref.watch(drinkLogRepositoryProvider);
+  
+  final logsStream = repository.watchLogsForUser(userId);
+  
+  return logsStream.map((logs) {
+    // If it's the owner, show all logs.
+    if (userId == currentUserId) return logs;
+    
+    // If it's someone else, hide private logs.
+    return logs.where((log) => !log.isPrivate).toList();
+  });
 });

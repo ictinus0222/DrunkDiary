@@ -104,6 +104,7 @@ class _CreateReviewBottomSheetState extends State<CreateReviewBottomSheet> {
           .collection('users')
           .doc(user.uid)
           .get();
+      final isPrivate = userDoc.data()?['isPrivate'] as bool? ?? false;
 
       // 🔒 DETERMINISTIC REVIEW ID
       final reviewDocId = '${user.uid}_${widget.alcohol.id}';
@@ -120,6 +121,7 @@ class _CreateReviewBottomSheetState extends State<CreateReviewBottomSheet> {
         note: reviewController.text.trim(),
         logKind: LogKind.review,
         createdAt: DateTime.now(),
+        isPrivate: isPrivate,
       );
 
       final ref =

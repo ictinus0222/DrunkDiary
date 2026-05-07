@@ -139,28 +139,50 @@ class _AlcoholDetailScreenState extends ConsumerState<AlcoholDetailScreen> {
 
   Stream<(int, double, int, int)> _advancedStatsStream(AlcoholModel alcohol) {
     final user = FirebaseAuth.instance.currentUser!;
+    
+    // We need to fetch both public logs and current user's logs for accurate stats
     return FirebaseFirestore.instance
         .collection('drink_logs')
         .where('alcoholId', isEqualTo: alcohol.id)
+        .where('isPrivate', isEqualTo: false) // Filter by public logs
         .snapshots()
-        .map((snapshot) {
-      final items = snapshot.docs.map(DrinkLogModel.fromFirestore).toList();
-      if (items.isEmpty) return (0, 0.0, 0, 0);
+        .asyncMap((publicSnapshot) async {
+      // Also fetch user's own logs for this alcohol (even if private)
+      final userSnapshot = await FirebaseFirestore.instance
+          .collection('drink_logs')
+          .where('alcoholId', isEqualTo: alcohol.id)
+          .where('userId', isEqualTo: user.uid)
+          .get();
 
-      final ratingDocs = items.where((d) => d.logKind == LogKind.review).toList();
+      // Combine and de-duplicate by ID using a Map
+      final Map<String, DrinkLogModel> logsMap = {};
+      for (var doc in publicSnapshot.docs) {
+        final log = DrinkLogModel.fromFirestore(doc);
+        logsMap[log.id] = log;
+      }
+      for (var doc in userSnapshot.docs) {
+        final log = DrinkLogModel.fromFirestore(doc);
+        logsMap[log.id] = log;
+      }
+      
+      final allItems = logsMap.values.toList();
+
+      if (allItems.isEmpty) return (0, 0.0, 0, 0);
+
+      final ratingDocs = allItems.where((d) => d.logKind == LogKind.review).toList();
       double avgRating = 0.0;
       if (ratingDocs.isNotEmpty) {
         final ratings = ratingDocs.map((doc) => doc.rating ?? 0.0).toList();
         avgRating = ratings.reduce((a, b) => a + b) / ratings.length;
       }
-
-      final personalLogs = items
+ 
+      final personalLogsCount = allItems
           .where((d) => d.userId == user.uid && d.logKind == LogKind.log)
-          .toList();
-
+          .length;
+ 
       int likes = 0;
       int dislikes = 0;
-      final generalLogs = items.where((d) => d.logKind == LogKind.log).toList();
+      final generalLogs = allItems.where((d) => d.logKind == LogKind.log).toList();
       for (var log in generalLogs) {
         final bool isPositive = log.reaction == DrinkReaction.loved ||
             log.reaction == DrinkReaction.liked ||
@@ -178,7 +200,7 @@ class _AlcoholDetailScreenState extends ConsumerState<AlcoholDetailScreen> {
         likeRatio = (likes * 100 / (likes + dislikes)).round();
       }
 
-      return (generalLogs.length, avgRating, personalLogs.length, likeRatio);
+      return (generalLogs.length, avgRating, personalLogsCount, likeRatio);
     });
   }
 

@@ -108,6 +108,7 @@ class _UnifiedLoggingScreenState extends State<UnifiedLoggingScreen> {
     try {
       final user = FirebaseAuth.instance.currentUser!;
       final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      final isPrivate = userDoc.data()?['isPrivate'] as bool? ?? false;
 
       final log = DrinkLogModel(
         id: '',
@@ -123,6 +124,7 @@ class _UnifiedLoggingScreenState extends State<UnifiedLoggingScreen> {
         note: noteController.text.isNotEmpty ? noteController.text : null,
         logKind: LogKind.log,
         createdAt: DateTime.now(),
+        isPrivate: isPrivate,
       );
 
       final logRef = await FirebaseFirestore.instance.collection('drink_logs').add(log.toMap());

@@ -55,10 +55,11 @@ class DrinkLogRepository {
     return snapshot.docs.map(DrinkLogModel.fromFirestore).toList();
   }
 
-  /// Real-time stream of all interaction logs (Global Feed)
+  /// Real-time stream of all public interaction logs (Global Feed)
   Stream<List<DrinkLogModel>> watchAllLogs() {
     return _firestore
         .collection('drink_logs')
+        .where('isPrivate', isEqualTo: false)
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) =>

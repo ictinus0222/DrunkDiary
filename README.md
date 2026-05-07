@@ -28,8 +28,9 @@ AuthGate
 ├── LoginScreen
 ├── OnboardingScreen
 └── HomeScreen (BottomNavigationBar)
-    ├── Tab 0: DiaryScreen
-    │   └── StatsScreen (via action button)
+    ├── Tab 0: Diary (DiaryScreen)
+    │   ├── Notifications (NotificationsScreen via AppBar badge)
+    │   └── Activity Viewer (ActivityDetailViewer via Card Body tap)
     ├── Tab 1: Discover (SearchScreen)
     │   ├── WishlistScreen (via AppBar icon)
     │   │   └── AlcoholDetailScreen
@@ -55,6 +56,7 @@ DrunkDiary uses a **Serverless (BaaS)** architecture based on Firebase:
 - **`alcohols`**
 - **`drink_logs`**
 - **`wishlists`**
+- **`activity_sessions`**
 - **`configs`**
 <!-- SYNC_ARCH_END -->
 

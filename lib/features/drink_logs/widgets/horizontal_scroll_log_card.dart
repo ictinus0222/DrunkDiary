@@ -27,13 +27,14 @@ import '../providers/drink_logs_provider.dart';
 /// └──────────────────────────┘
 class LogMiniCard extends ConsumerWidget {
   final DrinkLogModel log;
+  final VoidCallback? onTap;
 
-  const LogMiniCard({super.key, required this.log});
+  const LogMiniCard({super.key, required this.log, this.onTap});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
-      onTap: () {
+      onTap: onTap ?? () {
         showModalBottomSheet(
           context: context,
           useSafeArea: true,

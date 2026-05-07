@@ -2,7 +2,7 @@ import 'package:drunk_diary/features/drink_logs/providers/drink_logs_provider.da
 import 'package:drunk_diary/features/profile/models/profile_data_model.dart';
 import 'package:drunk_diary/features/profile/models/user_model.dart';
 import 'package:drunk_diary/features/profile/repositories/profile_repository.dart';
-import 'package:drunk_diary/features/profile/services/profile_stats_service.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/providers/common_providers.dart';
@@ -22,11 +22,33 @@ final profileDataProvider = FutureProvider<ProfileDataModel?>((ref) async {
   final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
   final userData = UserModel.fromFirestore(userDoc);
 
-  // Compute stats reactively from the logs
-  final stats = await ProfileStatsService.computeStatsFromLogs(logs);
+  return ProfileDataModel(
+    userData: userData,
+  );
+});
+
+/// Cache for user models to avoid redundant fetches in feed filtering
+final userCacheProvider = FutureProvider.family<UserModel?, String>((ref, userId) async {
+  final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+  if (!userDoc.exists) return null;
+  return UserModel.fromFirestore(userDoc);
+});
+
+/// Fetch profile data for any user
+final otherProfileDataProvider = FutureProvider.family<ProfileDataModel?, String>((ref, userId) async {
+  final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+  if (!userDoc.exists) return null;
+  final userData = UserModel.fromFirestore(userDoc);
+
+  final repository = ref.watch(drinkLogRepositoryProvider);
+  // For other users, we only care about their reviews or public logs if we were using Option B,
+  // but for now we fetch all their logs to compute stats, 
+  // and filtering happens at the UI/Feed level.
+  final logs = await repository.fetchLogsForUser(userId);
+  final reviews = await repository.fetchReviewsForUser(userId);
+  final allLogs = [...logs, ...reviews]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
   return ProfileDataModel(
     userData: userData,
-    stats: stats,
   );
 });

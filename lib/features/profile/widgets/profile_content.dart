@@ -67,7 +67,7 @@ class ProfileContent extends StatelessWidget {
                 radius: 32,
                 backgroundColor: colorScheme.primary,
                 backgroundImage: userModel.photoUrl != null
-                    ? NetworkImage(userModel.photoUrl!)
+                    ? CachedNetworkImageProvider(userModel.photoUrl!)
                     : null,
                 child: userModel.photoUrl == null
                     ? Icon(Icons.person, size: 32, color: colorScheme.onPrimary)

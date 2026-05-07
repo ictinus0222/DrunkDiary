@@ -1,6 +1,6 @@
 # Frontend Design System & Guidelines
 
-Last Updated: 2026-05-03
+Last Updated: 2026-05-06
 
 ## 1. Design Principles (Inferred From UI)
 *   **High Contrast Dark UI:** The primary implementation centers entirely around a dark theme with a stark black background and high-visibility amber accents.
@@ -43,6 +43,9 @@ Defined in `lib/app/app_theme.dart` as `ThemeExtension<AppCustomColors>`. Access
     - `DMSans`: Primary UI font for both Heading and Body (via `google_fonts` and `AppTextStyles`).
     - `GiveYouGlory`: Decorative font for greetings.
 *   **Font Weights:** Regular (`w400`), `FontWeight.w500`, `FontWeight.w600`, `FontWeight.w700` (bold).
+
+### Haptic Feedback
+*   `HapticFeedback.lightImpact()`: Used for subtle interaction confirmation (e.g., Cheers toggle).
 
 ### AppTextStyles (Centralized Type Scale)
 Defined in `lib/core/theme/app_text_styles.dart`. All styles use Google Fonts `DM Sans`.
@@ -92,7 +95,15 @@ No explicit custom shadow scales or elevation configurations identified in the i
 *   **OnboardingButton:** Primary gold sticky CTA with scale animations and "Saving..." loading state.
 *   **ElevatedButton:** Standard full-width button (Amber #FFC107).
 *   **OutlinedButton:** Used for secondary actions.
-*   **Log CTA Button:** Gold Pill shape, Height 38px, Radius 16. Used for "+ Log" primary actions in cards.
+*   **NotificationBadgeButton**:
+    - **Visual**: 🔔 icon with a circular red/amber badge if unread count > 0.
+    - **Location**: Top-right of `DiaryScreen` AppBar.
+    - **Animation**: Badge appears with a subtle scale-in transition.
+*   **Log CTA Button**: Gold Pill shape, Height 38px, Radius 16. Used for "+ Log" primary actions in cards.
+*   **CheersButton**: 
+    - **Visual**: 🥂 icon + count.
+    - **Interaction**: Scale-pop animation on tap.
+    - **Logic**: Optimistic UI updates count immediately.
 
 ### Alcohol/Product Tile (Premium Container)
 *   **Dimensions:** 84x84px (in Wishlist/Discovery).
@@ -133,6 +144,7 @@ Located in `lib/features/auth/widgets/onboarding_components.dart`:
     *   **Username**: Prefixed with `@` (e.g., `@sharmakhil`).
     *   **More Menu**: `Icons.more_horiz` in the top-right header.
     *   **Share Button**: `Icons.ios_share` in the bottom-right footer.
+    *   **Cheers Footer**: Interactive 🥂 button + count label. If the session contains private logs, this is replaced by a `Text('PRIVATE')` badge.
     *   **Feedback**: All buttons trigger a "Coming Soon" SnackBar.
 
 ### App Bar
@@ -174,15 +186,21 @@ No explicit accessibility enhancements identified beyond default Flutter semanti
 ## 6. Animation & Transitions (If Present)
 *   **`FadeSlidePageRoute`** (`lib/core/navigation/page_transitions.dart`): Custom `PageRouteBuilder` combining fade + subtle upward slide (`Offset(0, 0.05)` → `Offset.zero`, 300ms, `Curves.easeOut`).
 *   **Hero Animations**: Uses **context-aware prefixes** to prevent tag collisions in the `IndexedStack` (where all tabs are active simultaneously):
-    *   `search_alcohol_[ID]` (Discover tab)
+    - `search_alcohol_[ID]` (Discover tab)
     - `shelf_alcohol_[ID]` (Shelf tab)
-    - `stats_alcohol_[ID]` (Stats screen)
     - `alcohol_log_[LOG_ID]` (Diary entry)
 *   **BetterFeedback UI**:
     - Uses a custom dark theme (`Color(0xFF121212)`) and sheet color (`Color(0xFF1E1E1E)`).
     - Triggered from Profile Screen's leading action button.
     - Provides a full-screen screenshot annotation and text entry interface.
 *   Modal bottom sheets use default Flutter slide-up transitions.
+
+### Immersive Viewers
+For media-first content consumption (e.g., Activity Detail Viewer):
+- **Background**: Pitch black (`#000000`).
+- **Media**: Edge-to-edge rendering, `InteractiveViewer` for zoom/pan.
+- **Overlays**: Floating translucent controls (`Colors.black54` with blur).
+- **Navigation**: Cinematic fade/scale transitions, back button always accessible top-left.
 
 ### Light Theme
 A complete `lightTheme` and `lightCustomColors` definition exists in `app_theme.dart` (lines 131-190). It is **not currently applied** — `main.dart` only uses `darkTheme`. Available for future use.

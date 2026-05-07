@@ -1,6 +1,6 @@
 # Backend Architecture & Database Structure
 
-Last Updated: 2026-04-18
+Last Updated: 2026-05-06
 
 ## 1. Architecture Overview (As Implemented)
 Architecture pattern not explicitly defined; inferred from folder organization. The application operates on a "Serverless / Backend-as-a-Service (BaaS)" architecture using Firebase directly from the Flutter client. There is no dedicated API server, Node.js/Python backend, or centralized controller layer in this repository. All database reads/writes and authentication flows are executed directly from the client application using the Firebase SDK.
@@ -25,6 +25,17 @@ Source of Truth: `lib/features/profile/models/user_model.dart` + `lib/features/a
 *   `drinkPreferences`: List<String> (Captured during onboarding Stage 3)
 *   `tasteProfile`: List<String> (Captured during onboarding Stage 4)
 *   `drinkingContext`: List<String> (Captured during onboarding Stage 4)
+*   `isPrivate`: Boolean (Default: false. Global privacy toggle.)
+*   **Subcollection: `notifications`**
+    *   Source of Truth: `lib/features/activity/models/notification_model.dart`
+    *   `id`: String (Document ID)
+    *   `senderId`: String (Uid of the user who triggered the alert)
+    *   `senderUsername`: String (Username for display)
+    *   `senderProfileImage`: String? (Profile image URL)
+    *   `type`: String (Value: `'cheers'`)
+    *   `activityId`: String (Deterministic session ID: `{userId}_{yyyy-MM-dd}`)
+    *   `createdAt`: Timestamp
+    *   `isRead`: Boolean (Default: false)
 
 > **Note:** `email`, `authProvider`, and `onboardingCompleted` are written directly in `google_auth_service.dart` and `onboarding_screen.dart` via raw Firestore maps. They are **not** part of `UserModel.fromFirestore()` — `onboardingCompleted` is accessed via raw map indexing in `AuthGate`.
 
@@ -76,6 +87,7 @@ Source of Truth: `lib/features/drink_logs/models/drink_model_dto.dart`
 *   `consumedAt`: Timestamp? (Nullable, Mapped to DateTime)
 *   `photoUrl`: String? (Nullable)
 *   `photoUploadedAt`: Timestamp? (Nullable, Mapped to DateTime)
+*   `isPrivate`: Boolean (Default: false. Denormalized from user profile for efficient feed filtering.)
 
 ### Collection: `wishlists`
 Source of Truth: `lib/features/wishlist/models/wishlist_item_model.dart`
@@ -89,14 +101,23 @@ Source of Truth: `lib/features/wishlist/models/wishlist_item_model.dart`
 *   `note`: String? (Nullable — optional personal note)
 *   `addedAt`: Timestamp (When the item was added)
 
+### Collection: `activity_sessions`
+Source of Truth: `lib/features/activity/models/day_activity_model.dart`
+*   Document ID: String (Deterministic: `{userId}_{yyyy-MM-dd}`)
+*   `cheeredBy`: List<String> (Uids of users who have cheered this session)
+*   `cheerCount`: Number (Total count of cheers)
+*   `updatedAt`: Timestamp
+
 ### Collection: `configs`
 Source of Truth: `lib/core/flags/feature_flags.dart`
 * Document ID: `app_flags`
 - (Add future flags here)
 
 
-**Indexes (Only If Defined):**
-No explicit secondary indexes defined in the repository (Firestore handles single-field indexing automatically; no composite index configurations like `firestore.indexes.json` are present).
+**Indexes:**
+*   **Composite Index (`drink_logs`)**: `alcoholId` (Ascending) + `isPrivate` (Ascending) + `createdAt` (Descending). Required for public bottle stats.
+*   **Composite Index (`drink_logs`)**: `isPrivate` (Ascending) + `createdAt` (Descending). Required for the filtered community feed.
+*   **Query Filtering**: All collection-wide queries (Discover, Shelf stats) MUST filter by `isPrivate == false` to comply with Security Rules. Personal data is merged locally after fetching owner-specific documents.
 
 **Relationships:**
 *   `drink_logs.userId` references `users.id` (Implied foreign key, enforced loosely by client code mapping).

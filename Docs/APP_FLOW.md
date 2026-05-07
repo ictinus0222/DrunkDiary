@@ -117,7 +117,11 @@ Last Updated: 2026-04-18
      - Scrollable feed using `DayActivityCard` (Timeline Layout)
      - Logs grouped by date (Left-column anchor)
      - Matches Diary layout exactly
-  4. **Edit (UI Placeholder)**:
+  4. **Privacy Management**:
+     - User toggles "Private Profile" switch in Settings.
+     - System Action: Updates user document and all associated logs with `isPrivate` status.
+     - UI Logic: Logs immediately vanish/appear in the community "All Activity" feed.
+  5. **Edit (UI Placeholder)**:
      - Edit button present
      - No functional editing in V1
 
@@ -129,8 +133,9 @@ AuthGate
 ├── LoginScreen
 ├── OnboardingScreen
 └── HomeScreen (BottomNavigationBar)
-    ├── Tab 0: DiaryScreen
-    │   └── StatsScreen (via action button)
+    ├── Tab 0: Diary (DiaryScreen)
+    │   ├── Notifications (NotificationsScreen via AppBar badge)
+    │   └── Activity Viewer (ActivityDetailViewer via Card Body tap)
     ├── Tab 1: Discover (SearchScreen)
     │   ├── WishlistScreen (via AppBar icon)
     │   │   └── AlcoholDetailScreen
@@ -171,8 +176,23 @@ AuthGate
   * **Route:** `/diary`
   * **Access:** Authenticated
   * **Purpose:** Fetches user's `drink_logs` and displays them in a customizable diary view. Includes summary stats and a layout switcher. Standardized with the `drunk_diary_logo.svg` branding.
-  * **State Variants:** Loading (Skeleton UI / Shimmer), Empty (Standardized `AppEmptyState` with action to log a drink), Layouts (Timeline vs. Gallery).
-  * **Actions Available:** Switch between Timeline Layout (detailed list) and Gallery Layout (photo grid). Working filter chips for Log/Review types.
+  * **State Variants:** 
+    - Loading (Skeleton UI / Shimmer).
+    - Empty (Standardized `AppEmptyState` with action to log a drink).
+    - Layouts (Timeline vs. Gallery).
+    - **Privacy Locked**: If a daily session contains a private log, the Cheers interaction is disabled and replaced with a "PRIVATE" badge.
+  * **Actions Available:** 
+    - Switch between Timeline Layout and Gallery Layout. 
+    - 🥂 **Cheers**: Tap the reaction button to celebrate a session.
+    - **Notifications**: Tap the badge button to open `NotificationsScreen`.
+    - Filter chips for Log/Review types.
+* **Screen:** `NotificationsScreen`
+  * **Route:** `/notifications`
+  * **Access:** Authenticated
+  * **Purpose:** Real-time social interaction center. Shows Cheers received from other users.
+  * **Actions Available:**
+    - Tap item: Mark as read.
+    - "Mark all as read" icon in AppBar.
 * **Screen:** `SearchScreen`
   * **Route:** `/search` (Tab 1)
   * **Access:** Authenticated
@@ -216,10 +236,6 @@ AuthGate
 * **Component:** `SettingsDrawer`
   * **Purpose:** Provides a right-aligned sidebar for account settings and logout functionality.
   * **Admin Logic:** Includes an entry point for `AdminSettingsScreen` if the authenticated account matches authorized admin emails.
-* **Screen:** `StatsScreen`
-  - **Route:** `/stats`
-  - **Access:** Authenticated
-  - **Purpose:** Displays detailed user metrics and taste identity cards focused on memory and exploration.
 * **Screen:** `AdminSettingsScreen`
   * **Route:** `/adminSettings`
   * **Access:** Restricted (Authorized Admin Emails Only)

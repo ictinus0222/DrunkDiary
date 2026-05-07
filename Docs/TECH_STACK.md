@@ -2,7 +2,7 @@
 
 ## 1. Stack Overview
 
-Last Updated: 2026-04-18
+Last Updated: 2026-05-06
 
 Architecture Type:
 Mobile Client / Serverless Backend (Flutter application communicating directly with Firebase services).

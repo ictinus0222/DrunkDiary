@@ -51,10 +51,24 @@ class _SearchScreenState extends State<SearchScreen> {
       // 1. Fetch Alcohols
       final alcohols = await _alcoholRepo.getAllAlcohols();
 
-      // 2. Fetch Logs
-      final logsSnapshot =
-          await FirebaseFirestore.instance.collection('drink_logs').get();
-      final logs = logsSnapshot.docs.map(DrinkLogModel.fromFirestore).toList();
+      // 2. Fetch Public Logs for global ratings
+      final logsSnapshot = await FirebaseFirestore.instance.collection('drink_logs')
+          .where('isPrivate', isEqualTo: false)
+          .get();
+      
+      // Also fetch current user's logs (even if private) to show their history
+      final myLogsSnapshot = await FirebaseFirestore.instance.collection('drink_logs')
+          .where('userId', isEqualTo: user.uid)
+          .get();
+
+      final rawLogs = [
+        ...logsSnapshot.docs.map(DrinkLogModel.fromFirestore),
+        ...myLogsSnapshot.docs.map(DrinkLogModel.fromFirestore),
+      ];
+
+      // De-duplicate if needed (though userId == currentUid and isPrivate == false overlap)
+      final logsMap = {for (var log in rawLogs) log.id: log};
+      final logs = logsMap.values.toList();
 
       // 3. Process Data
       final Set<String> typesList = {};

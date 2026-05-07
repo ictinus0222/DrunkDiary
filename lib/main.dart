@@ -13,8 +13,10 @@ import 'features/profile/screens/profile_screen.dart';
 import 'features/search/screens/search_screen.dart';
 import 'features/admin/screens/admin_settings_screen.dart';
 import 'features/admin/screens/admin_bottle_manager_screen.dart';
+import 'features/activity/screens/notifications_screen.dart';
+import 'features/profile/screens/settings_screen.dart';
 import 'splash/splash_screen.dart';
-import 'features/activity/screens/stats_screen.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:feedback/feedback.dart';
@@ -77,9 +79,10 @@ class DrunkDiaryApp extends StatelessWidget {
           AppRoutes.profile: (context) => ProfileScreen(), // ☑️
           AppRoutes.shelf: (context) => ShelfScreen(),
           AppRoutes.search: (context) => SearchScreen(), // ☑️
-          AppRoutes.stats: (context) => const StatsScreen(),
+          AppRoutes.notifications: (context) => const NotificationsScreen(),
           AppRoutes.adminSettings: (context) => const AdminSettingsScreen(),
           AppRoutes.adminBottleManager: (context) => const AdminBottleManagerScreen(),
+          AppRoutes.settings: (context) => const SettingsScreen(),
         },
 
         theme: AppThemes.darkTheme,

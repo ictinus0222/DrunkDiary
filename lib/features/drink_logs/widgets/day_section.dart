@@ -6,16 +6,22 @@ import '../models/drink_model_dto.dart';
 import 'horizontal_scroll_log_card.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/drink_logs_provider.dart';
+import '../../activity/providers/activity_providers.dart';
+import 'cheers_button.dart';
+import '../../profile/screens/profile_screen.dart';
+import '../../activity/screens/activity_detail_viewer.dart';
+import '../../../core/navigation/tab_change_notification.dart';
+import '../../../core/providers/common_providers.dart';
 
 /// Groups one day's logs into a timeline-style activity cluster.
 ///
 /// Structure:
 /// ┌──────┬────────────────────────────┐
 /// │ 03   │  (Avatar) (Username)       │
-/// │ MAY  │  [ log ] [ log ] [ log ] → │
-/// │      │  3 LOGS                    │
-/// └──────┴────────────────────────────┘
-class DayActivityCard extends StatelessWidget {
+/// │ MAY  │  [ log ] [ log ] [ log ] → 
+class DayActivityCard extends ConsumerWidget {
   final DateTime date;
   final List<DrinkLogModel> logs;
   final bool showUser;
@@ -28,11 +34,17 @@ class DayActivityCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (logs.isEmpty) return const SizedBox.shrink();
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     final firstLog = logs.first;
     final localDate = date.toLocal();
+
+    final dateString = "${localDate.year}-${localDate.month.toString().padLeft(2, '0')}-${localDate.day.toString().padLeft(2, '0')}";
+    final activityId = "${firstLog.userId}_$dateString";
+
+    final activityAsync = ref.watch(dayActivityProvider(activityId));
+    final isPrivateSession = logs.any((l) => l.isPrivate);
 
     return Column(
       children: [
@@ -52,23 +64,42 @@ class DayActivityCard extends StatelessWidget {
                 Expanded(
                   child: Row(
                     children: [
-                      CircleAvatar(
-                        radius: 22,
-                        backgroundColor: Colors.amber,
-                        backgroundImage: firstLog.userPhotoUrl != null
-                            ? CachedNetworkImageProvider(firstLog.userPhotoUrl!)
-                            : null,
-                        child: firstLog.userPhotoUrl == null
-                            ? const Icon(Icons.person, size: 24, color: Colors.black)
-                            : null,
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Text(
-                        "@${firstLog.username}",
-                        style: GoogleFonts.dmSans(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                      GestureDetector(
+                        onTap: () {
+                          final currentUserId = ref.read(userIdProvider);
+                          if (firstLog.userId == currentUserId) {
+                            const TabChangeNotification(4).dispatch(context);
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ProfileScreen(userId: firstLog.userId),
+                              ),
+                            );
+                          }
+                        },
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 22,
+                              backgroundColor: Colors.amber,
+                              backgroundImage: firstLog.userPhotoUrl != null
+                                  ? CachedNetworkImageProvider(firstLog.userPhotoUrl!)
+                                  : null,
+                              child: firstLog.userPhotoUrl == null
+                                  ? const Icon(Icons.person, size: 24, color: Colors.black)
+                                  : null,
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            Text(
+                              "@${firstLog.username}",
+                              style: GoogleFonts.dmSans(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const Spacer(),
@@ -89,8 +120,10 @@ class DayActivityCard extends StatelessWidget {
         const SizedBox(height: 12),
 
         // ── 🖼 FULL-WIDTH HORIZONTAL LOG SCROLL ──────────────────────────────
-        // Moved outside the constrained column to allow edge-to-edge scrolling.
-        _HorizontalLogScroll(logs: logs),
+        _HorizontalLogScroll(
+          logs: logs,
+          onLogTap: (index) => _openViewer(context, ref, index, activityId),
+        ),
 
         const SizedBox(height: 4),
 
@@ -99,8 +132,38 @@ class DayActivityCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: Row(
             children: [
-              // Spacer to align with the right column content (56px date + 12px gap)
               const SizedBox(width: 56 + 12),
+              if (!isPrivateSession)
+                activityAsync.when(
+                  data: (activity) => CheersButton(
+                    activityId: activityId,
+                    activityOwnerId: firstLog.userId,
+                    activityDate: date,
+                    activityData: activity,
+                  ),
+                  loading: () => CheersButton(
+                    activityId: '',
+                    activityOwnerId: '',
+                    activityDate: DateTime(2000),
+                  ),
+                  error: (_, __) => const SizedBox.shrink(),
+                ),
+              if (isPrivateSession)
+                Row(
+                  children: [
+                    Icon(Icons.lock_outline, size: 14, color: customColors.textMuted),
+                    const SizedBox(width: 4),
+                    Text(
+                      'PRIVATE',
+                      style: AppTextStyles.caption.copyWith(
+                        color: customColors.textMuted,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                  ],
+                ),
+              const Spacer(),
               Text(
                 '${logs.length} ${logs.length == 1 ? 'LOG' : 'LOGS'}',
                 style: AppTextStyles.caption.copyWith(
@@ -109,7 +172,7 @@ class DayActivityCard extends StatelessWidget {
                   letterSpacing: 1.5,
                 ),
               ),
-              const Spacer(),
+              const SizedBox(width: AppSpacing.md),
               IconButton(
                 icon: const Icon(Icons.ios_share, size: 18, color: Colors.white54),
                 onPressed: () => _showComingSoon(context),
@@ -123,7 +186,6 @@ class DayActivityCard extends StatelessWidget {
 
         const SizedBox(height: AppSpacing.xxl),
         
-        // ── ➖ SEPARATING BAR ──────────────────────────────────────────────
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: Divider(
@@ -133,6 +195,38 @@ class DayActivityCard extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  void _openViewer(BuildContext context, WidgetRef ref, int initialIndex, String activityId) {
+    final firstLog = logs.first;
+    final isPrivateSession = logs.any((l) => l.isPrivate);
+    
+    if (isPrivateSession && firstLog.userId != ref.read(userIdProvider)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('This session is private')),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        opaque: false,
+        barrierColor: Colors.black,
+        pageBuilder: (context, animation, secondaryAnimation) => FadeTransition(
+          opacity: animation,
+          child: ActivityDetailViewer(
+            activityId: activityId,
+            initialLogs: logs,
+            date: date,
+            userId: firstLog.userId,
+            username: firstLog.username,
+            userPhotoUrl: firstLog.userPhotoUrl,
+            initialPageIndex: initialIndex,
+          ),
+        ),
+      ),
     );
   }
 
@@ -202,8 +296,9 @@ class _DateColumn extends StatelessWidget {
 
 class _HorizontalLogScroll extends StatelessWidget {
   final List<DrinkLogModel> logs;
+  final Function(int) onLogTap;
 
-  const _HorizontalLogScroll({required this.logs});
+  const _HorizontalLogScroll({required this.logs, required this.onLogTap});
 
   @override
   Widget build(BuildContext context) {
@@ -223,7 +318,10 @@ class _HorizontalLogScroll extends StatelessWidget {
         ),
         itemCount: logs.length,
         separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.md),
-        itemBuilder: (context, index) => LogMiniCard(log: logs[index]),
+        itemBuilder: (context, index) => LogMiniCard(
+          log: logs[index],
+          onTap: () => onLogTap(index),
+        ),
       ),
     );
   }

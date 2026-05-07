@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:drunk_diary/app/app_routes.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drunk_diary/features/drink_logs/models/drink_model_dto.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,9 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_spacing.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/constants/app_constants.dart';
+import '../providers/notifications_provider.dart';
+import '../../profile/providers/profile_providers.dart';
+import '../../profile/models/user_model.dart';
 
 enum DiaryLayout { timeline, gallery }
 
@@ -36,7 +40,7 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
   @override
   Widget build(BuildContext context) {
     final logsAsync = _selectedFilter == 'All' 
-        ? ref.watch(allDrinkLogsProvider) 
+        ? ref.watch(filteredAllDrinkLogsProvider) 
         : ref.watch(drinkLogsProvider);
 
     return SafeArea(
@@ -49,15 +53,16 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
                 floating: true,
                 snap: true,
                 centerTitle: true,
+                leading: const _ProfileAvatarLeading(),
+                leadingWidth: 64,
                 title: SvgPicture.asset(
                   'assets/icons/drunk_diary_logo.svg',
                   height: APP_BAR_VISUAL_HEIGHT,
                 ),
                 actions: [
-                  IconButton(
-                    icon: const Icon(Icons.bar_chart),
-                    onPressed: () => Navigator.pushNamed(context, '/stats'),
-                    tooltip: 'View Stats',
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: _NotificationBadgeButton(),
                   ),
                 ],
               ),
@@ -103,20 +108,21 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
                   floating: true,
                   snap: true,
                   centerTitle: true,
+                  leading: const _ProfileAvatarLeading(),
+                  leadingWidth: 64,
                   title: SvgPicture.asset(
                     'assets/icons/drunk_diary_logo.svg',
                     height: APP_BAR_VISUAL_HEIGHT,
                   ),
                   actions: [
-                    IconButton(
-                      icon: const Icon(Icons.bar_chart),
-                      onPressed: () => Navigator.pushNamed(context, '/stats'),
-                      tooltip: 'View Stats',
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: _NotificationBadgeButton(),
                     ),
                   ],
                 ),
                 const SliverToBoxAdapter(child: _WelcomeSection()),
-                const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)), // 16 (section padding) + 8 = 24 total gap
+                const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
                 SliverToBoxAdapter(
                   child: _FiltersRow(
                     selectedFilter: _selectedFilter,
@@ -138,7 +144,6 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
                   logs: logs,
                   layout: _currentLayout,
                 ),
-                // FAB naturally floats above the list, no need for large bottom padding
                 const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.hero)),
               ],
             ),
@@ -640,6 +645,99 @@ class _DiarySliverListSkeleton extends StatelessWidget {
           );
         },
         childCount: 10,
+      ),
+    );
+  }
+}
+
+class _NotificationBadgeButton extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unreadCount = ref.watch(unreadNotificationsCountProvider);
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.notifications_outlined),
+          onPressed: () => Navigator.of(context, rootNavigator: true).pushNamed(AppRoutes.notifications),
+          tooltip: 'Notifications',
+        ),
+        if (unreadCount > 0)
+          Positioned(
+            right: 8,
+            top: 8,
+            child: IgnorePointer(
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.black, width: 1.5),
+                ),
+                constraints: const BoxConstraints(
+                  minWidth: 16,
+                  minHeight: 16,
+                ),
+                child: Text(
+                  unreadCount > 9 ? '9+' : '$unreadCount',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 8,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+/* ----------------------------- WIDGETS & HELPERS --------------------------- */
+
+class _ProfileAvatarLeading extends ConsumerWidget {
+  const _ProfileAvatarLeading();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profileAsync = ref.watch(profileDataProvider);
+
+    return GestureDetector(
+      onTap: () {
+        const TabChangeNotification(4).dispatch(context);
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(left: AppSpacing.lg),
+        child: Center(
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white10, width: 1.5),
+            ),
+            child: ClipOval(
+              child: profileAsync.when(
+                data: (profile) {
+                  final photoUrl = profile?.userData.photoUrl;
+                  if (photoUrl != null && photoUrl.isNotEmpty) {
+                    return CachedNetworkImage(
+                      imageUrl: photoUrl,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => const AppShimmer(),
+                      errorWidget: (_, __, ___) => const Icon(Icons.person, size: 20, color: Colors.white24),
+                    );
+                  }
+                  return const Icon(Icons.person, size: 20, color: Colors.white24);
+                },
+                loading: () => const AppShimmer(),
+                error: (_, __) => const Icon(Icons.person, size: 20, color: Colors.white24),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
