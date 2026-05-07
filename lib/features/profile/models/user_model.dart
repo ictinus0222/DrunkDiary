@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum FriendState {
   none,
-  pendingSent,
-  pendingReceived,
+  outgoingPending,
+  incomingPending,
   friends,
 }
 
@@ -24,6 +24,19 @@ class UserModel {
   final bool isPrivate;
   final FriendState friendState;
 
+  // Social (Private fields with safe getters to prevent Null subtype errors)
+  final List<String>? _friends;
+  final List<String>? _pendingIncomingRequests;
+  final List<String>? _pendingOutgoingRequests;
+  final List<String>? _blockedUsers;
+  final Map<String, DateTime>? _friendsSince;
+
+  List<String> get friends => _friends ?? const [];
+  List<String> get pendingIncomingRequests => _pendingIncomingRequests ?? const [];
+  List<String> get pendingOutgoingRequests => _pendingOutgoingRequests ?? const [];
+  List<String> get blockedUsers => _blockedUsers ?? const [];
+  Map<String, DateTime> get friendsSince => _friendsSince ?? const {};
+
   UserModel({
     required this.id,
     required this.displayName,
@@ -40,15 +53,27 @@ class UserModel {
     this.role = 'user',
     this.isPrivate = false,
     this.friendState = FriendState.none,
-  });
+    List<String> friends = const [],
+    List<String> pendingIncomingRequests = const [],
+    List<String> pendingOutgoingRequests = const [],
+    List<String> blockedUsers = const [],
+    Map<String, DateTime> friendsSince = const {},
+  })  : _friends = friends,
+        _pendingIncomingRequests = pendingIncomingRequests,
+        _pendingOutgoingRequests = pendingOutgoingRequests,
+        _blockedUsers = blockedUsers,
+        _friendsSince = friendsSince;
 
   factory UserModel.fromFirestore(DocumentSnapshot userDoc) {
-    final userData = userDoc.data() as Map<String, dynamic>;
+    final userData = userDoc.data() as Map<String, dynamic>? ?? {};
+    final id = userDoc.id;
 
-    return UserModel(
-      id: userDoc.id,
+    try {
+      return UserModel(
+        id: id,
       displayName: userData['displayName'] ?? '',
-      displayNameLowercase: userData['displayNameLowercase'] ?? (userData['displayName'] ?? '').toString().toLowerCase(),
+      displayNameLowercase: userData['displayNameLowercase'] ??
+          (userData['displayName'] ?? '').toString().toLowerCase(),
       photoUrl: userData['photoUrl'],
       coverUrl: userData['coverUrl'],
       ageVerified: userData['ageVerified'] ?? false,
@@ -58,11 +83,46 @@ class UserModel {
       bio: userData['bio'],
       instagram: userData['instagram'],
       username: userData['username'] ?? '',
-      usernameLowercase: userData['usernameLowercase'] ?? (userData['username'] ?? '').toString().toLowerCase(),
+      usernameLowercase: userData['usernameLowercase'] ??
+          (userData['username'] ?? '').toString().toLowerCase(),
       role: userData['role'] ?? 'user',
       isPrivate: userData['isPrivate'] ?? false,
       friendState: _parseFriendState(userData['friendState']),
+      friends: _parseStringList(userData['friends']),
+      pendingIncomingRequests:
+          _parseStringList(userData['pendingIncomingRequests']),
+      pendingOutgoingRequests:
+          _parseStringList(userData['pendingOutgoingRequests']),
+      blockedUsers: _parseStringList(userData['blockedUsers']),
+      friendsSince: _parseFriendsSince(userData['friendsSince']),
     );
+    } catch (e, stack) {
+      print('Error parsing UserModel for $id: $e');
+      print(stack);
+      // Return a minimal valid model to prevent crashes
+      return UserModel(
+        id: id,
+        username: 'unknown',
+        usernameLowercase: 'unknown',
+        displayName: 'Unknown User',
+        displayNameLowercase: 'unknown user',
+        ageVerified: false,
+        createdAt: DateTime.now(),
+      );
+    }
+  }
+
+  static List<String> _parseStringList(dynamic value) {
+    if (value == null || value is! List) return [];
+    return value.map((e) => e.toString()).toList();
+  }
+
+  static Map<String, DateTime> _parseFriendsSince(dynamic value) {
+    if (value == null || value is! Map) return {};
+    return value.map((key, val) => MapEntry(
+          key.toString(),
+          (val as Timestamp).toDate(),
+        ));
   }
 
   static FriendState _parseFriendState(dynamic value) {
@@ -89,6 +149,11 @@ class UserModel {
       'role': role,
       'isPrivate': isPrivate,
       'friendState': friendState.name,
+      'friends': friends,
+      'pendingIncomingRequests': pendingIncomingRequests,
+      'pendingOutgoingRequests': pendingOutgoingRequests,
+      'blockedUsers': blockedUsers,
+      'friendsSince': friendsSince.map((key, value) => MapEntry(key, Timestamp.fromDate(value))),
     };
   }
 
@@ -106,6 +171,11 @@ class UserModel {
     String? role,
     bool? isPrivate,
     FriendState? friendState,
+    List<String>? friends,
+    List<String>? pendingIncomingRequests,
+    List<String>? pendingOutgoingRequests,
+    List<String>? blockedUsers,
+    Map<String, DateTime>? friendsSince,
   }) {
     return UserModel(
       id: id,
@@ -122,6 +192,11 @@ class UserModel {
       role: role ?? this.role,
       isPrivate: isPrivate ?? this.isPrivate,
       friendState: friendState ?? this.friendState,
+      friends: friends ?? this.friends,
+      pendingIncomingRequests: pendingIncomingRequests ?? this.pendingIncomingRequests,
+      pendingOutgoingRequests: pendingOutgoingRequests ?? this.pendingOutgoingRequests,
+      blockedUsers: blockedUsers ?? this.blockedUsers,
+      friendsSince: friendsSince ?? this.friendsSince,
     );
   }
 }

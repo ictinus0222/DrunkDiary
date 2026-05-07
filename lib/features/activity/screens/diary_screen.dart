@@ -41,7 +41,9 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
   Widget build(BuildContext context) {
     final logsAsync = _selectedFilter == 'All' 
         ? ref.watch(filteredAllDrinkLogsProvider) 
-        : ref.watch(drinkLogsProvider);
+        : _selectedFilter == 'Friends'
+            ? ref.watch(friendsFeedProvider)
+            : ref.watch(drinkLogsProvider);
 
     return SafeArea(
       child: logsAsync.when(
@@ -126,15 +128,9 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
                 SliverToBoxAdapter(
                   child: _FiltersRow(
                     selectedFilter: _selectedFilter,
-                    currentLayout: _currentLayout,
                     onFilterChanged: (filter) {
                       setState(() {
                         _selectedFilter = filter;
-                      });
-                    },
-                    onLayoutChanged: (layout) {
-                      setState(() {
-                        _currentLayout = layout;
                       });
                     },
                   ),
@@ -143,6 +139,7 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
                 _DiarySliverList(
                   logs: logs,
                   layout: _currentLayout,
+                  selectedFilter: _selectedFilter,
                 ),
                 const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.hero)),
               ],
@@ -253,15 +250,11 @@ class _WelcomeSectionState extends State<_WelcomeSection> {
 
 class _FiltersRow extends StatelessWidget {
   final String selectedFilter;
-  final DiaryLayout currentLayout;
   final ValueChanged<String> onFilterChanged;
-  final ValueChanged<DiaryLayout> onLayoutChanged;
 
   const _FiltersRow({
     required this.selectedFilter,
-    required this.currentLayout,
     required this.onFilterChanged,
-    required this.onLayoutChanged,
   });
 
   @override
@@ -275,17 +268,23 @@ class _FiltersRow extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _FilterChip(
-                    label: 'All Activity',
-                    selected: selectedFilter == 'All',
-                    onTap: () => onFilterChanged('All'),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  _FilterChip(
-                    label: 'Your Logs',
-                    selected: selectedFilter == 'Logs',
-                    onTap: () => onFilterChanged('Logs'),
-                  ),
+                    _FilterChip(
+                      label: 'All Activity',
+                      selected: selectedFilter == 'All',
+                      onTap: () => onFilterChanged('All'),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    _FilterChip(
+                      label: 'Friends',
+                      selected: selectedFilter == 'Friends',
+                      onTap: () => onFilterChanged('Friends'),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    _FilterChip(
+                      label: 'Your Logs',
+                      selected: selectedFilter == 'Logs',
+                      onTap: () => onFilterChanged('Logs'),
+                    ),
                   const SizedBox(width: AppSpacing.md),
                   _FilterChip(
                     label: 'Your Reviews',
@@ -294,22 +293,6 @@ class _FiltersRow extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          IconButton(
-            onPressed: () {
-              onLayoutChanged(
-                currentLayout == DiaryLayout.timeline
-                    ? DiaryLayout.gallery
-                    : DiaryLayout.timeline,
-              );
-            },
-            icon: Icon(
-              currentLayout == DiaryLayout.timeline
-                  ? Icons.grid_view
-                  : Icons.view_agenda_outlined,
-              color: Colors.white,
             ),
           ),
         ],
@@ -358,24 +341,33 @@ class _FilterChip extends StatelessWidget {
 class _DiarySliverList extends StatelessWidget {
   final List<DrinkLogModel> logs;
   final DiaryLayout layout;
+  final String selectedFilter;
 
   const _DiarySliverList({
     required this.logs,
     required this.layout,
+    required this.selectedFilter,
   });
 
   @override
   Widget build(BuildContext context) {
     if (logs.isEmpty) {
+      final isFriendsFeed = selectedFilter == 'Friends';
       return SliverFillRemaining(
         hasScrollBody: false,
         child: AppEmptyState(
-          icon: Icons.history_edu_outlined,
-          title: 'Your diary is empty',
-          subtitle: 'Capture your first drink memory\nand see it here.',
-          buttonText: 'Log a Drink',
+          icon: isFriendsFeed ? Icons.people_outline_rounded : Icons.history_edu_outlined,
+          title: isFriendsFeed ? 'No friend activity yet' : 'Your diary is empty',
+          subtitle: isFriendsFeed 
+              ? 'Add friends to see their diary entries,\nratings, and drinking memories here.'
+              : 'Capture your first drink memory\nand see it here.',
+          buttonText: isFriendsFeed ? 'Find Friends' : 'Log a Drink',
           onAddTap: () {
-            const TabChangeNotification(2).dispatch(context);
+            if (isFriendsFeed) {
+              const TabChangeNotification(1).dispatch(context); // Discover tab
+            } else {
+              const TabChangeNotification(2).dispatch(context); // Log tab
+            }
           },
         ),
       );

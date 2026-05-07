@@ -7,6 +7,7 @@ class NotificationModel {
   final String senderUsername;
   final String? senderProfileImage;
   final String activityId;
+  final DateTime? activityDate; // NEW: The date of the session being cheered
   final DateTime createdAt;
   final bool isRead;
 
@@ -17,6 +18,7 @@ class NotificationModel {
     required this.senderUsername,
     this.senderProfileImage,
     required this.activityId,
+    this.activityDate,
     required this.createdAt,
     this.isRead = false,
   });
@@ -30,6 +32,7 @@ class NotificationModel {
       senderUsername: data['senderUsername'] ?? '',
       senderProfileImage: data['senderProfileImage'],
       activityId: data['activityId'] ?? '',
+      activityDate: (data['activityDate'] as Timestamp?)?.toDate(),
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       isRead: data['isRead'] ?? false,
     );
@@ -42,6 +45,7 @@ class NotificationModel {
       'senderUsername': senderUsername,
       'senderProfileImage': senderProfileImage,
       'activityId': activityId,
+      'activityDate': activityDate != null ? Timestamp.fromDate(activityDate!) : null,
       'createdAt': Timestamp.fromDate(createdAt),
       'isRead': isRead,
     };

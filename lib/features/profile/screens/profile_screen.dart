@@ -14,9 +14,12 @@ import '../../drink_logs/models/drink_model_dto.dart';
 import '../../drink_logs/providers/drink_logs_provider.dart';
 import '../../drink_logs/widgets/day_section.dart';
 import '../providers/profile_providers.dart';
+import '../models/user_model.dart';
+import '../../../core/utils/visibility_resolver.dart';
 import '../../../app/app_routes.dart';
 import '../../../core/providers/common_providers.dart';
 import '../widgets/edit_profile_sheet.dart';
+import '../../../core/theme/app_colors.dart';
 
 class ProfileScreen extends ConsumerWidget {
   final String? userId;
@@ -50,19 +53,16 @@ class ProfileScreen extends ConsumerWidget {
   Widget _buildProfileData(BuildContext context, WidgetRef ref, dynamic profile, bool isMe) {
     if (profile == null) return const Center(child: Text('No profile found'));
 
-    final userData = profile.userData;
+    final userData = profile.userData as UserModel;
+    final currentUserAsync = ref.watch(profileDataProvider);
+    final currentUser = currentUserAsync.value?.userData;
+
+    if (currentUser == null) return const Center(child: CircularProgressIndicator());
+
+    final canView = VisibilityResolver.canViewProfile(viewer: currentUser, owner: userData);
     
-    // Self-heal: If user is viewing their own profile and normalized fields are missing, update them.
-    if (isMe && (userData.usernameLowercase.isEmpty || userData.displayNameLowercase.isEmpty)) {
-      _selfHealUser(userData);
-    }
-
-    // For now, isFriend is false as the social graph isn't implemented.
-    const isFriend = false;
-    final isLocked = userData.isPrivate && !isMe && !isFriend;
-
-    if (isLocked) {
-      return _buildLockedProfileView(context, ref, userData);
+    if (!canView) {
+      return _buildLockedProfileView(context, ref, userData, currentUser);
     }
 
     return _buildFullProfile(context, ref, profile, isMe);
@@ -75,7 +75,7 @@ class ProfileScreen extends ConsumerWidget {
     }).catchError((e) => print('Self-heal failed: $e'));
   }
 
-  Widget _buildLockedProfileView(BuildContext context, WidgetRef ref, dynamic userData) {
+  Widget _buildLockedProfileView(BuildContext ctx, WidgetRef ref, UserModel userData, UserModel currentUser) {
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
@@ -84,6 +84,7 @@ class ProfileScreen extends ConsumerWidget {
             uniqueDays: 0, // Gated
             isMe: false,
             isLocked: true,
+            currentUser: currentUser,
           ),
         ),
         
@@ -130,26 +131,8 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: AppSpacing.xl),
                     
-                    // Add Friend CTA
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          // TODO: Implement friend request logic
-                        },
-                        icon: const Icon(Icons.person_add_rounded),
-                        label: const Text('Add Friend to Unlock'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.amber,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          textStyle: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ),
+                    // Social Action Area
+                    _buildSocialAction(ctx, ref, userData, currentUser),
                   ],
                 ),
               ),
@@ -186,6 +169,113 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
+  Widget _buildSocialAction(BuildContext ctx, WidgetRef ref, UserModel targetUser, UserModel currentUser) {
+    if (currentUser.friends.contains(targetUser.id)) {
+      return _buildActionBadge(Icons.check_circle_rounded, 'Friends', AppColors.amber);
+    } else if (currentUser.pendingOutgoingRequests.contains(targetUser.id)) {
+      return _buildActionBadge(Icons.hourglass_bottom_rounded, 'Friend Request Sent', Colors.white38);
+    } else if (currentUser.pendingIncomingRequests.contains(targetUser.id)) {
+      return _buildPrimaryAction(
+        Icons.person_add_rounded,
+        'Accept Friend Request',
+        () => _handleAccept(ctx, ref, currentUser, targetUser),
+      );
+    } else if (currentUser.blockedUsers.contains(targetUser.id)) {
+      return _buildActionBadge(Icons.block_rounded, 'User Blocked', Colors.white24);
+    } else {
+      return _buildPrimaryAction(
+        Icons.person_add_rounded,
+        'Add Friend to Unlock',
+        () => _handleSendRequest(ctx, ref, currentUser, targetUser),
+      );
+    }
+  }
+
+  Widget _buildActionBadge(IconData icon, String label, Color color) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.1)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 8),
+          Text(label, style: AppTextStyles.body.copyWith(color: color, fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrimaryAction(IconData icon, String label, VoidCallback onPressed) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icon),
+        label: Text(label),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.amber,
+          foregroundColor: Colors.black,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          textStyle: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleSendRequest(BuildContext context, WidgetRef ref, UserModel currentUser, UserModel targetUser) async {
+    try {
+      await ref.read(friendshipRepositoryProvider).sendFriendRequest(
+        fromUserId: currentUser.id,
+        fromUsername: currentUser.displayName,
+        fromPhotoUrl: currentUser.photoUrl,
+        toUserId: targetUser.id,
+      );
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Friend request sent to ${targetUser.displayName}')),
+        );
+      }
+      
+      ref.invalidate(profileDataProvider);
+      ref.invalidate(otherProfileDataProvider(targetUser.id));
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to send request: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleAccept(BuildContext context, WidgetRef ref, UserModel currentUser, UserModel targetUser) async {
+    try {
+      await ref.read(friendshipRepositoryProvider).acceptFriendRequest(currentUser.id, targetUser.id);
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Accepted ${targetUser.displayName}\'s request')),
+        );
+      }
+      
+      ref.invalidate(profileDataProvider);
+      ref.invalidate(otherProfileDataProvider(targetUser.id));
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to accept: $e')),
+        );
+      }
+    }
+  }
+
   Widget _buildBlurredPlaceholderCard() {
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -196,7 +286,10 @@ class ProfileScreen extends ConsumerWidget {
         border: Border.all(color: Colors.white.withOpacity(0.05)),
       ),
       child: Center(
-        child: Icon(Icons.blur_on_rounded, color: Colors.white10, size: 32),
+        child: Text(
+          'DIARY ENTRY HIDDEN',
+          style: AppTextStyles.caption.copyWith(color: Colors.white12, letterSpacing: 1.5, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -241,6 +334,7 @@ class ProfileScreen extends ConsumerWidget {
             profile: userData,
             uniqueDays: uniqueDays,
             isMe: isMe,
+            currentUser: ref.watch(profileDataProvider).value?.userData,
           ),
         ),
 
@@ -309,21 +403,23 @@ class ProfileScreen extends ConsumerWidget {
   }
 }
 
-class _ProfileHeader extends StatelessWidget {
+class _ProfileHeader extends ConsumerWidget {
   final dynamic profile;
   final int uniqueDays;
-  final bool isMe;
   final bool isLocked;
+  final UserModel? currentUser;
+  final bool isMe;
 
   const _ProfileHeader({
     required this.profile,
     required this.uniqueDays,
     this.isMe = true,
     this.isLocked = false,
+    this.currentUser,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     
     return Column(
@@ -447,17 +543,9 @@ class _ProfileHeader extends StatelessWidget {
                       child: const Text("Edit"),
                     ),
                   ],
-                )
-              else if (profile.instagram != null && profile.instagram!.isNotEmpty)
-                CircleAvatar(
-                  radius: 18,
-                  backgroundColor: Colors.white.withOpacity(0.1),
-                  child: IconButton(
-                    padding: EdgeInsets.zero,
-                    icon: const Icon(Icons.alternate_email, color: Colors.amber, size: 18),
-                    onPressed: () => _launchInstagram(context, profile.instagram!),
-                  ),
                 ),
+              if (!isMe && currentUser != null)
+                _buildFriendshipAction(context, ref),
             ],
           ),
         ),
@@ -489,22 +577,180 @@ class _ProfileHeader extends StatelessWidget {
 
         const SizedBox(height: 16),
 
-        // ── Stats ─────────────────────────────────────────────────────────────
-        if (uniqueDays > 0)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-            child: Text(
-              "$uniqueDays DAYS LOGGED",
-              style: AppTextStyles.caption.copyWith(
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.5,
-                color: Colors.white70,
-              ),
-            ),
+        // ── Stats Row ────────────────────────────────────────────────────────
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: Row(
+            children: [
+              if (uniqueDays > 0)
+                Text(
+                  "$uniqueDays DAYS LOGGED",
+                  style: AppTextStyles.caption.copyWith(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
+                    color: Colors.white70,
+                  ),
+                ),
+              if (!isMe && !isLocked) ...[
+                if (uniqueDays > 0) const SizedBox(width: AppSpacing.md),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    VisibilityResolver.getActivitySignal(null), // TODO: pass actual last log date
+                    style: AppTextStyles.caption.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.amber,
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
+        ),
       ],
     );
   }
+
+  Widget _buildFriendshipAction(BuildContext ctx, WidgetRef ref) {
+    final targetId = profile.id;
+    final viewer = currentUser!;
+    
+    if (viewer.friends.contains(targetId)) {
+      return _buildFriendOptions(ctx, ref);
+    } else if (viewer.pendingOutgoingRequests.contains(targetId)) {
+      return _buildCompactActionBadge(Icons.hourglass_bottom_rounded, 'Sent', Colors.white38);
+    } else if (viewer.pendingIncomingRequests.contains(targetId)) {
+      return _buildCompactPrimaryAction(
+        Icons.person_add_rounded, 
+        'Accept', 
+        () => _handleAccept(ctx, ref, viewer, profile)
+      );
+    } else if (viewer.blockedUsers.contains(targetId)) {
+      return _buildCompactActionBadge(Icons.block_rounded, 'Blocked', Colors.white24);
+    } else {
+      return _buildCompactPrimaryAction(
+        Icons.person_add_rounded, 
+        'Add Friend', 
+        () => _handleSendRequest(ctx, ref, viewer, profile)
+      );
+    }
+  }
+
+  Widget _buildFriendOptions(BuildContext ctx, WidgetRef ref) {
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_horiz_rounded, color: Colors.white70),
+      onSelected: (value) => _handleFriendMenu(ctx, ref, value),
+      itemBuilder: (context) => [
+        const PopupMenuItem(
+          value: 'remove',
+          child: Text('Remove Friend'),
+        ),
+        const PopupMenuItem(
+          value: 'block',
+          child: Text('Block User', style: TextStyle(color: Colors.redAccent)),
+        ),
+      ],
+    );
+  }
+
+  void _handleFriendMenu(BuildContext context, WidgetRef ref, String action) {
+    if (action == 'remove') {
+      ref.read(friendshipRepositoryProvider).removeFriend(currentUser!.id, profile.id).then((_) {
+        ref.invalidate(profileDataProvider);
+        ref.invalidate(otherProfileDataProvider(profile.id));
+      });
+    } else if (action == 'block') {
+      ref.read(friendshipRepositoryProvider).blockUser(currentUser!.id, profile.id).then((_) {
+        ref.invalidate(profileDataProvider);
+        ref.invalidate(otherProfileDataProvider(profile.id));
+      });
+    }
+  }
+
+  Future<void> _handleSendRequest(BuildContext context, WidgetRef ref, UserModel currentUser, dynamic targetUser) async {
+    try {
+      await ref.read(friendshipRepositoryProvider).sendFriendRequest(
+        fromUserId: currentUser.id,
+        fromUsername: currentUser.displayName,
+        fromPhotoUrl: currentUser.photoUrl,
+        toUserId: targetUser.id,
+      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Friend request sent to ${targetUser.displayName}')),
+        );
+      }
+      ref.invalidate(profileDataProvider);
+      ref.invalidate(otherProfileDataProvider(targetUser.id));
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to send request: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleAccept(BuildContext context, WidgetRef ref, UserModel currentUser, dynamic targetUser) async {
+    try {
+      await ref.read(friendshipRepositoryProvider).acceptFriendRequest(currentUser.id, targetUser.id);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Accepted ${targetUser.displayName}\'s request')),
+        );
+      }
+      ref.invalidate(profileDataProvider);
+      ref.invalidate(otherProfileDataProvider(targetUser.id));
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to accept: $e')),
+        );
+      }
+    }
+  }
+
+  Widget _buildCompactPrimaryAction(IconData icon, String label, VoidCallback onPressed) {
+    return OutlinedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 16),
+      label: Text(label),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Colors.amber,
+        side: const BorderSide(color: Colors.amber, width: 1),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        visualDensity: VisualDensity.compact,
+      ),
+    );
+  }
+
+  Widget _buildCompactActionBadge(IconData icon, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: AppTextStyles.caption.copyWith(color: color, fontWeight: FontWeight.bold, fontSize: 10),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   Future<void> _launchInstagram(BuildContext context, String handle) async {
     final cleanHandle = handle.replaceAll('@', '').trim();

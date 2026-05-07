@@ -3,6 +3,8 @@ import '../../../core/constants/reaction_config.dart';
 
 enum LogKind { log, review }
 
+enum Visibility { public, friendsOnly, closeFriends }
+
 // DrinkLogModel is one user interaction with one drink, not a static entity
 // TODO: fix for when document is deleted, malformed or empty.
 class DrinkLogModel {
@@ -32,6 +34,7 @@ class DrinkLogModel {
   final DateTime? photoUploadedAt;
 
   final bool isPrivate;
+  final Visibility visibility;
 
   DrinkLogModel({
     required this.id,
@@ -53,6 +56,7 @@ class DrinkLogModel {
     this.photoUrl,
     this.photoUploadedAt,
     this.isPrivate = false,
+    this.visibility = Visibility.public,
   });
 
   factory DrinkLogModel.fromFirestore(DocumentSnapshot doc) {
@@ -90,6 +94,15 @@ class DrinkLogModel {
       photoUrl: data['photoUrl'] as String?,
       photoUploadedAt: (data['photoUploadedAt'] as Timestamp?)?.toDate(),
       isPrivate: data['isPrivate'] as bool? ?? false,
+      visibility: _parseVisibility(data['visibility']),
+    );
+  }
+
+  static Visibility _parseVisibility(dynamic value) {
+    if (value == null) return Visibility.public;
+    return Visibility.values.firstWhere(
+      (e) => e.name == value.toString(),
+      orElse: () => Visibility.public,
     );
   }
 
@@ -113,6 +126,7 @@ class DrinkLogModel {
       'photoUrl': photoUrl,
       'photoUploadedAt': photoUploadedAt,
       'isPrivate': isPrivate,
+      'visibility': visibility.name,
     };
   }
 
@@ -131,6 +145,7 @@ class DrinkLogModel {
     String? alcoholName,
     String? alcoholType,
     bool? isPrivate,
+    Visibility? visibility,
   }) {
     return DrinkLogModel(
       id: id,
@@ -152,6 +167,7 @@ class DrinkLogModel {
       photoUrl: photoUrl,
       photoUploadedAt: photoUploadedAt,
       isPrivate: isPrivate ?? this.isPrivate,
+      visibility: visibility ?? this.visibility,
     );
   }
 }

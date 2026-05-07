@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:intl/intl.dart';
+import '../../profile/providers/profile_providers.dart';
+import '../../profile/screens/profile_screen.dart';
 
 import '../../../app/app_theme.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -10,6 +13,9 @@ import '../../../core/widgets/app_empty_state.dart';
 import '../../../core/widgets/app_shimmer.dart';
 import '../providers/notifications_provider.dart';
 import '../models/notification_model.dart';
+import '../screens/activity_detail_viewer.dart';
+import '../../drink_logs/repositories/drink_log_repository.dart';
+import '../../drink_logs/providers/drink_logs_provider.dart';
 import '../../../core/providers/common_providers.dart';
 
 class NotificationsScreen extends ConsumerWidget {
@@ -81,6 +87,18 @@ class _NotificationItem extends ConsumerWidget {
       onTap: () {
         // Mark as read
         ref.read(notificationRepositoryProvider).markAsRead(userId, notification.id);
+        
+        if (notification.type == 'cheers') {
+          _handleCheersTap(context, ref);
+        } else {
+          // Default: Navigate to Sender's Profile
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ProfileScreen(userId: notification.senderId),
+            ),
+          );
+        }
       },
       child: Container(
         padding: const EdgeInsets.symmetric(
@@ -121,8 +139,12 @@ class _NotificationItem extends ConsumerWidget {
                         ),
                         TextSpan(
                           text: notification.type == 'cheers' 
-                              ? ' cheered your activity 🥂' 
-                              : ' interacted with you',
+                              ? (notification.activityDate != null 
+                                  ? ' cheered your ${DateFormat('MMMM d').format(notification.activityDate!)} 🥂'
+                                  : ' cheered your activity 🥂')
+                              : notification.type == 'friend_request'
+                                  ? ' sent you a friend request 👋'
+                                  : ' interacted with you',
                         ),
                       ],
                     ),
@@ -134,6 +156,28 @@ class _NotificationItem extends ConsumerWidget {
                       color: customColors.textMuted,
                     ),
                   ),
+                  if (notification.type == 'friend_request' && !notification.isRead) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    Row(
+                      children: [
+                        _buildAction(
+                          context, 
+                          ref, 
+                          'Accept', 
+                          Colors.amber, 
+                          () => _handleAccept(ref),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        _buildAction(
+                          context, 
+                          ref, 
+                          'Ignore', 
+                          Colors.white24, 
+                          () => _handleIgnore(ref),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -153,6 +197,103 @@ class _NotificationItem extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildAction(BuildContext context, WidgetRef ref, String label, Color color, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color.withOpacity(0.2)),
+        ),
+        child: Text(
+          label,
+          style: AppTextStyles.caption.copyWith(
+            color: color == Colors.white24 ? Colors.white70 : color,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handleAccept(WidgetRef ref) {
+    ref.read(friendshipRepositoryProvider).acceptFriendRequest(userId, notification.senderId).then((_) {
+      ref.read(notificationRepositoryProvider).markAsRead(userId, notification.id);
+      ref.invalidate(profileDataProvider);
+    });
+  }
+
+  void _handleIgnore(WidgetRef ref) {
+    ref.read(friendshipRepositoryProvider).rejectFriendRequest(userId, notification.senderId).then((_) {
+      ref.read(notificationRepositoryProvider).markAsRead(userId, notification.id);
+    });
+  }
+
+  Future<void> _handleCheersTap(BuildContext context, WidgetRef ref) async {
+    // We need to fetch the logs for the activity being cheered.
+    // The activityId is usually userId_yyyy-MM-dd
+    final activityId = notification.activityId;
+    final activityDate = notification.activityDate;
+    
+    if (activityDate == null) {
+      // Fallback to profile if date is missing
+      Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileScreen(userId: userId)));
+      return;
+    }
+
+    try {
+      // Fetch user logs for that date
+      final repository = ref.read(drinkLogRepositoryProvider);
+      final logs = await repository.fetchLogsForUser(userId); // This is the RECEIVER's logs
+      
+      // Filter logs by date
+      final dateStr = DateFormat('yyyy-MM-dd').format(activityDate);
+      final dayLogs = logs.where((l) {
+        final lDate = DateFormat('yyyy-MM-dd').format(l.createdAt);
+        return lDate == dateStr;
+      }).toList();
+
+      if (dayLogs.isEmpty) {
+        if (context.mounted) {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileScreen(userId: userId)));
+        }
+        return;
+      }
+
+      // Open ActivityDetailViewer
+      if (context.mounted) {
+        final profileAsync = ref.read(profileDataProvider);
+        final userData = profileAsync.value?.userData;
+
+        Navigator.push(
+          context,
+          PageRouteBuilder(
+            opaque: false,
+            barrierColor: Colors.black,
+            pageBuilder: (context, animation, secondaryAnimation) => FadeTransition(
+              opacity: animation,
+              child: ActivityDetailViewer(
+                activityId: activityId,
+                initialLogs: dayLogs,
+                date: activityDate,
+                userId: userId,
+                username: userData?.displayName ?? 'You',
+                userPhotoUrl: userData?.photoUrl,
+              ),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileScreen(userId: userId)));
+      }
+    }
   }
 }
 

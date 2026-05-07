@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drunk_diary/core/providers/common_providers.dart';
+import 'package:drunk_diary/core/utils/visibility_resolver.dart';
 import 'package:drunk_diary/features/alcohol/models/alcohol_model.dart';
 import 'package:drunk_diary/features/drink_logs/models/drink_model_dto.dart';
 import 'package:drunk_diary/features/drink_logs/repositories/drink_log_repository.dart';
@@ -25,21 +26,62 @@ final allDrinkLogsProvider = StreamProvider<List<DrinkLogModel>>((ref) {
   return repository.watchAllLogs();
 });
 
+/// Friends-Only Feed (Friends Activity)
+final friendsFeedProvider = StreamProvider<List<DrinkLogModel>>((ref) {
+  final userId = ref.watch(userIdProvider);
+  if (userId == null) return Stream.value([]);
+
+  // Watch current user's profile to get friends list
+  final profileAsync = ref.watch(profileDataProvider);
+  final userData = profileAsync.value?.userData;
+  final friends = userData?.friends ?? [];
+
+  // Include self in the "Friends" feed so you see your own activity too
+  final List<String> targetIds = [if (userId != null) userId, ...friends];
+
+  if (targetIds.isEmpty) return Stream.value([]);
+
+  final repository = ref.watch(drinkLogRepositoryProvider);
+  final logsStream = repository.watchFriendsFeed(targetIds);
+
+  return logsStream.map((logs) {
+    final viewer = profileAsync.value?.userData;
+    if (viewer == null) return [];
+
+    final List<String> friends = viewer.friends;
+    final List<String> blocked = viewer.blockedUsers;
+
+    // Filter logs through VisibilityResolver (Friendship check + Blocking check)
+    return logs.where((log) {
+      if (log.userId == viewer.id) return true; // Always see your own logs
+      if (blocked.contains(log.userId)) return false;
+      
+      // Since these are friends' logs, visibility check is straightforward
+      return log.visibility != Visibility.closeFriends || friends.contains(log.userId);
+    }).toList();
+  });
+});
+
 /// Filtered Global Feed (Option B - Denormalized)
 /// Watches allDrinkLogsProvider and filters out logs from private users using the denormalized field.
 final filteredAllDrinkLogsProvider = Provider<AsyncValue<List<DrinkLogModel>>>((ref) {
   final logsAsync = ref.watch(allDrinkLogsProvider);
-  final currentUserId = ref.watch(userIdProvider);
+  final profileAsync = ref.watch(profileDataProvider);
+  final viewer = profileAsync.value?.userData;
 
   return logsAsync.whenData((allLogs) {
     if (allLogs.isEmpty) return [];
+    if (viewer == null) return allLogs.where((log) => !log.isPrivate).toList();
 
     return allLogs.where((log) {
       // 1. Owners see their own logs
-      if (log.userId == currentUserId) return true;
+      if (log.userId == viewer.id) return true;
       
-      // 2. Others only see non-private logs
-      return !log.isPrivate;
+      // 2. Blocked check
+      if (viewer.blockedUsers.contains(log.userId)) return false;
+
+      // 3. Visibility check
+      return log.visibility == Visibility.public;
     }).toList();
   });
 });
@@ -112,11 +154,22 @@ final userDrinkLogsProvider = StreamProvider.family<List<DrinkLogModel>, String>
   
   final logsStream = repository.watchLogsForUser(userId);
   
+  final profileAsync = ref.watch(profileDataProvider);
+  final viewer = profileAsync.value?.userData;
+
   return logsStream.map((logs) {
-    // If it's the owner, show all logs.
-    if (userId == currentUserId) return logs;
+    if (viewer == null) return logs.where((log) => !log.isPrivate).toList();
     
-    // If it's someone else, hide private logs.
-    return logs.where((log) => !log.isPrivate).toList();
+    return logs.where((log) {
+      // 1. Self access
+      if (log.userId == viewer.id) return true;
+
+      // 2. Public profile activity is visible to all
+      if (!log.isPrivate) return true;
+
+      // 3. Private profile activity is visible only to friends
+      // We use viewer.friends as the source of truth for the viewer's experience
+      return viewer.friends.contains(log.userId);
+    }).toList();
   });
 });

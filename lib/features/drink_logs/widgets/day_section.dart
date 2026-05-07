@@ -14,6 +14,7 @@ import '../../profile/screens/profile_screen.dart';
 import '../../activity/screens/activity_detail_viewer.dart';
 import '../../../core/navigation/tab_change_notification.dart';
 import '../../../core/providers/common_providers.dart';
+import '../../profile/providers/profile_providers.dart';
 
 /// Groups one day's logs into a timeline-style activity cluster.
 ///
@@ -44,7 +45,16 @@ class DayActivityCard extends ConsumerWidget {
     final activityId = "${firstLog.userId}_$dateString";
 
     final activityAsync = ref.watch(dayActivityProvider(activityId));
+    final profileAsync = ref.watch(profileDataProvider);
+    final viewer = profileAsync.value?.userData;
+    final isFriend = viewer != null && viewer.friends.contains(firstLog.userId);
+    
     final isPrivateSession = logs.any((l) => l.isPrivate);
+    
+    // A session is ONLY effectively private if the viewer is not the owner AND not a friend
+    final isEffectivelyPrivate = isPrivateSession && 
+                                firstLog.userId != viewer?.id && 
+                                !isFriend;
 
     return Column(
       children: [
@@ -66,7 +76,7 @@ class DayActivityCard extends ConsumerWidget {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          final currentUserId = ref.read(userIdProvider);
+                          final currentUserId = viewer?.id;
                           if (firstLog.userId == currentUserId) {
                             const TabChangeNotification(4).dispatch(context);
                           } else {
@@ -122,7 +132,7 @@ class DayActivityCard extends ConsumerWidget {
         // ── 🖼 FULL-WIDTH HORIZONTAL LOG SCROLL ──────────────────────────────
         _HorizontalLogScroll(
           logs: logs,
-          onLogTap: (index) => _openViewer(context, ref, index, activityId),
+          onLogTap: (index) => _openViewer(context, ref, index, activityId, isEffectivelyPrivate),
         ),
 
         const SizedBox(height: 4),
@@ -133,7 +143,7 @@ class DayActivityCard extends ConsumerWidget {
           child: Row(
             children: [
               const SizedBox(width: 56 + 12),
-              if (!isPrivateSession)
+              if (!isEffectivelyPrivate)
                 activityAsync.when(
                   data: (activity) => CheersButton(
                     activityId: activityId,
@@ -148,7 +158,7 @@ class DayActivityCard extends ConsumerWidget {
                   ),
                   error: (_, __) => const SizedBox.shrink(),
                 ),
-              if (isPrivateSession)
+              if (isEffectivelyPrivate)
                 Row(
                   children: [
                     Icon(Icons.lock_outline, size: 14, color: customColors.textMuted),
@@ -198,11 +208,10 @@ class DayActivityCard extends ConsumerWidget {
     );
   }
 
-  void _openViewer(BuildContext context, WidgetRef ref, int initialIndex, String activityId) {
+  void _openViewer(BuildContext context, WidgetRef ref, int initialIndex, String activityId, bool isEffectivelyPrivate) {
     final firstLog = logs.first;
-    final isPrivateSession = logs.any((l) => l.isPrivate);
     
-    if (isPrivateSession && firstLog.userId != ref.read(userIdProvider)) {
+    if (isEffectivelyPrivate) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('This session is private')),
       );

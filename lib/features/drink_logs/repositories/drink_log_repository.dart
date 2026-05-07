@@ -77,6 +77,23 @@ class DrinkLogRepository {
             snapshot.docs.map(DrinkLogModel.fromFirestore).toList());
   }
 
+  /// Real-time stream of logs from a user's friends (Friends Feed)
+  /// Limited to 10 friends for MVP due to Firestore 'whereIn' limits.
+  Stream<List<DrinkLogModel>> watchFriendsFeed(List<String> friendIds) {
+    if (friendIds.isEmpty) return Stream.value([]);
+    
+    // Take max 10 friends for MVP
+    final limitedFriendIds = friendIds.take(10).toList();
+
+    return _firestore
+        .collection('drink_logs')
+        .where('userId', whereIn: limitedFriendIds)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) =>
+            snapshot.docs.map(DrinkLogModel.fromFirestore).toList());
+  }
+
   // ============================
   // ➕ CREATE SINGLE LOG / REVIEW
   // ============================

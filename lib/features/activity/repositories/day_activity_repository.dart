@@ -48,6 +48,7 @@ class DayActivityRepository {
           senderUsername: senderUsername,
           senderProfileImage: senderProfileImage,
           activityId: activityId,
+          activityDate: date,
         );
       }
       return;
@@ -78,6 +79,7 @@ class DayActivityRepository {
           senderUsername: senderUsername,
           senderProfileImage: senderProfileImage,
           activityId: activityId,
+          activityDate: date,
         );
       }
     }
@@ -89,6 +91,7 @@ class DayActivityRepository {
     required String senderUsername,
     String? senderProfileImage,
     required String activityId,
+    required DateTime activityDate, // NEW
   }) async {
     await _firestore
         .collection('users')
@@ -100,6 +103,7 @@ class DayActivityRepository {
       'senderUsername': senderUsername,
       'senderProfileImage': senderProfileImage,
       'activityId': activityId,
+      'activityDate': Timestamp.fromDate(activityDate), // NEW
       'createdAt': FieldValue.serverTimestamp(),
       'isRead': false,
     });

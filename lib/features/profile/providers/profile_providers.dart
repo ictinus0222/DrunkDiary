@@ -7,7 +7,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/providers/common_providers.dart';
 
+import '../repositories/friendship_repository.dart';
+import '../models/friend_request_model.dart';
+
 final profileRepositoryProvider = Provider((ref) => ProfileRepository());
+final friendshipRepositoryProvider = Provider((ref) => FriendshipRepository());
+
+/// Stream of incoming friend requests for the current user
+final incomingFriendRequestsProvider = StreamProvider<List<FriendRequestModel>>((ref) {
+  final userId = ref.watch(userIdProvider);
+  if (userId == null) return Stream.value([]);
+
+  return FirebaseFirestore.instance
+      .collection('friend_requests')
+      .where('toUserId', isEqualTo: userId)
+      .where('status', isEqualTo: 'pending')
+      .orderBy('createdAt', descending: true)
+      .snapshots()
+      .map((snapshot) => snapshot.docs
+          .map((doc) => FriendRequestModel.fromFirestore(doc))
+          .toList());
+});
 
 /// Reactive Profile Data (User Data + Stats)
 final profileDataProvider = FutureProvider<ProfileDataModel?>((ref) async {
@@ -21,6 +41,7 @@ final profileDataProvider = FutureProvider<ProfileDataModel?>((ref) async {
   // Fetch basic user data once (or could also be a stream if needed)
   final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
   final userData = UserModel.fromFirestore(userDoc);
+  print('Loaded profile for ${userData.id}. Friends: ${userData.friends.length}');
 
   return ProfileDataModel(
     userData: userData,
@@ -39,6 +60,7 @@ final otherProfileDataProvider = FutureProvider.family<ProfileDataModel?, String
   final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
   if (!userDoc.exists) return null;
   final userData = UserModel.fromFirestore(userDoc);
+  print('Loaded other profile for ${userData.id}. Friends: ${userData.friends.length}');
 
   final repository = ref.watch(drinkLogRepositoryProvider);
   // For other users, we only care about their reviews or public logs if we were using Option B,
