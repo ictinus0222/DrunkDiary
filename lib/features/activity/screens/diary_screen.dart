@@ -22,6 +22,10 @@ import '../../../core/constants/app_constants.dart';
 import '../providers/notifications_provider.dart';
 import '../../profile/providers/profile_providers.dart';
 import '../../profile/models/user_model.dart';
+import '../../../core/theme/responsive_tokens.dart';
+import '../../../core/theme/app_typography_roles.dart';
+import '../../../core/utils/responsive_utils.dart';
+import '../../../core/widgets/responsive_layout.dart';
 
 enum DiaryLayout { timeline, gallery }
 
@@ -103,46 +107,50 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
           }).toList();
 
           return Scaffold(
-            body: CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-              slivers: [
-                SliverAppBar(
-                  floating: true,
-                  snap: true,
-                  centerTitle: true,
-                  leading: const _ProfileAvatarLeading(),
-                  leadingWidth: 64,
-                  title: SvgPicture.asset(
-                    'assets/icons/drunk_diary_logo.svg',
-                    height: APP_BAR_VISUAL_HEIGHT,
-                  ),
-                  actions: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: _NotificationBadgeButton(),
+            body: ResponsiveScaffoldBody(
+              maxWidth: AppWidths.feed,
+              padding: EdgeInsets.zero,
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                slivers: [
+                  SliverAppBar(
+                    floating: true,
+                    snap: true,
+                    centerTitle: true,
+                    leading: const _ProfileAvatarLeading(),
+                    leadingWidth: 64,
+                    title: SvgPicture.asset(
+                      'assets/icons/drunk_diary_logo.svg',
+                      height: APP_BAR_VISUAL_HEIGHT,
                     ),
-                  ],
-                ),
-                const SliverToBoxAdapter(child: _WelcomeSection()),
-                const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
-                SliverToBoxAdapter(
-                  child: _FiltersRow(
-                    selectedFilter: _selectedFilter,
-                    onFilterChanged: (filter) {
-                      setState(() {
-                        _selectedFilter = filter;
-                      });
-                    },
+                    actions: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: _NotificationBadgeButton(),
+                      ),
+                    ],
                   ),
-                ),
-                const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
-                _DiarySliverList(
-                  logs: logs,
-                  layout: _currentLayout,
-                  selectedFilter: _selectedFilter,
-                ),
-                const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.hero)),
-              ],
+                  const SliverToBoxAdapter(child: _WelcomeSection()),
+                  const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
+                  SliverToBoxAdapter(
+                    child: _FiltersRow(
+                      selectedFilter: _selectedFilter,
+                      onFilterChanged: (filter) {
+                        setState(() {
+                          _selectedFilter = filter;
+                        });
+                      },
+                    ),
+                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
+                  _DiarySliverList(
+                    logs: logs,
+                    layout: _currentLayout,
+                    selectedFilter: _selectedFilter,
+                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.hero)),
+                ],
+              ),
             ),
           );
         },
@@ -374,11 +382,12 @@ class _DiarySliverList extends StatelessWidget {
     }
 
     if (layout == DiaryLayout.gallery) {
-      return SliverPadding(
+      return SliverResponsiveConstrainedBox(
+        maxWidth: AppWidths.grid,
         padding: AppSpacing.pagePadding.copyWith(top: 0),
         sliver: SliverGrid(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 240,
             crossAxisSpacing: AppSpacing.lg,
             mainAxisSpacing: AppSpacing.lg,
             childAspectRatio: 0.85,

@@ -14,6 +14,10 @@ import '../../alcohol/models/alcohol_model.dart';
 import '../../alcohol/screens/bottle_selection_screen.dart';
 import '../models/drink_model_dto.dart';
 import '../widgets/create_log_bottom_sheet.dart';
+import '../../../core/theme/responsive_tokens.dart';
+import '../../../core/theme/app_typography_roles.dart';
+import '../../../core/utils/responsive_utils.dart';
+import '../../../core/widgets/responsive_layout.dart';
 
 class UnifiedLoggingScreen extends StatefulWidget {
   const UnifiedLoggingScreen({super.key});
@@ -185,181 +189,187 @@ class _UnifiedLoggingScreenState extends State<UnifiedLoggingScreen> {
         title: Text('LOG A DRINK', style: AppTextStyles.appBarTitle),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Mode Selector
-            Row(
-              children: [
-                _ModeButton(
-                  label: 'Custom',
-                  isSelected: isCustom,
-                  onTap: () => setState(() => isCustom = true),
+      body: ResponsiveScaffoldBody(
+        maxWidth: AppWidths.form,
+        padding: EdgeInsets.zero,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Mode Selector
+              Row(
+                children: [
+                  _ModeButton(
+                    label: 'Custom',
+                    isSelected: isCustom,
+                    onTap: () => setState(() => isCustom = true),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  _ModeButton(
+                    label: 'Bottle',
+                    isSelected: !isCustom,
+                    onTap: () => setState(() => isCustom = false),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xxl),
+
+              if (isCustom) ...[
+                Text('Drink Name', style: AppTypography.sectionLabel(context)),
+                const SizedBox(height: AppSpacing.sm),
+                TextField(
+                  controller: nameController,
+                  style: AppTextStyles.body,
+                  decoration: InputDecoration(
+                    hintText: 'What are you drinking?',
+                    filled: true,
+                    fillColor: customColors.cardBackground,
+                  ),
                 ),
-                const SizedBox(width: AppSpacing.md),
-                _ModeButton(
-                  label: 'Bottle',
-                  isSelected: !isCustom,
-                  onTap: () => setState(() => isCustom = false),
+              ] else ...[
+                Text('Selected Bottle', style: AppTypography.sectionLabel(context)),
+                const SizedBox(height: AppSpacing.sm),
+                GestureDetector(
+                  onTap: _selectBottle,
+                  child: Container(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    decoration: BoxDecoration(
+                      color: customColors.cardBackground,
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
+                      border: Border.all(color: customColors.borderDark),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.local_bar, color: colorScheme.primary),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: Text(
+                            selectedBottle?.name ?? 'Tap to select a bottle',
+                            style: AppTextStyles.body.copyWith(
+                              color: selectedBottle == null ? customColors.textMuted : Colors.white,
+                            ),
+                          ),
+                        ),
+                        const Icon(Icons.chevron_right, color: Colors.white24),
+                      ],
+                    ),
+                  ),
                 ),
               ],
-            ),
-            const SizedBox(height: AppSpacing.xxl),
 
-            if (isCustom) ...[
-              Text('Drink Name', style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: AppSpacing.xxl),
+
+              // Image Picker
+              Text('Photo', style: AppTypography.sectionLabel(context)),
+              const SizedBox(height: AppSpacing.sm),
+              GestureDetector(
+                onTap: _pickImage,
+                child: AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: customColors.cardBackground,
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
+                      border: Border.all(color: customColors.borderDark),
+                      image: selectedPhoto != null
+                          ? DecorationImage(image: FileImage(selectedPhoto!), fit: BoxFit.cover)
+                          : null,
+                    ),
+                    child: selectedPhoto == null
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.camera_alt_outlined, color: customColors.textMuted, size: 40),
+                              const SizedBox(height: AppSpacing.sm),
+                              Text('Add a photo', style: AppTextStyles.caption.copyWith(color: customColors.textMuted)),
+                            ],
+                          )
+                        : null,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: AppSpacing.xxl),
+
+              // Reaction
+              Text('How was it?', style: AppTypography.sectionLabel(context)),
+              const SizedBox(height: AppSpacing.md),
+              Row(
+                children: DrinkReaction.values.map((reaction) {
+                  final isSelected = selectedReaction == reaction;
+                  return Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => selectedReaction = reaction),
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: isSelected ? ReactionConfig.getColor(reaction).withOpacity(0.2) : Colors.transparent,
+                          border: Border.all(
+                            color: isSelected ? ReactionConfig.getColor(reaction) : customColors.borderDark,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(
+                              ReactionConfig.getIcon(reaction),
+                              color: isSelected ? ReactionConfig.getColor(reaction) : customColors.textMuted,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              ReactionConfig.getLabel(reaction),
+                              style: AppTextStyles.caption.copyWith(
+                                color: isSelected ? ReactionConfig.getColor(reaction) : customColors.textMuted,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+
+              const SizedBox(height: AppSpacing.xxl),
+
+              // Notes
+              Text('Notes', style: AppTypography.sectionLabel(context)),
               const SizedBox(height: AppSpacing.sm),
               TextField(
-                controller: nameController,
+                controller: noteController,
+                maxLines: 3,
                 style: AppTextStyles.body,
                 decoration: InputDecoration(
-                  hintText: 'What are you drinking?',
+                  hintText: 'Any special memories?',
                   filled: true,
                   fillColor: customColors.cardBackground,
                 ),
               ),
-            ] else ...[
-              Text('Selected Bottle', style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
-              const SizedBox(height: AppSpacing.sm),
-              GestureDetector(
-                onTap: _selectBottle,
-                child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  decoration: BoxDecoration(
-                    color: customColors.cardBackground,
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
-                    border: Border.all(color: customColors.borderDark),
+
+              const SizedBox(height: AppSpacing.hero),
+
+              // Save Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: isSaving ? null : _save,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.local_bar, color: colorScheme.primary),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: Text(
-                          selectedBottle?.name ?? 'Tap to select a bottle',
-                          style: AppTextStyles.body.copyWith(
-                            color: selectedBottle == null ? customColors.textMuted : Colors.white,
-                          ),
-                        ),
-                      ),
-                      const Icon(Icons.chevron_right, color: Colors.white24),
-                    ],
-                  ),
+                  child: isSaving
+                      ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
+                      : const Text('SAVE LOG', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
               ),
             ],
-
-            const SizedBox(height: AppSpacing.xxl),
-
-            // Image Picker
-            Text('Photo', style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: AppSpacing.sm),
-            GestureDetector(
-              onTap: _pickImage,
-              child: Container(
-                height: 200,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: customColors.cardBackground,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
-                  border: Border.all(color: customColors.borderDark),
-                  image: selectedPhoto != null
-                      ? DecorationImage(image: FileImage(selectedPhoto!), fit: BoxFit.cover)
-                      : null,
-                ),
-                child: selectedPhoto == null
-                    ? Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.camera_alt_outlined, color: customColors.textMuted, size: 40),
-                          const SizedBox(height: AppSpacing.sm),
-                          Text('Add a photo', style: AppTextStyles.caption.copyWith(color: customColors.textMuted)),
-                        ],
-                      )
-                    : null,
-              ),
-            ),
-
-            const SizedBox(height: AppSpacing.xxl),
-
-            // Reaction
-            Text('How was it?', style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: AppSpacing.md),
-            Row(
-              children: DrinkReaction.values.map((reaction) {
-                final isSelected = selectedReaction == reaction;
-                return Expanded(
-                  child: GestureDetector(
-                    onTap: () => setState(() => selectedReaction = reaction),
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        color: isSelected ? ReactionConfig.getColor(reaction).withOpacity(0.2) : Colors.transparent,
-                        border: Border.all(
-                          color: isSelected ? ReactionConfig.getColor(reaction) : customColors.borderDark,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        children: [
-                          Icon(
-                            ReactionConfig.getIcon(reaction),
-                            color: isSelected ? ReactionConfig.getColor(reaction) : customColors.textMuted,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            ReactionConfig.getLabel(reaction),
-                            style: AppTextStyles.caption.copyWith(
-                              color: isSelected ? ReactionConfig.getColor(reaction) : customColors.textMuted,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-
-            const SizedBox(height: AppSpacing.xxl),
-
-            // Notes
-            Text('Notes', style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: AppSpacing.sm),
-            TextField(
-              controller: noteController,
-              maxLines: 3,
-              style: AppTextStyles.body,
-              decoration: InputDecoration(
-                hintText: 'Any special memories?',
-                filled: true,
-                fillColor: customColors.cardBackground,
-              ),
-            ),
-
-            const SizedBox(height: AppSpacing.hero),
-
-            // Save Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: isSaving ? null : _save,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: colorScheme.primary,
-                  foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: isSaving
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-                    : const Text('SAVE LOG', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

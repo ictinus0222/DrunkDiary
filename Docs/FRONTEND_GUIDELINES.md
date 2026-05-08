@@ -88,7 +88,6 @@ No explicit custom shadow scales or elevation configurations identified in the i
 ## 3. Layout System (As Implemented)
 *   **Container Wrappers:** The majority of screens utilize a single column layout padded with `EdgeInsets.all(16)` or `EdgeInsets.all(24)`.
 *   **Grids:** The `ShelfScreen` utilizes a `GridView` explicitly locked to 3 columns (`crossAxisCount: 3`) with a `childAspectRatio` of `0.7`.
-*   **Breakpoints:** No explicit breakpoints are customized. Uses default framework layout behavior.
 
 ## 4. Component Inventory (Only Existing Components)
 
@@ -212,10 +211,38 @@ For media-first content consumption (e.g., Activity Detail Viewer):
 ### Light Theme
 A complete `lightTheme` and `lightCustomColors` definition exists in `app_theme.dart` (lines 131-190). It is **not currently applied** — `main.dart` only uses `darkTheme`. Available for future use.
 
-## 7. Responsive Behavior (If Visible)
-No explicit responsive differentiation implemented beyond default framework behavior. Viewports scale linearly.
+## 9. Responsive Platform Architecture
 
-## 8. Performance Guidelines
+DrunkDiary uses a **Platform-First Layout System** that ensures a premium, readable experience across mobile, tablet, and desktop.
+
+### 🏛️ Governance Layer
+- **`ResponsiveScaffoldBody`**: The mandatory root wrapper for all primary screen bodies. It automatically applies horizontal constraints and centering.
+- **`ResponsiveConstrainedBox`**: A box-based utility for enforcing max-widths on standard widgets.
+- **`SliverResponsiveConstrainedBox`**: A sliver-based utility for enforcing max-widths on items inside `CustomScrollView` (e.g., `SliverGrid`).
+
+### 📐 Semantic Width Tokens
+Defined in `lib/core/theme/responsive_tokens.dart`:
+- `AppWidths.feed` (600px): Optimized for single-column scrolling content (Diary, Timeline).
+- `AppWidths.grid` (1200px): Optimized for multi-column discovery grids (Search, Shelf).
+- `AppWidths.form` (500px): Optimized for input-heavy screens (Logging, Onboarding).
+- `AppWidths.profile` (800px): Optimized for identity-centric layouts.
+
+### 📱 Breakpoints & Adaptive Logic
+Accessed via `ResponsiveContext` extensions on `BuildContext`:
+- `context.isTablet`: `width >= 600`.
+- `context.isDesktop`: `width >= 1200`.
+- `context.responsiveValue<T>(mobile: ..., tablet: ..., desktop: ...)`: Declarative platform-specific values.
+- `context.pagePadding`: Adaptive gutter that scales based on device width.
+
+### 🌊 Layout Density
+The system supports three density levels: `compact`, `comfortable`, and `expanded`.
+- Affects vertical spacing, typography sizing, and avatar scale.
+- Density is automatically inferred from screen width but can be overridden.
+
+### 🎞️ Sliver Compatibility
+Always use `SliverResponsiveConstrainedBox` when wrapping slivers inside a `CustomScrollView`. Avoid using `ResponsiveConstrainedBox` (Box-based) inside a sliver list to prevent `RenderSliver` expectation errors.
+
+## 10. Performance Guidelines
 *   **Image Handling:**
     - Use `cached_network_image` for all network images.
     - **Memory Optimization**: Always specify `memCacheWidth` (and/or `memCacheHeight`) in `CachedNetworkImage`. This prevents high-resolution images from being decoded at full size into RAM, which is the #1 cause of scrolling jank.

@@ -1,6 +1,6 @@
 # Backend Architecture & Database Structure
 
-Last Updated: 2026-05-06
+Last Updated: 2026-05-08
 
 ## 1. Architecture Overview (As Implemented)
 Architecture pattern not explicitly defined; inferred from folder organization. The application operates on a "Serverless / Backend-as-a-Service (BaaS)" architecture using Firebase directly from the Flutter client. There is no dedicated API server, Node.js/Python backend, or centralized controller layer in this repository. All database reads/writes and authentication flows are executed directly from the client application using the Firebase SDK.
@@ -15,7 +15,11 @@ Source of Truth: `lib/features/profile/models/user_model.dart` + `lib/features/a
 *   **displayNameLowercase**: String (Search index, auto-generated)
 *   **usernameLowercase**: String (Search index, auto-generated)
 *   **isPrivate**: Boolean (Default: false. Global privacy toggle.)
-*   **friendState**: String (Default: 'none', Options: 'pendingSent', 'pendingReceived', 'friends')
+*   **friends**: List<String> (Uids of accepted friends)
+*   **pendingOutgoingRequests**: List<String> (Uids of users you've sent requests to)
+*   **pendingIncomingRequests**: List<String> (Uids of users who sent you requests)
+*   **blockedUsers**: List<String> (Uids of users you've blocked)
+*   **friendsSince**: Map<String, Timestamp> (Mapping of friendId to acceptance time)
 *   **Subcollection: `notifications`**
     *   Source of Truth: `lib/features/activity/models/notification_model.dart`
     *   `id`: String (Document ID)
@@ -28,6 +32,16 @@ Source of Truth: `lib/features/profile/models/user_model.dart` + `lib/features/a
     *   `isRead`: Boolean (Default: false)
 
 > **Note:** `email`, `authProvider`, and `onboardingCompleted` are written directly in `google_auth_service.dart` and `onboarding_screen.dart` via raw Firestore maps. They are **not** part of `UserModel.fromFirestore()` — `onboardingCompleted` is accessed via raw map indexing in `AuthGate`.
++
++### Collection: `friend_requests`
++Source of Truth: `lib/features/profile/repositories/friendship_repository.dart`
++*   Document ID: String (Deterministic: `{fromUserId}_{toUserId}`)
++*   `fromUserId`: String
++*   `fromUsername`: String
++*   `fromPhotoUrl`: String?
++*   `toUserId`: String
++*   `status`: String (`'pending'`, `'accepted'`, `'rejected'`, `'cancelled'`)
++*   `createdAt`: Timestamp
 
 ### Collection: `usernames`
 Source of Truth: `lib/features/auth/screens/onboarding_screen.dart` (Transaction logic)
@@ -94,8 +108,11 @@ Source of Truth: `lib/features/wishlist/models/wishlist_item_model.dart`
 ### Collection: `activity_sessions`
 Source of Truth: `lib/features/activity/models/day_activity_model.dart`
 *   Document ID: String (Deterministic: `{userId}_{yyyy-MM-dd}`)
+*   `userId`: String
+*   `date`: Timestamp
 *   `cheeredBy`: List<String> (Uids of users who have cheered this session)
-*   `cheerCount`: Number (Total count of cheers)
+*   `cheerAvatars`: List<String> (Profile photo URLs of the last few people who cheered)
+*   `cheersCount`: Number (Total count of cheers)
 *   `updatedAt`: Timestamp
 
 ### Collection: `configs`

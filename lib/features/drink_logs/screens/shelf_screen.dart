@@ -10,6 +10,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/widgets/app_shimmer.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/responsive_tokens.dart';
+import '../../../core/theme/app_typography_roles.dart';
+import '../../../core/utils/responsive_utils.dart';
+import '../../../core/widgets/responsive_layout.dart';
 
 class ShelfScreen extends ConsumerStatefulWidget {
   static const routeName = '/shelf';
@@ -86,22 +90,28 @@ class _ShelfScreenState extends ConsumerState<ShelfScreen> {
       Colors.greenAccent,
     ];
 
-    // Chunk list by 3
+    // Calculate items per shelf based on screen width
+    final itemsPerShelf = context.responsiveValue<int>(mobile: 3, tablet: 4, desktop: 5);
+
+    // Chunk list by itemsPerShelf
     List<List<Map<String, dynamic>>> shelves = [];
-    for (var i = 0; i < displayItems.length; i += 3) {
-      shelves.add(displayItems.sublist(i, min(i + 3, displayItems.length)));
+    for (var i = 0; i < displayItems.length; i += itemsPerShelf) {
+      shelves.add(displayItems.sublist(i, min(i + itemsPerShelf, displayItems.length)));
     }
 
     return Scaffold(
-      body: CustomScrollView(
-        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-        slivers: [
-          SliverAppBar(
-            floating: true,
-            snap: true,
-            centerTitle: true,
-            title: Text('SHELF', style: AppTextStyles.appBarTitle),
-          ),
+      body: ResponsiveScaffoldBody(
+        maxWidth: AppWidths.grid,
+        padding: EdgeInsets.zero,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+          slivers: [
+            SliverAppBar(
+              floating: true,
+              snap: true,
+              centerTitle: true,
+              title: Text('SHELF', style: AppTypography.appBarTitle(context)),
+            ),
           SliverToBoxAdapter(
             child: Column(
               children: [
@@ -208,7 +218,7 @@ class _ShelfScreenState extends ConsumerState<ShelfScreen> {
                                       )));
                             }).toList()
                               ..addAll(List.generate(
-                                  3 - chunk.length,
+                                  itemsPerShelf - chunk.length,
                                   (_) => const Expanded(
                                       child: SizedBox()))),
                           )),
@@ -255,8 +265,9 @@ class _ShelfScreenState extends ConsumerState<ShelfScreen> {
             ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _sortChip(BuildContext context, String title) {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;

@@ -20,6 +20,10 @@ import '../../profile/screens/profile_screen.dart';
 import '../../profile/widgets/user_search_tile.dart';
 import '../providers/discover_search_provider.dart';
 import '../widgets/search_result_section.dart';
+import '../../../core/theme/responsive_tokens.dart';
+import '../../../core/theme/app_typography_roles.dart';
+import '../../../core/utils/responsive_utils.dart';
+import '../../../core/widgets/responsive_layout.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -183,83 +187,87 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final searchState = ref.watch(discoverSearchProvider);
 
     return Scaffold(
-      body: CustomScrollView(
-        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-        slivers: [
-          SliverAppBar(
-            floating: true,
-            snap: true,
-            centerTitle: true,
-            title: Text('DISCOVER', style: AppTextStyles.appBarTitle),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.bookmark_outline),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const WishlistScreen()),
-                  );
-                },
-                tooltip: 'Wishlist',
-              ),
-            ],
-          ),
-          
-          // Unified Search Bar
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.xl, vertical: AppSpacing.sm),
-              child: TextField(
-                controller: _controller,
-                style: AppTextStyles.body,
-                decoration: InputDecoration(
-                  hintText: 'Search bottles or people',
-                  prefixIcon:
-                      Icon(Icons.search, color: customColors.textMuted),
-                  suffixIcon: _controller.text.isNotEmpty 
-                    ? IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () {
-                          _controller.clear();
-                          ref.read(searchQueryControllerProvider).add('');
-                        },
-                      )
-                    : IconButton(
-                        icon: Icon(
-                          Icons.tune,
-                          color: (_selectedType != null ||
-                                  _selectedSort !=
-                                      DiscoverSortOption.random)
-                              ? colorScheme.primary
-                              : customColors.textMuted,
-                        ),
-                        onPressed: _openFilterSheet,
-                      ),
+      body: ResponsiveScaffoldBody(
+        maxWidth: AppWidths.grid,
+        padding: EdgeInsets.zero,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+          slivers: [
+            SliverAppBar(
+              floating: true,
+              snap: true,
+              centerTitle: true,
+              title: Text('DISCOVER', style: AppTypography.appBarTitle(context)),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.bookmark_outline),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const WishlistScreen()),
+                    );
+                  },
+                  tooltip: 'Wishlist',
                 ),
-                onChanged: (value) {
-                  ref.read(searchQueryControllerProvider).add(value);
-                },
+              ],
+            ),
+            
+            // Unified Search Bar
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xl, vertical: AppSpacing.sm),
+                child: TextField(
+                  controller: _controller,
+                  style: AppTextStyles.body,
+                  decoration: InputDecoration(
+                    hintText: 'Search bottles or people',
+                    prefixIcon:
+                        Icon(Icons.search, color: customColors.textMuted),
+                    suffixIcon: _controller.text.isNotEmpty 
+                      ? IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () {
+                            _controller.clear();
+                            ref.read(searchQueryControllerProvider).add('');
+                          },
+                        )
+                      : IconButton(
+                          icon: Icon(
+                            Icons.tune,
+                            color: (_selectedType != null ||
+                                    _selectedSort !=
+                                        DiscoverSortOption.random)
+                                ? colorScheme.primary
+                                : customColors.textMuted,
+                          ),
+                          onPressed: _openFilterSheet,
+                        ),
+                  ),
+                  onChanged: (value) {
+                    ref.read(searchQueryControllerProvider).add(value);
+                  },
+                ),
               ),
             ),
-          ),
-
-          if (searchState.showResults)
-            ..._buildSearchResults(searchState)
-          else if (_isLoading)
-            const SliverToBoxAdapter(
-              child: _SearchLoadingSkeleton(),
-            )
-          else if (_error.isNotEmpty)
-            SliverFillRemaining(
-              child: Center(
-                child: Text('Error: $_error',
-                    style: AppTextStyles.body.copyWith(color: colorScheme.error)),
-              ),
-            )
-          else
-            _buildDiscoveryFeed(),
-        ],
+  
+            if (searchState.showResults)
+              ..._buildSearchResults(searchState)
+            else if (_isLoading)
+              const SliverToBoxAdapter(
+                child: _SearchLoadingSkeleton(),
+              )
+            else if (_error.isNotEmpty)
+              SliverFillRemaining(
+                child: Center(
+                  child: Text('Error: $_error',
+                      style: AppTextStyles.body.copyWith(color: colorScheme.error)),
+                ),
+              )
+            else
+              _buildDiscoveryFeed(),
+          ],
+        ),
       ),
     );
   }
@@ -353,14 +361,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _buildBottleResultsList(DiscoverSearchState state) {
-    return SliverPadding(
+    return SliverResponsiveConstrainedBox(
+      maxWidth: AppWidths.grid,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-      sliver: SliverList(
+      sliver: SliverGrid(
+        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: 450,
+          crossAxisSpacing: AppSpacing.lg,
+          mainAxisSpacing: AppSpacing.lg,
+          childAspectRatio: 2.2,
+        ),
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             final alcohol = state.bottleResults[index].alcohol;
-            // Map to DiscoverItemModel for consistent UI
-            // In a real app, this should be cached or fetched properly
             final item = DiscoverItemModel(
               alcohol: alcohol,
               globalRating: 0,
@@ -396,9 +409,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       );
     }
 
-    return SliverPadding(
+    return SliverResponsiveConstrainedBox(
+      maxWidth: AppWidths.grid,
       padding: AppSpacing.pagePadding.copyWith(top: 0),
-      sliver: SliverList(
+      sliver: SliverGrid(
+        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: 450,
+          crossAxisSpacing: AppSpacing.lg,
+          mainAxisSpacing: AppSpacing.lg,
+          childAspectRatio: 2.2,
+        ),
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             return DiscoverAlcoholCard(

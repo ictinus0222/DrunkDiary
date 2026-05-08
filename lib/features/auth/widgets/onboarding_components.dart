@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../../../app/app_theme.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/responsive_tokens.dart';
+import '../../../core/utils/responsive_utils.dart';
+import '../../../core/widgets/responsive_layout.dart';
 
 class OnboardingProgressBar extends StatelessWidget {
   final int currentStep;
@@ -193,46 +196,50 @@ class OnboardingLayout extends StatelessWidget {
     
     return Scaffold(
       backgroundColor: const Color(0xFF0F0F0F), // Absolute black for premium feel
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 24),
-              progress,
-              const SizedBox(height: AppSpacing.hero),
-              Text(
-                title,
-                style: AppTextStyles.section.copyWith(
-                  fontSize: 28,
-                  height: 1.2,
-                  fontWeight: FontWeight.w800,
-                ),
-                textAlign: TextAlign.left,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                subtitle,
-                style: AppTextStyles.body.copyWith(
-                  color: customColors.textMuted,
-                  height: 1.5,
-                ),
-                textAlign: TextAlign.left,
-              ),
-              const SizedBox(height: AppSpacing.hero),
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: body,
-                ),
-              ),
-              if (cta != null) ...[
-                const SizedBox(height: AppSpacing.lg),
-                cta!,
+      body: ResponsiveScaffoldBody(
+        maxWidth: AppWidths.form,
+        padding: EdgeInsets.zero,
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: context.pagePadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
                 const SizedBox(height: 24),
+                progress,
+                const SizedBox(height: AppSpacing.hero),
+                Text(
+                  title,
+                  style: AppTextStyles.section.copyWith(
+                    fontSize: 28,
+                    height: 1.2,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  textAlign: TextAlign.left,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  subtitle,
+                  style: AppTextStyles.body.copyWith(
+                    color: customColors.textMuted,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.left,
+                ),
+                const SizedBox(height: AppSpacing.hero),
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: body,
+                  ),
+                ),
+                if (cta != null) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  cta!,
+                  const SizedBox(height: 24),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

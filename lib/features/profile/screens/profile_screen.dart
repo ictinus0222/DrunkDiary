@@ -20,6 +20,10 @@ import '../../../app/app_routes.dart';
 import '../../../core/providers/common_providers.dart';
 import '../widgets/edit_profile_sheet.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/responsive_tokens.dart';
+import '../../../core/theme/app_typography_roles.dart';
+import '../../../core/utils/responsive_utils.dart';
+import '../../../core/widgets/responsive_layout.dart';
 
 class ProfileScreen extends ConsumerWidget {
   final String? userId;
@@ -39,13 +43,17 @@ class ProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: profileAsync.when(
-        skipLoadingOnRefresh: true,
-        loading: () => profileAsync.hasValue 
-            ? _buildProfileData(context, ref, profileAsync.value, isMe)
-            : const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
-        data: (profile) => _buildProfileData(context, ref, profile, isMe),
+      body: ResponsiveScaffoldBody(
+        maxWidth: AppWidths.profile,
+        padding: EdgeInsets.zero,
+        child: profileAsync.when(
+          skipLoadingOnRefresh: true,
+          loading: () => profileAsync.hasValue 
+              ? _buildProfileData(context, ref, profileAsync.value, isMe)
+              : const Center(child: CircularProgressIndicator()),
+          error: (err, stack) => Center(child: Text('Error: $err')),
+          data: (profile) => _buildProfileData(context, ref, profile, isMe),
+        ),
       ),
     );
   }
@@ -430,21 +438,23 @@ class _ProfileHeader extends ConsumerWidget {
           clipBehavior: Clip.none,
           children: [
             // Cover Image
-            Container(
-              height: 200,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: customColors.cardBackground,
+            AspectRatio(
+              aspectRatio: 2.5,
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: customColors.cardBackground,
+                ),
+                child: profile.coverUrl != null
+                    ? CachedNetworkImage(
+                        imageUrl: profile.coverUrl!,
+                        fit: BoxFit.cover,
+                        fadeInDuration: Duration.zero,
+                        placeholder: (_, __) => Container(color: Colors.white10),
+                        errorWidget: (_, __, ___) => const Icon(Icons.image, color: Colors.white12, size: 48),
+                      )
+                    : const Center(child: Icon(Icons.image, color: Colors.white12, size: 48)),
               ),
-              child: profile.coverUrl != null
-                  ? CachedNetworkImage(
-                      imageUrl: profile.coverUrl!,
-                      fit: BoxFit.cover,
-                      fadeInDuration: Duration.zero,
-                      placeholder: (_, __) => Container(color: Colors.white10),
-                      errorWidget: (_, __, ___) => const Icon(Icons.image, color: Colors.white12, size: 48),
-                    )
-                  : const Center(child: Icon(Icons.image, color: Colors.white12, size: 48)),
             ),
 
             // Settings Icon

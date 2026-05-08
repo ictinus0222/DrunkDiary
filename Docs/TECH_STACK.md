@@ -2,7 +2,7 @@
 
 ## 1. Stack Overview
 
-Last Updated: 2026-05-06
+Last Updated: 2026-05-08
 
 Architecture Type:
 Mobile Client / Serverless Backend (Flutter application communicating directly with Firebase services).
@@ -87,6 +87,11 @@ Library: url_launcher
 Version: ^6.3.1
 Source File Evidence: `pubspec.yaml`
 Reason: Opening browser URLs for privacy policies and external links.
+
+### Responsive Architecture Implementation
+- **Layout Governance**: `ResponsiveScaffoldBody` and `SliverResponsiveConstrainedBox` (Custom components).
+- **Design Tokens**: `lib/core/theme/responsive_tokens.dart` (Semantic widths: 600px, 800px, 1200px).
+- **Adaptive Utilities**: `lib/core/utils/responsive_utils.dart` (Context extensions for `isTablet`, `isDesktop`).
 
 ## 3. Backend Stack
 

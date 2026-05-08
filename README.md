@@ -40,12 +40,15 @@ AuthGate
     │   └── (Saves Log)
     ├── Tab 3: ShelfScreen
     │   └── AlcoholDetailScreen
-    └── Tab 4: ProfileScreen
-        ├── View Variant: Public (Full Activity)
-        ├── View Variant: Locked (Private Gated)
-        ├── SettingsScreen (via AppBar icon)
-        │   └── Logout Action (Clears Nav Stack)
-        └── FeedbackOverlay (via Leading Action Icon)
+    ├── Tab 4: ProfileScreen
+    │   ├── View Variant: Public (Full Activity)
+    │   ├── View Variant: Locked (Private Gated)
+    │   ├── SettingsScreen (via AppBar icon)
+    │   │   └── Logout Action (Clears Nav Stack)
+    │   ├── FriendRequestsScreen (Incoming/Outgoing)
+    │   └── FeedbackOverlay (via Leading Action Icon)
+    └── Dev Routes
+        └── ResponsivePreviewScreen (Breakpoint & Density Audit)
 ```
 <!-- SYNC_FLOW_END -->
 
@@ -53,6 +56,7 @@ AuthGate
 <!-- SYNC_ARCH_START -->
 DrunkDiary uses a **Serverless (BaaS)** architecture based on Firebase:
 - **`users`**
+- **`friend_requests`**
 - **`usernames`**
 - **`alcohols`**
 - **`drink_logs`**

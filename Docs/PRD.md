@@ -2,8 +2,8 @@
 
 ## 1. Product Overview
 Project Title: DrunkDiary
-Version: 1.0.6+8
-Last Updated: 2026-05-07
+Version: 1.1.0+9
+Last Updated: 2026-05-08
 Owner: Not explicitly identified in the repository metadata.
 
 DrunkDiary is a Flutter-based mobile application that allows legal-age users to log or review the alcoholic beverages they consume for personal tracking. It securely authenticates users via Google, ensures they are 18+, and acts as a digital diary and tracking shelf for their drinking journey. The app provides a timeline of past drinks, aggregates statistics (like favorite drinks and average ratings) in a "Shelf" view, and enables discovery of beverages via a centralized search architecture.
@@ -21,6 +21,7 @@ The application solves the problem of tracking and remembering one's experiences
 - **Notifications & Cheers (Social Interaction)**: Consolidate social feedback into a centralized Notifications system triggered by 🥂 Cheers interactions.
 - **Premium UX**: Utilize Skeleton UI (Shimmer) for all primary data-driven screens to provide stable and polished loading states.
 - **Privacy Controls**: Empower users to hide their profile and activity from the global feed via a "Private Profile" toggle.
+- **Platform-First Architecture**: Establish a centralized responsive layout system (Tokens, Governance, Density) to ensure high-quality scaling across Mobile, Tablet, and Desktop tiers.
 - Manage global app features via a feature flag system to enable A/B testing and controlled rollouts.
 
 ## 4. Success Metrics

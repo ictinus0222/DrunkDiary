@@ -1,6 +1,6 @@
 # Application Flow Documentation
 
-Last Updated: 2026-04-18
+Last Updated: 2026-05-08
 
 ## 1. Entry Points (Code-Verified Only)
 * **Primary Entry Points:** 
@@ -119,6 +119,10 @@ Last Updated: 2026-04-18
 * **Privacy Management**:
   1. User toggles "Private Profile" in Settings.
   2. System Action: Updates user document. Search remains enabled, but profile content becomes gated for others.
+* **Social Graph (Friend System)**:
+  1. **Sending Request**: User taps "Add Friend" on a profile or search tile.
+  2. **Accepting/Rejecting**: Recipient views `FriendRequestsScreen` and chooses to accept or reject.
+  3. **Blocking**: User can block another user from their profile, triggering a mutual removal and communication blackout.
 
 ## 3. Navigation Map (Actual Structure Only)
 
@@ -140,12 +144,15 @@ AuthGate
     │   └── (Saves Log)
     ├── Tab 3: ShelfScreen
     │   └── AlcoholDetailScreen
-    └── Tab 4: ProfileScreen
-        ├── View Variant: Public (Full Activity)
-        ├── View Variant: Locked (Private Gated)
-        ├── SettingsScreen (via AppBar icon)
-        │   └── Logout Action (Clears Nav Stack)
-        └── FeedbackOverlay (via Leading Action Icon)
+    ├── Tab 4: ProfileScreen
+    │   ├── View Variant: Public (Full Activity)
+    │   ├── View Variant: Locked (Private Gated)
+    │   ├── SettingsScreen (via AppBar icon)
+    │   │   └── Logout Action (Clears Nav Stack)
+    │   ├── FriendRequestsScreen (Incoming/Outgoing)
+    │   └── FeedbackOverlay (via Leading Action Icon)
+    └── Dev Routes
+        └── ResponsivePreviewScreen (Breakpoint & Density Audit)
 ```
 
 ## 4. Screen Inventory (Code-Verified)
