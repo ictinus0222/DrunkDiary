@@ -44,8 +44,9 @@ AuthGate
     │   ├── View Variant: Public (Full Activity)
     │   ├── View Variant: Locked (Private Gated)
     │   ├── SettingsScreen (via AppBar icon)
-    │   │   └── Logout Action (Clears Nav Stack)
-    │   ├── FriendRequestsScreen (Incoming/Outgoing)
+    │   │   ├── Logout Action (Clears Nav Stack)
+    │   │   └── Delete Account (Confirmation Dialog)
+    │   ├── FriendRequestsScreen (Pending Implementation)
     │   └── FeedbackOverlay (via Leading Action Icon)
     └── Dev Routes
         └── ResponsivePreviewScreen (Breakpoint & Density Audit)

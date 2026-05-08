@@ -59,7 +59,7 @@ Source File Evidence: `pubspec.yaml`
 Reason: Rendering scalable vector graphics (SVGs), primarily for the AppBar branding logo.
 
 Library: cupertino_icons
-Version: ^1.0.9
+Version: ^1.0.8
 Source File Evidence: `pubspec.yaml`
 Reason: Default iOS styling icons. Reason not explicitly documented in repository.
 
@@ -194,6 +194,7 @@ dependencies:
   flutter_email_sender: ^8.0.0
   path_provider: ^2.1.4
   package_info_plus: ^9.0.0
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:

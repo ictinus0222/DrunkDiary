@@ -105,6 +105,16 @@ Last Updated: 2026-05-08
     6. Resulting State: Device email composer opens.
   * Message: SnackBar displays "No email client found. Please configure an email account."
 
+### Flow: Account Deletion
+* **Goal:** Permanently remove user account and data.
+* **Entry Point:** `SettingsScreen` -> "Delete Account" button.
+* **Happy Path:**
+  1. User taps "Delete Account".
+  2. System Action: Triggers `DeleteAccountDialog`.
+  3. User Action: Confirms deletion through multi-step dialog.
+  4. System Action: Deletes Firestore user document and calls `user.delete()` in Firebase Auth.
+  5. Resulting State: Redirects to `LoginScreen`.
+
 ### Flow: Profile Flow (V1 + Social Privacy)
 * **Goal:** View identity and activity.
 * **Entry Point:** `ProfileScreen` (Tab index 4) or Search results.
@@ -148,8 +158,9 @@ AuthGate
     │   ├── View Variant: Public (Full Activity)
     │   ├── View Variant: Locked (Private Gated)
     │   ├── SettingsScreen (via AppBar icon)
-    │   │   └── Logout Action (Clears Nav Stack)
-    │   ├── FriendRequestsScreen (Incoming/Outgoing)
+    │   │   ├── Logout Action (Clears Nav Stack)
+    │   │   └── Delete Account (Confirmation Dialog)
+    │   ├── FriendRequestsScreen (Pending Implementation)
     │   └── FeedbackOverlay (via Leading Action Icon)
     └── Dev Routes
         └── ResponsivePreviewScreen (Breakpoint & Density Audit)

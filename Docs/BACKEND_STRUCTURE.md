@@ -12,14 +12,23 @@ The application uses Cloud Firestore (NoSQL). The schema below is inferred exact
 Source of Truth: `lib/features/profile/models/user_model.dart` + `lib/features/auth/services/google_auth_service.dart`
 *   `id`: String (Document ID)
 *   `email`: String (Set once during initial Google Sign-In, sourced from `FirebaseAuth.user.email`)
+*   `displayName`: String (Display name)
 *   **displayNameLowercase**: String (Search index, auto-generated)
+*   `username`: String (Unique handle)
 *   **usernameLowercase**: String (Search index, auto-generated)
+*   `photoUrl`: String? (Avatar URL)
+*   `coverUrl`: String? (Profile cover URL)
+*   `bio`: String? (User biography)
+*   `instagram`: String? (Instagram handle)
+*   `ageVerified`: Boolean (Status of age verification)
+*   `role`: String (Default: 'user')
 *   **isPrivate**: Boolean (Default: false. Global privacy toggle.)
-*   **friends**: List<String> (Uids of accepted friends)
-*   **pendingOutgoingRequests**: List<String> (Uids of users you've sent requests to)
-*   **pendingIncomingRequests**: List<String> (Uids of users who sent you requests)
-*   **blockedUsers**: List<String> (Uids of users you've blocked)
-*   **friendsSince**: Map<String, Timestamp> (Mapping of friendId to acceptance time)
+*   `createdAt`: Timestamp (Account creation time)
+*   `friends`: List<String> (Uids of accepted friends)
+*   `pendingOutgoingRequests**: List<String> (Uids of users you've sent requests to)
+*   `pendingIncomingRequests**: List<String> (Uids of users who sent you requests)
+*   `blockedUsers`: List<String> (Uids of users you've blocked)
+*   `friendsSince`: Map<String, Timestamp> (Mapping of friendId to acceptance time)
 *   **Subcollection: `notifications`**
     *   Source of Truth: `lib/features/activity/models/notification_model.dart`
     *   `id`: String (Document ID)
@@ -92,6 +101,7 @@ Source of Truth: `lib/features/drink_logs/models/drink_model_dto.dart`
 *   `photoUrl`: String? (Nullable)
 *   `photoUploadedAt`: Timestamp? (Nullable, Mapped to DateTime)
 *   `isPrivate`: Boolean (Default: false. Denormalized from user profile for efficient feed filtering.)
+*   `visibility`: String (Enum mapped to string: 'public', 'friendsOnly', 'closeFriends')
 
 ### Collection: `wishlists`
 Source of Truth: `lib/features/wishlist/models/wishlist_item_model.dart`

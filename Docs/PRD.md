@@ -2,7 +2,7 @@
 
 ## 1. Product Overview
 Project Title: DrunkDiary
-Version: 1.1.0+9
+Version: 1.1.1+10
 Last Updated: 2026-05-08
 Owner: Not explicitly identified in the repository metadata.
 
@@ -148,9 +148,10 @@ Based on the onboarding flow and feature structure, the target users are individ
     - **Privacy Toggle**:
       - A dedicated switch to set the profile as "Private".
       - **Global Impact**: Setting a profile to private hides all associated logs from the community "All Activity" feed.
-    - **Edit Interaction (UI only)**:
-      - Edit button visible
-      - No backend integration in V1
+    - **Edit Profile**:
+      - Full-screen editing interface with support for Display Name, Username (with uniqueness validation), Instagram handle, and Bio.
+      - **Media Management**: Direct upload of Profile Avatar and Cover Image to Firebase Storage with cache-busting versioning.
+      - Discard changes confirmation dialog.
   - **Out of Scope (V1)**:
     - Followers / Friends
     - Stats tab
@@ -177,7 +178,14 @@ Based on the onboarding flow and feature structure, the target users are individ
   - **Description:** A system for controlling visibility of new features globally or per segment.
   - **User Story:** As an admin, I want to toggle experimental features on or off for all users from within the app.
   - **Acceptance Criteria:** Real-time state management via Riverpod. Authentication-restricted entry point in Profile. Persists values in Firestore `configs` collection.
-- **Safe Logout Mechanism**
+- **Account Deletion Compliance**
+  - **Description**: Allows users to permanently delete their account and associated data.
+  - **Acceptance Criteria**:
+    - Accessible from Settings.
+    - Multi-step confirmation dialog to prevent accidental deletion.
+    - Clears Firestore user data and triggers Firebase Auth account deletion.
+    - Redirects to Login screen upon completion.
+- **Safe Logout Mechanism****
   - **Description:** Allows users to securely sign out of the application.
   - **User Story:** As a user, I want to safely logout from my account so that my data is protected and I can switch accounts if needed.
   - **Acceptance Criteria:**
