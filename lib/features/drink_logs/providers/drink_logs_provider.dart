@@ -8,8 +8,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:drunk_diary/features/profile/models/user_model.dart';
 import 'package:drunk_diary/features/profile/providers/profile_providers.dart';
+import 'package:drunk_diary/core/analytics/analytics_service.dart';
+import 'package:drunk_diary/core/analytics/performance_tracker.dart';
 
-final drinkLogRepositoryProvider = Provider((ref) => DrinkLogRepository());
+final drinkLogRepositoryProvider = Provider((ref) {
+  final analytics = ref.watch(analyticsServiceProvider);
+  final performance = ref.watch(performanceTrackerProvider);
+  return DrinkLogRepository(analytics, performance);
+});
 
 /// Central stream of all user logs (Logs + Reviews)
 final drinkLogsProvider = StreamProvider<List<DrinkLogModel>>((ref) {

@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../app/app_theme.dart';
 import '../../../core/analytics/analytics_service.dart';
+import 'package:drunk_diary/core/analytics/analytics_service.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../models/drink_model_dto.dart';
 

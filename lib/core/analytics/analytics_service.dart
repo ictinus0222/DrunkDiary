@@ -1,5 +1,10 @@
+import 'dart:developer' as dev;
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'analytics_environment.dart';
+import 'analytics_event_names.dart';
+import 'analytics_parameters.dart';
 
 final analyticsServiceProvider = Provider<AnalyticsService>((ref) {
   return AnalyticsService();
@@ -7,88 +12,122 @@ final analyticsServiceProvider = Provider<AnalyticsService>((ref) {
 
 class AnalyticsService {
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
+  final FirebaseCrashlytics _crashlytics = FirebaseCrashlytics.instance;
 
-  // Identity Tracking
+  // Track simple events with environment guard
+  Future<void> logEvent({
+    required String name,
+    Map<String, Object>? parameters,
+  }) async {
+    if (!AnalyticsConfig.isTrackingEnabled) {
+      if (AnalyticsConfig.shouldLogToConsole) {
+        dev.log('📊 [DEBUG ANALYTICS] Event: $name, Params: $parameters', name: 'Analytics');
+      }
+      return;
+    }
+
+    try {
+      await _analytics.logEvent(name: name, parameters: parameters);
+    } catch (e, stack) {
+      dev.log('❌ Failed to log event $name', error: e, stackTrace: stack);
+    }
+  }
+
+  // Identity
   Future<void> setUserId(String userId) async {
-    await _analytics.setUserId(id: userId);
+    if (AnalyticsConfig.isTrackingEnabled) {
+      await _analytics.setUserId(id: userId);
+    }
+    await _crashlytics.setUserIdentifier(userId);
   }
 
   Future<void> setUserProperty(String name, String value) async {
-    await _analytics.setUserProperty(name: name, value: value);
+    if (AnalyticsConfig.isTrackingEnabled) {
+      await _analytics.setUserProperty(name: name, value: value);
+    }
+    await _crashlytics.setCustomKey(name, value);
   }
 
-  // Track standard Login
-  Future<void> logLogin(String method) async {
-    await _analytics.logLogin(loginMethod: method);
-  }
-
-  // Track standard SignUp
-  Future<void> logSignUp(String method) async {
-    await _analytics.logSignUp(signUpMethod: method);
-  }
-
-  // Track Onboarding completion
-  Future<void> logOnboardingComplete() async {
-    await _analytics.logEvent(
-      name: 'onboarding_complete',
-      parameters: {
-        'timestamp': DateTime.now().toIso8601String(),
-      },
-    );
-  }
-
-  // Track individual onboarding steps
-  Future<void> logOnboardingStep(int stepIndex, String stepName) async {
-    await _analytics.logEvent(
-      name: 'onboarding_step',
-      parameters: {
-        'step_index': stepIndex,
-        'step_name': stepName,
-      },
-    );
-  }
-
-  // Track Drink Log / Review creation
-  Future<void> logCreateDrinkLog({
-    required String logKind, // 'log' or 'review'
-    required String alcoholType,
-    required String reaction, // 'loved', 'liked', 'nah' or rating
+  // Failure Tracking (Crashlytics + Analytics)
+  Future<void> logFailure({
+    required String operation,
+    required dynamic error,
+    StackTrace? stackTrace,
+    Map<String, Object>? extraParams,
   }) async {
-    await _analytics.logEvent(
-      name: 'create_drink_log',
+    final params = {
+      AnalyticsParams.operationName: operation,
+      AnalyticsParams.errorCode: error.toString(),
+      ...?extraParams,
+    };
+
+    await logEvent(name: AnalyticsEvents.repositoryOperation, parameters: {
+      ...params,
+      AnalyticsParams.status: 'failure',
+    });
+
+    if (AnalyticsConfig.isTrackingEnabled) {
+      await _crashlytics.recordError(error, stackTrace, reason: operation, fatal: false);
+    }
+  }
+
+  // Breadcrumbs for Crashlytics
+  void addBreadcrumb(String message) {
+    _crashlytics.log(message);
+    if (AnalyticsConfig.shouldLogToConsole) {
+      dev.log('🍞 [BREADCRUMB] $message', name: 'Analytics');
+    }
+  }
+
+  // --- Legacy Compatibility & Helper Methods ---
+
+  Future<void> logLogin(String method) async {
+    await logEvent(
+      name: AnalyticsEvents.loginCompleted,
+      parameters: {AnalyticsParams.method: method},
+    );
+  }
+
+  Future<void> logSignUp(String method) async {
+    await logEvent(
+      name: AnalyticsEvents.signupCompleted,
+      parameters: {AnalyticsParams.method: method},
+    );
+  }
+
+  Future<void> logOnboardingComplete() async {
+    await logEvent(name: AnalyticsEvents.onboardingCompleted);
+  }
+
+  Future<void> logCreateDrinkLog({
+    String? logKind,
+    String? alcoholType,
+    String? reaction,
+    double? rating,
+    bool? hasPhoto,
+  }) async {
+    await logEvent(
+      name: AnalyticsEvents.drinkLogged,
       parameters: {
-        'log_kind': logKind,
-        'alcohol_type': alcoholType,
-        'reaction': reaction,
+        if (logKind != null) 'log_kind': logKind,
+        if (alcoholType != null) AnalyticsParams.drinkType: alcoholType,
+        if (reaction != null) 'reaction': reaction,
+        if (rating != null) AnalyticsParams.ratingValue: rating,
+        if (hasPhoto != null) AnalyticsParams.hasPhoto: hasPhoto,
       },
     );
   }
 
-  // Track Search queries
-  Future<void> logSearch(String searchTerm) async {
-    await _analytics.logSearch(searchTerm: searchTerm);
-  }
- 
-  // Track Search Health (Zero Results)
-  Future<void> logZeroResults(String searchTerm) async {
-    await _analytics.logEvent(
-      name: 'zero_search_results',
-      parameters: {
-        'search_term': searchTerm,
-      },
-    );
-  }
- 
-  // Track Wishlist Intent
   Future<void> logAddToWishlist({
     required String alcoholId,
     required String alcoholName,
   }) async {
-    await _analytics.logEvent(
-      name: 'add_to_wishlist',
+    await logEvent(
+      name: AnalyticsEvents.repositoryOperation,
       parameters: {
-        'item_id': alcoholId,
-        'item_name': alcoholName,
+        AnalyticsParams.operationName: 'add_to_wishlist',
+        'alcohol_id': alcoholId,
+        'alcohol_name': alcoholName,
       },
     );
   }

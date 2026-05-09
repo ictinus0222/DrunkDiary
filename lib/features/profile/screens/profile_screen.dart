@@ -19,11 +19,11 @@ import '../../../core/utils/visibility_resolver.dart';
 import '../../../app/app_routes.dart';
 import '../../../core/providers/common_providers.dart';
 import '../widgets/edit_profile_sheet.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/responsive_tokens.dart';
-import '../../../core/theme/app_typography_roles.dart';
-import '../../../core/utils/responsive_utils.dart';
 import '../../../core/widgets/responsive_layout.dart';
+import '../widgets/tester_mode_sheet.dart';
+import '../../../core/analytics/analytics_service.dart';
+import '../../../core/theme/responsive_tokens.dart';
+import '../../../core/theme/app_colors.dart';
 
 class ProfileScreen extends ConsumerWidget {
   final String? userId;
@@ -493,15 +493,25 @@ class _ProfileHeader extends ConsumerWidget {
                   color: Theme.of(context).scaffoldBackgroundColor,
                   shape: BoxShape.circle,
                 ),
-                child: CircleAvatar(
-                  radius: 40,
-                  backgroundColor: Colors.amber,
-                  backgroundImage: profile.photoUrl != null
-                      ? CachedNetworkImageProvider(profile.photoUrl!)
-                      : null,
-                  child: profile.photoUrl == null
-                      ? const Icon(Icons.person, size: 40, color: Colors.black)
-                      : null,
+                child: GestureDetector(
+                  onLongPress: () {
+                    ref.read(analyticsServiceProvider).addBreadcrumb("Opening Tester Mode via long-press");
+                    showModalBottomSheet(
+                      context: context,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) => const TesterModeSheet(),
+                    );
+                  },
+                  child: CircleAvatar(
+                    radius: 40,
+                    backgroundColor: Colors.amber,
+                    backgroundImage: profile.photoUrl != null
+                        ? CachedNetworkImageProvider(profile.photoUrl!)
+                        : null,
+                    child: profile.photoUrl == null
+                        ? const Icon(Icons.person, size: 40, color: Colors.black)
+                        : null,
+                  ),
                 ),
               ),
             ),

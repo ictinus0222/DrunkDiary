@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:feedback/feedback.dart';
+import '../widgets/feedback_bottom_sheet.dart';
 import '../../../app/app_theme.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -87,11 +87,12 @@ class SettingsScreen extends ConsumerWidget {
         _SettingTile(
           icon: Icons.bug_report_outlined,
           title: 'Send Feedback',
-          onTap: () => BetterFeedback.of(context).show((feedback) async {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Thank you for your feedback!')),
-            );
-          }),
+          onTap: () => showModalBottomSheet(
+            context: context,
+            backgroundColor: Colors.transparent,
+            isScrollControlled: true,
+            builder: (context) => const FeedbackBottomSheet(currentScreen: 'Settings'),
+          ),
         ),
         _SettingTile(
           icon: Icons.mail_outline,

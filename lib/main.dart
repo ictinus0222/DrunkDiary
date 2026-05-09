@@ -19,20 +19,32 @@ import 'splash/splash_screen.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:feedback/feedback.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-// imports
+import 'core/analytics/analytics_service.dart';
+import 'core/analytics/session_tracker.dart';
+import 'core/analytics/screen_tracking_observer.dart';
+import 'core/analytics/analytics_environment.dart';
+import 'package:flutter/foundation.dart';
 
 void main() async {
-  // app execution starts here
-  WidgetsFlutterBinding.ensureInitialized(); // ensure flutter engine is ready
+  WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(
-    // connect flutter app to Firebase backend
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Initialize Google Sign-In (v7.0.0+ requirement)
+  // Initialize Crashlytics
+  FlutterError.onError = (errorDetails) {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+  };
+  
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
+
+  // Initialize Google Sign-In
   await GoogleSignIn.instance.initialize(
     serverClientId: '1080840005468-j82oa5apllnb65o6r4j831crdplodv3t.apps.googleusercontent.com',
   );
@@ -41,52 +53,72 @@ void main() async {
     const ProviderScope(
       child: DrunkDiaryApp(),
     ),
-  ); // launch the app
+  );
 }
 
-class DrunkDiaryApp extends StatelessWidget {
-  // root widget of the application
-  const DrunkDiaryApp({super.key}); // stateless because app-level config doesn't change
+class DrunkDiaryApp extends ConsumerStatefulWidget {
+  const DrunkDiaryApp({super.key});
 
-  static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
-  static FirebaseAnalyticsObserver observer =
-      FirebaseAnalyticsObserver(analytics: analytics);
+  @override
+  ConsumerState<DrunkDiaryApp> createState() => _DrunkDiaryAppState();
+}
+
+class _DrunkDiaryAppState extends ConsumerState<DrunkDiaryApp> with WidgetsBindingObserver {
+  late ScreenTrackingObserver _observer;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    
+    final analytics = ref.read(analyticsServiceProvider);
+    final sessionTracker = ref.read(sessionTrackerProvider);
+    
+    _observer = ScreenTrackingObserver(analytics, sessionTracker);
+    
+    // Start initial session
+    sessionTracker.startSession();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final sessionTracker = ref.read(sessionTrackerProvider);
+    if (state == AppLifecycleState.paused) {
+      sessionTracker.endSession();
+    } else if (state == AppLifecycleState.resumed) {
+      sessionTracker.startSession();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return BetterFeedback(
-      theme: FeedbackThemeData(
-        background: const Color(0xFF121212),
-        feedbackSheetColor: const Color(0xFF1E1E1E),
-        activeFeedbackModeColor: const Color(0xFFFF5722),
-        brightness: Brightness.dark,
-      ),
-      child: MaterialApp(
-        //root container for material design app
-        title: 'DrunkDiary', // app-switcher name
-        debugShowCheckedModeBanner: false, // disable debug banner
-        navigatorObservers: [observer],
-
-        home: const AuthGate(), //  AuthGate handles routing based on auth state
-
-        routes: {
-          AppRoutes.auth: (context) => AuthGate(),
-          AppRoutes.splash: (context) => const SplashScreen(),
-          AppRoutes.login: (context) => const LoginScreen(),
-          AppRoutes.home: (context) => HomeScreen(),
-          AppRoutes.onboarding: (context) => OnboardingScreen(),
-          AppRoutes.diary: (context) => DiaryScreen(),
-          AppRoutes.profile: (context) => ProfileScreen(), // ☑️
-          AppRoutes.shelf: (context) => ShelfScreen(),
-          AppRoutes.search: (context) => SearchScreen(), // ☑️
-          AppRoutes.notifications: (context) => const NotificationsScreen(),
-          AppRoutes.adminSettings: (context) => const AdminSettingsScreen(),
-          AppRoutes.adminBottleManager: (context) => const AdminBottleManagerScreen(),
-          AppRoutes.settings: (context) => const SettingsScreen(),
-        },
-
-        theme: AppThemes.darkTheme,
-      ),
+    return MaterialApp(
+      title: 'DrunkDiary',
+      debugShowCheckedModeBanner: false,
+      navigatorObservers: [_observer],
+      home: const AuthGate(),
+      routes: {
+        AppRoutes.auth: (context) => AuthGate(),
+        AppRoutes.splash: (context) => const SplashScreen(),
+        AppRoutes.login: (context) => const LoginScreen(),
+        AppRoutes.home: (context) => HomeScreen(),
+        AppRoutes.onboarding: (context) => OnboardingScreen(),
+        AppRoutes.diary: (context) => DiaryScreen(),
+        AppRoutes.profile: (context) => ProfileScreen(),
+        AppRoutes.shelf: (context) => ShelfScreen(),
+        AppRoutes.search: (context) => SearchScreen(),
+        AppRoutes.notifications: (context) => const NotificationsScreen(),
+        AppRoutes.adminSettings: (context) => const AdminSettingsScreen(),
+        AppRoutes.adminBottleManager: (context) => const AdminBottleManagerScreen(),
+        AppRoutes.settings: (context) => const SettingsScreen(),
+      },
+      theme: AppThemes.darkTheme,
     );
   }
 }

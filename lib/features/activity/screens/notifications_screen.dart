@@ -14,6 +14,7 @@ import '../../../core/widgets/app_shimmer.dart';
 import '../providers/notifications_provider.dart';
 import '../models/notification_model.dart';
 import '../screens/activity_detail_viewer.dart';
+import '../../drink_logs/models/drink_model_dto.dart';
 import '../../drink_logs/repositories/drink_log_repository.dart';
 import '../../drink_logs/providers/drink_logs_provider.dart';
 import '../../../core/providers/common_providers.dart';

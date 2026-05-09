@@ -24,6 +24,11 @@ import '../../../core/theme/responsive_tokens.dart';
 import '../../../core/theme/app_typography_roles.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../../../core/widgets/responsive_layout.dart';
+import '../../../core/analytics/friction_tracker.dart';
+import '../../../core/analytics/analytics_service.dart';
+import '../../../core/analytics/analytics_event_names.dart';
+import '../../../core/analytics/analytics_parameters.dart';
+import '../../../core/theme/app_colors.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -228,6 +233,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       ? IconButton(
                           icon: const Icon(Icons.close),
                           onPressed: () {
+                            ref.read(frictionTrackerProvider).logSearchAbandoned(_controller.text);
                             _controller.clear();
                             ref.read(searchQueryControllerProvider).add('');
                           },
@@ -283,15 +289,27 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       return [
         SliverFillRemaining(
           hasScrollBody: false,
-          child: AppEmptyState(
-            icon: Icons.search_off_outlined,
-            title: 'No people or bottles found',
-            subtitle: 'Try searching for something else.',
-            buttonText: 'Clear Search',
-            onAddTap: () {
-              _controller.clear();
-              ref.read(searchQueryControllerProvider).add('');
-            },
+          child: Builder(
+            builder: (context) {
+              // Log zero results once
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                ref.read(analyticsServiceProvider).logEvent(
+                  name: AnalyticsEvents.searchZeroResults,
+                  parameters: {AnalyticsParams.searchTerm: _controller.text},
+                );
+              });
+              
+              return AppEmptyState(
+                icon: Icons.search_off_outlined,
+                title: 'No people or bottles found',
+                subtitle: 'Try searching for something else.',
+                buttonText: 'Clear Search',
+                onAddTap: () {
+                  _controller.clear();
+                  ref.read(searchQueryControllerProvider).add('');
+                },
+              );
+            }
           ),
         ),
       ];

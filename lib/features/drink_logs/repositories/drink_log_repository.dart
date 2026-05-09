@@ -1,9 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '../models/drink_model_dto.dart';
+import '../../../core/analytics/analytics_service.dart';
+import '../../../core/analytics/performance_tracker.dart';
 
 class DrinkLogRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final AnalyticsService _analytics;
+  final PerformanceTracker _performance;
+
+  DrinkLogRepository(this._analytics, this._performance);
 
   // ============================
   // 🍾 REVIEWS FOR ALCOHOL PAGE
@@ -100,6 +105,27 @@ class DrinkLogRepository {
   Future<void> createDrinkLog(
     DrinkLogModel log,
   ) async {
-    await _firestore.collection('drink_logs').add(log.toMap());
+    _analytics.addBreadcrumb("Submitting drink log: ${log.alcoholName} (${log.logKind})");
+    
+    await _performance.trackDuration(
+      operationName: 'create_drink_log',
+      action: () async {
+        try {
+          await _firestore.collection('drink_logs').add(log.toMap());
+        } catch (e) {
+          String category = 'firestore_error';
+          if (e.toString().contains('permission-denied')) {
+            category = 'permission_denied';
+          }
+          
+          await _analytics.logFailure(
+            operation: 'create_drink_log',
+            error: e,
+            extraParams: {'error_category': category},
+          );
+          rethrow;
+        }
+      },
+    );
   }
 }

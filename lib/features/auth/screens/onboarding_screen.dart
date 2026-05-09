@@ -2,20 +2,22 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../widgets/onboarding_components.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/analytics/funnel_tracker.dart';
+import '../../../core/analytics/analytics_service.dart';
 
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {
   static const routeName = '/onboarding';
   const OnboardingScreen({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   int currentStep = 1;
   static const int totalPerceivedSteps = 5;
 
@@ -36,13 +38,48 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   final PageController _pageController = PageController();
 
+  @override
+  void initState() {
+    super.initState();
+    _initOnboarding();
+  }
+
+  Future<void> _initOnboarding() async {
+    final funnel = ref.read(funnelTrackerProvider);
+    final lastStep = await funnel.getLastOnboardingStep();
+    
+    if (lastStep != null && lastStep > 0) {
+      setState(() {
+        currentStep = lastStep + 1;
+      });
+      _pageController.jumpToPage(lastStep);
+      ref.read(analyticsServiceProvider).addBreadcrumb("Restored onboarding to step $currentStep");
+    } else {
+      await funnel.logOnboardingStarted();
+    }
+  }
+
   void _nextStep() {
     if (currentStep < totalPerceivedSteps) {
+      final funnel = ref.read(funnelTrackerProvider);
+      funnel.logOnboardingStep(currentStep - 1, _getStepName(currentStep));
+      
       setState(() => currentStep++);
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
+    }
+  }
+
+  String _getStepName(int step) {
+    switch (step) {
+      case 1: return 'age_check';
+      case 2: return 'username';
+      case 3: return 'drink_preferences';
+      case 4: return 'taste_vibe';
+      case 5: return 'ready';
+      default: return 'unknown';
     }
   }
 
@@ -440,10 +477,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         );
       });
 
-      await AnalyticsService().logSignUp('google');
-      await AnalyticsService().logOnboardingComplete();
+      await ref.read(funnelTrackerProvider).logOnboardingCompleted();
     } catch (e) {
       setState(() => isLoading = false);
+      
+      ref.read(analyticsServiceProvider).logFailure(
+        operation: 'finish_onboarding',
+        error: e,
+      );
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.toString().contains('USERNAME_TAKEN') ? 'Username taken.' : 'Error saving profile.')),
       );
