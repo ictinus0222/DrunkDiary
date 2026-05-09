@@ -2,8 +2,8 @@
 
 ## 1. Product Overview
 Project Title: DrunkDiary
-Version: 1.1.1+10
-Last Updated: 2026-05-08
+Version: 1.1.2+11
+Last Updated: 2026-05-09
 Owner: Not explicitly identified in the repository metadata.
 
 DrunkDiary is a Flutter-based mobile application that allows legal-age users to log or review the alcoholic beverages they consume for personal tracking. It securely authenticates users via Google, ensures they are 18+, and acts as a digital diary and tracking shelf for their drinking journey. The app provides a timeline of past drinks, aggregates statistics (like favorite drinks and average ratings) in a "Shelf" view, and enables discovery of beverages via a centralized search architecture.
@@ -19,9 +19,10 @@ The application solves the problem of tracking and remembering one's experiences
 - Enable discovery of alcohols and community members via a unified **Discover** hub.
 - **Social Graph & Privacy**: Private profiles are discoverable in search to enable friend discovery, but their content (logs, reviews, shelf) remains strictly locked behind a friendship requirement.
 - **Notifications & Cheers (Social Interaction)**: Consolidate social feedback into a centralized Notifications system triggered by 🥂 Cheers interactions.
-- **Premium UX**: Utilize Skeleton UI (Shimmer) for all primary data-driven screens to provide stable and polished loading states.
-- **Privacy Controls**: Empower users to hide their profile and activity from the global feed via a "Private Profile" toggle.
-- **Platform-First Architecture**: Establish a centralized responsive layout system (Tokens, Governance, Density) to ensure high-quality scaling across Mobile, Tablet, and Desktop tiers.
+- **Premium UX & Analytics**: Utilize Skeleton UI (Shimmer) for polished loading and Firebase Analytics for intent tracking.
+- **In-App Beta Feedback**: Integrated a high-fidelity feedback system with clean screenshots and metadata for rapid triage.
+- **Account Deletion (Right to be Forgotten)**: Comprehensive data wipe including storage, firestore, and auth for privacy compliance.
+- **Platform-First Architecture**: Establish a centralized responsive layout system (Tokens, Governance, Density) to ensure high-quality scaling.
 - Manage global app features via a feature flag system to enable A/B testing and controlled rollouts.
 
 ## 4. Success Metrics
@@ -239,14 +240,30 @@ The following are NOT implemented in the codebase:
 ## 9. Dependencies & Constraints
 - **External APIs/SDKs:** Firebase Authentication, Cloud Firestore, Firebase Storage.
 - **Framework Constraints:** Built on Flutter SDK (^3.5.3) using Riverpod for state management.
-- **Data Storage Behavior:** Images are uploaded directly to Firebase Storage before document creation finishes.
-- **Platform Limitations:** No local persistence caching logic is manually implemented extending beyond standard Firestore offline caching.
+Library: firebase_core
+Version: ^4.7.0
+Source File Evidence: `pubspec.yaml`
+Reason: Core initialization for Firebase services.
 
-## 10. Timeline & Milestones
-No historical milestone data or version history beyond "1.0.0+1" is identifiable in the current repository.
+Library: firebase_auth
+Version: ^6.4.0
+Source File Evidence: `pubspec.yaml`
+Reason: User authentication tracking and token management.
 
-## 11. Risks & Assumptions
-- **Hardcoded Logic:** The legal drinking age is hardcoded to 18, creating compliance risks depending on the region.
+Library: google_sign_in
+Version: ^7.2.0
+Source File Evidence: `pubspec.yaml`
+Reason: Google OAuth provider integration.
+
+Library: cloud_firestore
+Version: ^6.3.0
+Source File Evidence: `pubspec.yaml`
+Reason: NoSQL database storage.
+
+Library: firebase_storage
+Version: ^13.3.0
+Source File Evidence: `pubspec.yaml`
+Reason: Cloud storage for user-uploaded images.
 - **Performance Constraints:** The Shelf Screen fetches all user logs, groups them in memory, and subsequently fetches each alcohol document individually. This N+1 logic poses a scalability limit as user activity grows.
 - **Validation Gaps:** The UI allows users to easily skip inputting notes or photos without explicit fallback content validation.
 

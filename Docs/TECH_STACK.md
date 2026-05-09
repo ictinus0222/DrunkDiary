@@ -2,7 +2,7 @@
 
 ## 1. Stack Overview
 
-Last Updated: 2026-05-08
+Last Updated: 2026-05-09
 
 Architecture Type:
 Mobile Client / Serverless Backend (Flutter application communicating directly with Firebase services).
@@ -93,29 +93,29 @@ Reason: Opening browser URLs for privacy policies and external links.
 The application uses Firebase as a Backend-as-a-Service (BaaS). The following client SDKs integrate with the backend:
 
 Library: firebase_core
-Version: ^4.2.1
+Version: ^4.7.0
 Source File Evidence: `pubspec.yaml`
-Reason: Core initialization for Firebase services. Reason not explicitly documented in repository.
+Reason: Core initialization for Firebase services.
 
 Library: firebase_auth
-Version: ^6.1.3
+Version: ^6.4.0
 Source File Evidence: `pubspec.yaml`
-Reason: User authentication tracking and token management. Reason not explicitly documented in repository.
+Reason: User authentication tracking and token management.
 
 Library: google_sign_in
 Version: ^7.2.0
 Source File Evidence: `pubspec.yaml`
-Reason: Google OAuth provider integration. Reason not explicitly documented in repository.
+Reason: Google OAuth provider integration.
 
 Library: cloud_firestore
-Version: ^6.1.1
+Version: ^6.3.0
 Source File Evidence: `pubspec.yaml`
-Reason: NoSQL database storage. Reason not explicitly documented in repository.
+Reason: NoSQL database storage.
 
 Library: firebase_storage
-Version: ^13.0.4
+Version: ^13.3.0
 Source File Evidence: `pubspec.yaml`
-Reason: Cloud storage for user-uploaded images. Reason not explicitly documented in repository.
+Reason: Cloud storage for user-uploaded images.
 
 If database is used but version not specified:
 Database version not specified in repository (Firestore is a managed, versionless BaaS).
@@ -171,11 +171,11 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
-  firebase_core: ^4.2.1
-  firebase_auth: ^6.1.3
-  cloud_firestore: ^6.1.1
+  firebase_core: ^4.7.0
+  firebase_auth: ^6.4.0
+  cloud_firestore: ^6.3.0
   image_picker: ^1.2.1
-  firebase_storage: ^13.0.4
+  firebase_storage: ^13.3.0
   google_fonts: ^8.0.2
   flutter_riverpod: ^3.0.3
   google_sign_in: ^7.2.0

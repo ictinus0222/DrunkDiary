@@ -13,11 +13,11 @@ DrunkDiary is a Flutter-based mobile application that allows legal-age users to 
 ## 🛠️ Tech Stack
 <!-- SYNC_TECH_START -->
 - **cupertino_icons:** ^1.0.8
-- **firebase_core:** ^4.2.1
-- **firebase_auth:** ^6.1.3
-- **cloud_firestore:** ^6.1.1
+- **firebase_core:** ^4.7.0
+- **firebase_auth:** ^6.4.0
+- **cloud_firestore:** ^6.3.0
 - **image_picker:** ^1.2.1
-- **firebase_storage:** ^13.0.4
+- **firebase_storage:** ^13.3.0
 <!-- SYNC_TECH_END -->
 
 ## 📱 Application Flow
