@@ -348,10 +348,10 @@ class _LoginButtonState extends State<_LoginButton> with SingleTickerProviderSta
                     children: [
                       Padding(
                         padding: const EdgeInsets.only(right: 12),
-                        child: SvgPicture.network(
-                          'https://www.gstatic.com/lamda/images/google_g_logo.svg', // Fallback or use a local asset
+                        child: SvgPicture.asset(
+                          'assets/icons/google_logo.svg',
                           height: 20,
-                          placeholderBuilder: (BuildContext context) => const Icon(Icons.g_mobiledata, color: Colors.black, size: 28),
+                          placeholderBuilder: (_) => const Icon(Icons.g_mobiledata, color: Colors.black, size: 28),
                         ),
                       ),
                       const Text(

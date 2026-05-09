@@ -64,6 +64,7 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
                 title: SvgPicture.asset(
                   'assets/icons/drunk_diary_logo.svg',
                   height: APP_BAR_VISUAL_HEIGHT,
+                  placeholderBuilder: (_) => const SizedBox.shrink(),
                 ),
                 actions: [
                   Padding(
@@ -122,6 +123,7 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
                     title: SvgPicture.asset(
                       'assets/icons/drunk_diary_logo.svg',
                       height: APP_BAR_VISUAL_HEIGHT,
+                      placeholderBuilder: (_) => const SizedBox.shrink(),
                     ),
                     actions: [
                       Padding(

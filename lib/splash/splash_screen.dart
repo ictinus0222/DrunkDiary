@@ -14,6 +14,7 @@ class SplashScreen extends StatelessWidget {
           'assets/icons/drunk_diary_wordmark.svg',
           width: 240,
           fit: BoxFit.contain,
+          placeholderBuilder: (_) => const SizedBox.shrink(),
         ),
       ),
     );
