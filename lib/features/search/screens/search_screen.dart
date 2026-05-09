@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:drunk_diary/core/widgets/beta_tester_disclaimer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/analytics/analytics_service.dart';
 
@@ -272,9 +273,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               )
             else
               _buildDiscoveryFeed(),
+
+            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.hero)),
           ],
         ),
       ),
+      bottomNavigationBar: const BetaTesterDisclaimer(currentScreen: 'Discover'),
     );
   }
 
@@ -386,7 +390,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: 450,
           crossAxisSpacing: AppSpacing.lg,
-          mainAxisSpacing: AppSpacing.lg,
+          mainAxisSpacing: AppSpacing.md,
           childAspectRatio: 2.2,
         ),
         delegate: SliverChildBuilderDelegate(
@@ -434,7 +438,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: 450,
           crossAxisSpacing: AppSpacing.lg,
-          mainAxisSpacing: AppSpacing.lg,
+          mainAxisSpacing: AppSpacing.md,
           childAspectRatio: 2.2,
         ),
         delegate: SliverChildBuilderDelegate(

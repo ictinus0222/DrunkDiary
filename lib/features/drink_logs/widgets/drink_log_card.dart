@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/app_theme.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/constants/reaction_config.dart';
@@ -125,7 +126,7 @@ class DrinkLogCard extends ConsumerWidget {
       width: isHorizontal ? 100 : double.infinity,
       height: isHorizontal ? null : 200, // Fixed height for photos in vertical list
       decoration: BoxDecoration(
-        color: const Color(0xFF151515),
+        gradient: AppColors.getAlcoholGradient(log.alcoholType),
         borderRadius: BorderRadius.only(
           topLeft: const Radius.circular(AppSpacing.radiusDefault),
           bottomLeft: isHorizontal ? const Radius.circular(AppSpacing.radiusDefault) : Radius.zero,
@@ -139,6 +140,8 @@ class DrinkLogCard extends ConsumerWidget {
               child: CachedNetworkImage(
                 imageUrl: log.photoUrl!,
                 fit: BoxFit.cover,
+                memCacheWidth: 1000, // Increased for high quality
+                maxWidthDiskCache: 1000,
                 placeholder: (context, url) => const AppShimmer(),
                 errorWidget: (context, url, error) => const Icon(Icons.error),
               ),
@@ -155,7 +158,8 @@ class DrinkLogCard extends ConsumerWidget {
                       child: CachedNetworkImage(
                         imageUrl: alcohol.imageUrl,
                         fit: BoxFit.cover,
-                        memCacheWidth: 200, // Optimize image memory
+                        memCacheWidth: 1000, // Increased from 200 for high quality
+                        maxWidthDiskCache: 1000,
                         placeholder: (context, url) => const AppShimmer(),
                         errorWidget: (context, url, error) => const Center(
                           child: Icon(Icons.local_bar, color: Colors.white24, size: 30),

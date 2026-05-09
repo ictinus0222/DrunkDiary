@@ -36,27 +36,51 @@ class AccountDeletionRepository {
   }
 
   Future<void> _deleteFirestoreData(String userId) async {
+    // 0. Fetch user doc to get username for reservation cleanup
+    final userDoc = await _firestore.collection('users').doc(userId).get();
+    final username = userDoc.data()?['usernameLowercase'] as String?;
+
     final batch = _firestore.batch();
 
     // 1. Delete user document
     batch.delete(_firestore.collection('users').doc(userId));
 
-    // 2. Delete logs (with pagination/loop to handle large amounts)
+    // 2. Delete username reservation
+    if (username != null) {
+      batch.delete(_firestore.collection('usernames').doc(username));
+    }
+
+    // 3. Delete logs
     await _deleteCollectionByQuery(
       _firestore.collection('drink_logs').where('userId', isEqualTo: userId),
     );
 
-    // 3. Delete activity sessions
+    // 4. Delete activity sessions
     await _deleteCollectionByQuery(
       _firestore.collection('activity_sessions').where('userId', isEqualTo: userId),
     );
 
-    // 4. Delete wishlist items
+    // 5. Delete wishlist items
     await _deleteCollectionByQuery(
       _firestore.collection('wishlists').where('userId', isEqualTo: userId),
     );
 
-    // 5. Delete notifications (subcollection)
+    // 6. Delete friend requests (Outgoing)
+    await _deleteCollectionByQuery(
+      _firestore.collection('friend_requests').where('fromUserId', isEqualTo: userId),
+    );
+    
+    // 7. Delete friend requests (Incoming)
+    await _deleteCollectionByQuery(
+      _firestore.collection('friend_requests').where('toUserId', isEqualTo: userId),
+    );
+
+    // 8. Delete feedback (Firestore)
+    await _deleteCollectionByQuery(
+      _firestore.collection('feedback').where('userId', isEqualTo: userId),
+    );
+
+    // 9. Delete notifications (subcollection)
     await _deleteCollectionByPath('users/$userId/notifications');
 
     // Commit the main user doc deletion
@@ -95,20 +119,36 @@ class AccountDeletionRepository {
   }
 
   Future<void> _deleteStorageFiles(String userId) async {
-    final folders = ['drink_logs', 'profiles'];
-    
-    for (final folder in folders) {
+    // 1. Delete sub-pathed folders (where files are inside /{userId}/)
+    final subPathedFolders = ['drink_logs', 'profiles'];
+    for (final folder in subPathedFolders) {
       try {
         final folderRef = _storage.ref().child(folder).child(userId);
         final listResult = await folderRef.listAll();
-        
         for (var item in listResult.items) {
           await item.delete();
         }
       } catch (e) {
-        // If folder doesn't exist or other error, just continue
         print('Error deleting storage files in $folder: $e');
       }
+    }
+
+    // 2. Delete Feedback Screenshots (flat structure)
+    // We need to query the feedback collection before deleting it in Firestore
+    try {
+      final feedbackSnapshot = await _firestore
+          .collection('feedback')
+          .where('userId', isEqualTo: userId)
+          .get();
+          
+      for (var doc in feedbackSnapshot.docs) {
+        final feedbackId = doc.id;
+        try {
+          await _storage.ref().child('feedback/$feedbackId.jpg').delete();
+        } catch (_) {}
+      }
+    } catch (e) {
+      print('Error cleaning up feedback screenshots: $e');
     }
   }
 

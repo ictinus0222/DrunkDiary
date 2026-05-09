@@ -1,3 +1,4 @@
+import 'package:drunk_diary/core/widgets/beta_tester_disclaimer.dart';
 import 'dart:math';
 import 'package:drunk_diary/app/app_routes.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,6 +16,7 @@ import 'package:drunk_diary/features/drink_logs/providers/drink_logs_provider.da
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/widgets/app_shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_spacing.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -154,6 +156,7 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
                 ],
               ),
             ),
+            bottomNavigationBar: const BetaTesterDisclaimer(currentScreen: 'Diary'),
           );
         },
       ),
@@ -488,7 +491,7 @@ class _GalleryItem extends ConsumerWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
-          color: Theme.of(context).colorScheme.surface,
+          gradient: AppColors.getAlcoholGradient(log.alcoholType),
         ),
         clipBehavior: Clip.antiAlias,
         child: Stack(
@@ -506,7 +509,9 @@ class _GalleryItem extends ConsumerWidget {
                     )
                       : (log.alcoholId == null
                           ? Container(
-                              color: customColors.borderDark,
+                              decoration: BoxDecoration(
+                                gradient: AppColors.getAlcoholGradient(log.alcoholType),
+                              ),
                               child: const Icon(Icons.local_bar, color: Colors.white24),
                             )
                           : ref.watch(alcoholCacheProvider(log.alcoholId!)).when(
@@ -525,18 +530,24 @@ class _GalleryItem extends ConsumerWidget {
                                     memCacheWidth: 300, // Gallery items are roughly 1/2 screen width
                                     placeholder: (context, url) => const AppShimmer(),
                                     errorWidget: (context, url, error) => Container(
-                                      color: customColors.borderDark,
+                                      decoration: BoxDecoration(
+                                        gradient: AppColors.getAlcoholGradient(log.alcoholType),
+                                      ),
                                       child: const Icon(Icons.local_bar, color: Colors.white24),
                                     ),
                                   ),
                                 );
                               },
                               loading: () => Container(
-                                color: customColors.borderDark,
+                                decoration: BoxDecoration(
+                                  gradient: AppColors.getAlcoholGradient(log.alcoholType),
+                                ),
                                 child: const Center(child: AppShimmer()),
                               ),
                               error: (_, __) => Container(
-                                color: customColors.borderDark,
+                                decoration: BoxDecoration(
+                                  gradient: AppColors.getAlcoholGradient(log.alcoholType),
+                                ),
                                 child: const Icon(Icons.local_bar, color: Colors.white24),
                               ),
                             )),

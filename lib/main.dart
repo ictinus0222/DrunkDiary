@@ -1,11 +1,14 @@
+import 'package:flutter/material.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:drunk_diary/core/utils/screenshot_provider.dart';
 import 'package:drunk_diary/app/app_routes.dart';
 import 'package:drunk_diary/features/activity/screens/diary_screen.dart';
 import 'package:drunk_diary/features/drink_logs/screens/shelf_screen.dart';
 import 'package:drunk_diary/features/home/screens/home_screen.dart';
 import 'package:drunk_diary/features/auth/screens/login_screen.dart';
-import 'package:drunk_diary/features/auth/screens/onboarding_screen.dart';
+import 'package:drunk_diary/features/onboarding/presentation/screens/onboarding_flow_screen.dart';
 import 'package:drunk_diary/app/app_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:drunk_diary/core/theme/app_text_styles.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'core/auth/auth_gate.dart';
 import 'core/firebase/firebase_options.dart';
@@ -101,24 +104,29 @@ class _DrunkDiaryAppState extends ConsumerState<DrunkDiaryApp> with WidgetsBindi
     return MaterialApp(
       title: 'DrunkDiary',
       debugShowCheckedModeBanner: false,
+      theme: AppThemes.darkTheme,
       navigatorObservers: [_observer],
       home: const AuthGate(),
+      builder: (context, child) {
+        return Screenshot(
+          controller: ref.read(screenshotControllerProvider),
+          child: child!,
+        );
+      },
       routes: {
-        AppRoutes.auth: (context) => AuthGate(),
         AppRoutes.splash: (context) => const SplashScreen(),
         AppRoutes.login: (context) => const LoginScreen(),
-        AppRoutes.home: (context) => HomeScreen(),
-        AppRoutes.onboarding: (context) => OnboardingScreen(),
-        AppRoutes.diary: (context) => DiaryScreen(),
-        AppRoutes.profile: (context) => ProfileScreen(),
-        AppRoutes.shelf: (context) => ShelfScreen(),
-        AppRoutes.search: (context) => SearchScreen(),
+        AppRoutes.home: (context) => const HomeScreen(),
+        AppRoutes.onboarding: (context) => const OnboardingFlowScreen(),
+        AppRoutes.diary: (context) => const DiaryScreen(),
+        AppRoutes.profile: (context) => const ProfileScreen(),
+        AppRoutes.shelf: (context) => const ShelfScreen(),
+        AppRoutes.search: (context) => const SearchScreen(),
         AppRoutes.notifications: (context) => const NotificationsScreen(),
         AppRoutes.adminSettings: (context) => const AdminSettingsScreen(),
         AppRoutes.adminBottleManager: (context) => const AdminBottleManagerScreen(),
         AppRoutes.settings: (context) => const SettingsScreen(),
       },
-      theme: AppThemes.darkTheme,
     );
   }
 }

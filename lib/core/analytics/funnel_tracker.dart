@@ -38,6 +38,10 @@ class FunnelTracker {
     await _clearStep();
   }
 
+  Future<void> logFirstLogCtaClicked() async {
+    await _analytics.logEvent(name: AnalyticsEvents.firstLogCtaClicked);
+  }
+
   Future<void> logOnboardingAbandoned(int lastStep) async {
     await _analytics.logEvent(
       name: AnalyticsEvents.onboardingAbandoned,

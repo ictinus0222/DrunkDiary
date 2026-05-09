@@ -9,6 +9,7 @@ import '../../auth/services/google_auth_service.dart';
 import '../models/profile_data_model.dart';
 import '../providers/profile_providers.dart';
 import '../widgets/delete_account_dialog.dart';
+import '../../../core/widgets/beta_tester_disclaimer.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -50,6 +51,7 @@ class SettingsScreen extends ConsumerWidget {
         centerTitle: true,
       ),
       body: _buildBody(context, ref, profileAsync),
+      bottomNavigationBar: const BetaTesterDisclaimer(currentScreen: 'Settings'),
     );
   }
 

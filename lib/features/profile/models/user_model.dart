@@ -15,6 +15,12 @@ class UserModel {
   final String? coverUrl;
   final bool ageVerified;
   final DateTime createdAt;
+  // Onboarding Metadata
+  final DateTime? onboardingCompletedAt;
+  final String? onboardingVersion;
+  final bool onboardingSkipped;
+  final List<String> preferredDrinkCategories;
+  final bool? initialPrivacyPreference;
   // Profile
   final String? bio;
   final String? instagram;
@@ -45,6 +51,11 @@ class UserModel {
     this.coverUrl,
     required this.ageVerified,
     required this.createdAt,
+    this.onboardingCompletedAt,
+    this.onboardingVersion,
+    this.onboardingSkipped = false,
+    this.preferredDrinkCategories = const [],
+    this.initialPrivacyPreference,
     // Profile
     this.bio,
     this.instagram,
@@ -79,6 +90,12 @@ class UserModel {
       ageVerified: userData['ageVerified'] ?? false,
       createdAt:
           (userData['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      onboardingCompletedAt:
+          (userData['onboardingCompletedAt'] as Timestamp?)?.toDate(),
+      onboardingVersion: userData['onboardingVersion'],
+      onboardingSkipped: userData['onboardingSkipped'] ?? false,
+      preferredDrinkCategories: _parseStringList(userData['preferredDrinkCategories']),
+      initialPrivacyPreference: userData['initialPrivacyPreference'],
       // Profile
       bio: userData['bio'],
       instagram: userData['instagram'],
@@ -141,6 +158,11 @@ class UserModel {
       'coverUrl': coverUrl,
       'ageVerified': ageVerified,
       'createdAt': Timestamp.fromDate(createdAt),
+      'onboardingCompletedAt': onboardingCompletedAt != null ? Timestamp.fromDate(onboardingCompletedAt!) : null,
+      'onboardingVersion': onboardingVersion,
+      'onboardingSkipped': onboardingSkipped,
+      'preferredDrinkCategories': preferredDrinkCategories,
+      'initialPrivacyPreference': initialPrivacyPreference,
       // Profile
       'bio': bio,
       'instagram': instagram,
@@ -164,6 +186,11 @@ class UserModel {
     String? coverUrl,
     bool? ageVerified,
     DateTime? createdAt,
+    DateTime? onboardingCompletedAt,
+    String? onboardingVersion,
+    bool? onboardingSkipped,
+    List<String>? preferredDrinkCategories,
+    bool? initialPrivacyPreference,
     String? bio,
     String? instagram,
     String? username,
@@ -185,6 +212,11 @@ class UserModel {
       coverUrl: coverUrl ?? this.coverUrl,
       ageVerified: ageVerified ?? this.ageVerified,
       createdAt: createdAt ?? this.createdAt,
+      onboardingCompletedAt: onboardingCompletedAt ?? this.onboardingCompletedAt,
+      onboardingVersion: onboardingVersion ?? this.onboardingVersion,
+      onboardingSkipped: onboardingSkipped ?? this.onboardingSkipped,
+      preferredDrinkCategories: preferredDrinkCategories ?? this.preferredDrinkCategories,
+      initialPrivacyPreference: initialPrivacyPreference ?? this.initialPrivacyPreference,
       bio: bio ?? this.bio,
       instagram: instagram ?? this.instagram,
       username: username ?? this.username,

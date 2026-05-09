@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:drunk_diary/core/widgets/beta_tester_disclaimer.dart';
 import '../../../app/app_theme.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../widgets/shelf_card.dart';
@@ -192,7 +193,7 @@ class _ShelfScreenState extends ConsumerState<ShelfScreen> {
             )
           else
             SliverPadding(
-              padding: const EdgeInsets.only(bottom: 100),
+              padding: const EdgeInsets.only(bottom: 32),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
@@ -263,11 +264,13 @@ class _ShelfScreenState extends ConsumerState<ShelfScreen> {
                 ),
               ),
             ),
-        ],
+            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.hero)),
+          ],
+        ),
       ),
-    ),
-  );
-}
+      bottomNavigationBar: const BetaTesterDisclaimer(currentScreen: 'Shelf'),
+    );
+  }
 
   Widget _sortChip(BuildContext context, String title) {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;

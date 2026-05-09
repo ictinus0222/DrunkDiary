@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../features/auth/screens/login_screen.dart';
-import '../../features/auth/screens/onboarding_screen.dart';
 import '../../features/home/screens/home_screen.dart';
+import '../../features/onboarding/presentation/screens/onboarding_flow_screen.dart';
 import '../../splash/splash_screen.dart';
 
 class AuthGate extends StatelessWidget {
@@ -42,7 +42,7 @@ class AuthGate extends StatelessWidget {
 
             //  User doc DOES NOT exist / missing => onboarding
             if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
-              return const OnboardingScreen();
+              return const OnboardingFlowScreen();
             }
 
             final data =                                       // Reading firestore data
@@ -56,13 +56,11 @@ class AuthGate extends StatelessWidget {
               return const HomeScreen();
             }
 
-            // Onboarding not done => OnboardingScreen
-            return const OnboardingScreen();
+            // Onboarding not done => OnboardingFlowScreen
+            return const OnboardingFlowScreen();
           },
         );
       },
     );
   }
 }
-
-

@@ -149,7 +149,7 @@ Located in `lib/features/auth/widgets/onboarding_components.dart`:
     *   **More Menu**: `Icons.more_horiz` in the top-right header.
     *   **Share Button**: `Icons.ios_share` in the bottom-right footer.
     *   **Cheers Footer**: Interactive 🥂 button + count label. If the session contains private logs, this is replaced by a `Text('PRIVATE')` badge.
-    *   **Feedback**: All buttons trigger a "Coming Soon" SnackBar.
+    *   **Feedback**: Accessible via the `BetaTesterDisclaimer` sticky footer on any core screen.
 
 ### App Bar
 *   **CustomAppBar:** All secondary screens utilize the `CustomAppBar` component which implements the project's branding standards:
@@ -157,14 +157,14 @@ Located in `lib/features/auth/widgets/onboarding_components.dart`:
     - **Header Formatting:** Other screens use ALL CAPS titles with a `Transform.translate(offset: Offset(0, 1))` shift for precise optical vertical centering.
     - **Branding Consistency:** Uses `CategoriesElegant` font for titles by default.
 *   **BottomNavigationBar:** Fixed type (`BottomNavigationBarType.fixed`) containing exactly 5 tabs.
-*   **Settings Drawer (Sidebar)**
-    - **Description:** A right-aligned `Drawer` accessible from the Profile screen.
-    - **Visuals:** Uses `--color-surface` and standard `ListTile` components. Maintains the project's dark theme and amber accents.
-    - **Items:**
-      - Header with Avatar + Username.
-      - "Admin Settings" (list tile, conditional if user is admin).
-      - "Logout" (list tile with `Icons.logout`).
-    - **Interaction:** Opens when the user taps the settings icon in the Profile AppBar.
+*   **Settings Screen**
+    - **Visuals**: Uses `--color-surface` and standard `ListTile` components. Maintains the project's dark theme and amber accents.
+    - **Items**:
+      - Profile Privacy Toggle.
+      - Friend Requests.
+      - Admin Settings (conditional).
+      - Logout & Account Deletion.
+    - **Interaction**: Opens via the settings icon in the Profile AppBar.
 
 *   **Centered Action Icon:** The central navigation item (Index 2) is a specialized circular action button (`+`) that opens the `UnifiedLoggingScreen` as a fullscreen dialog.
 
@@ -181,6 +181,16 @@ Located in `lib/features/auth/widgets/onboarding_components.dart`:
         *   Search: `Icons.search_off_outlined`
 *   **Error States:** Raw text messages rendered conditionally in UI trees (e.g., `Text(_error!, style: const TextStyle(color: Colors.red))`).
 
+### Beta Tester Feedback (Premium UI)
+*   **BetaTesterDisclaimer**: 
+    - **Visual**: Collapsible `ExpansionTile` at the bottom of core screens.
+    - **Branding**: Amber "BETA PREVIEW" label with compact density.
+    - **Behavior**: Hides itself automatically during screenshot capture.
+*   **FeedbackBottomSheet**:
+    - **Dimensions**: Slim/Compact vertical layout.
+    - **Layout**: Side-by-side buttons for Submission and Screenshot preview.
+    - **Overlay**: Opaque loading/success screens (`#1A1A1A`) to provide clear state transitions.
+
 ### Skeleton UI (Shimmer)
 Used to represent loading states for content blocks.
 *   **Colors:** baseColor: `Colors.grey[850]`, highlightColor: `Colors.grey[800]`.
@@ -195,10 +205,10 @@ No explicit accessibility enhancements identified beyond default Flutter semanti
     - `search_alcohol_[ID]` (Discover tab)
     - `shelf_alcohol_[ID]` (Shelf tab)
     - `alcohol_log_[LOG_ID]` (Diary entry)
-*   **BetterFeedback UI**:
-    - Uses a custom dark theme (`Color(0xFF121212)`) and sheet color (`Color(0xFF1E1E1E)`).
-    - Triggered from Profile Screen's leading action button.
-    - Provides a full-screen screenshot annotation and text entry interface.
+*   **Custom Feedback UI**:
+    - Uses a solid surface color (`#1A1A1A`) for submission overlays.
+    - Integrated directly into the app's amber/black theme.
+    - Automated "Thank You" success sequence with a 2-second auto-close.
 *   Modal bottom sheets use default Flutter slide-up transitions.
 
 ### Immersive Viewers

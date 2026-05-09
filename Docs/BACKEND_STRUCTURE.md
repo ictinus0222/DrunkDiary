@@ -1,6 +1,6 @@
 # Backend Architecture & Database Structure
 
-Last Updated: 2026-05-08
+Last Updated: 2026-05-09
 
 ## 1. Architecture Overview (As Implemented)
 Architecture pattern not explicitly defined; inferred from folder organization. The application operates on a "Serverless / Backend-as-a-Service (BaaS)" architecture using Firebase directly from the Flutter client. There is no dedicated API server, Node.js/Python backend, or centralized controller layer in this repository. All database reads/writes and authentication flows are executed directly from the client application using the Firebase SDK.
@@ -125,6 +125,16 @@ Source of Truth: `lib/features/activity/models/day_activity_model.dart`
 *   `cheersCount`: Number (Total count of cheers)
 *   `updatedAt`: Timestamp
 
+### Collection: `feedback`
+Source of Truth: `lib/features/profile/models/feedback_model.dart`
+*   `id`: String (Document ID, UUID v4)
+*   `userId`: String (References `users.id` or 'anonymous')
+*   `category`: String (Enum: `'bug'`, `'feature'`, `'other'`)
+*   `message`: String (User's feedback text)
+*   `screenshotUrl`: String? (Storage URL for attached screenshot)
+*   `createdAt`: Timestamp
+*   `metadata`: Map (Device model, app version, current screen, platform)
+
 ### Collection: `configs`
 Source of Truth: `lib/core/flags/feature_flags.dart`
 * Document ID: `app_flags`
@@ -164,6 +174,7 @@ Validation is implemented exclusively in the client-side `.dart` files:
 *   **Age Validation:** During onboarding, users must manually confirm they are of legal drinking age in their country (Yes/No choice). "No" selection triggers a hard block screen.
 *   **Username Validation:** `username` field is checked for `length >= 3`. Submissions are sanitized to lowercase and verified for uniqueness via a Firestore `runTransaction` covering the `usernames` collection.
 *   **Review Duplication Prevention:** When a user creates a public review for an alcohol, the codebase manually dictates a deterministic Document ID (`${userId}_${alcoholId}`) to natively prevent duplicate reviews per alcohol via Firestore overwrite logic.
+*   **Storage Path (`feedback/`)**: Stores user-submitted beta feedback screenshots. Files are named `${feedbackId}.jpg`.
 *   No explicit server-side content sanitization identified (relies on Firestore Security Rules which are not visible in this repository).
 
 ## 7. Error Handling Structure

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/app_theme.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/constants/reaction_config.dart';
@@ -113,39 +114,51 @@ class _ImageLayer extends ConsumerWidget {
 
     // Prefer the user's captured photo
     if (log.photoUrl != null && log.photoUrl!.isNotEmpty) {
-      return CachedNetworkImage(
-        imageUrl: log.photoUrl!,
-        fit: BoxFit.cover,
-        placeholder: (_, __) => const AppShimmer(),
-        errorWidget: (_, __, ___) => _FallbackBackground(customColors: customColors),
+      return Container(
+        decoration: BoxDecoration(
+          gradient: AppColors.getAlcoholGradient(log.alcoholType),
+        ),
+        child: CachedNetworkImage(
+          imageUrl: log.photoUrl!,
+          fit: BoxFit.cover,
+          placeholder: (_, __) => const AppShimmer(),
+          errorWidget: (_, __, ___) => _FallbackBackground(log: log),
+        ),
       );
     }
 
     return ref.watch(alcoholCacheProvider(log.alcoholId!)).when(
       data: (alcohol) {
-        if (alcohol == null) return _FallbackBackground(customColors: customColors);
-        return CachedNetworkImage(
-          imageUrl: alcohol.imageUrl,
-          fit: BoxFit.cover,
-          memCacheWidth: 250, // Mini cards are small
-          placeholder: (_, __) => const AppShimmer(),
-          errorWidget: (_, __, ___) => _FallbackBackground(customColors: customColors),
+        if (alcohol == null) return _FallbackBackground(log: log);
+        return Container(
+          decoration: BoxDecoration(
+            gradient: AppColors.getAlcoholGradient(log.alcoholType),
+          ),
+          child: CachedNetworkImage(
+            imageUrl: alcohol.imageUrl,
+            fit: BoxFit.cover,
+            memCacheWidth: 250, // Mini cards are small
+            placeholder: (_, __) => const AppShimmer(),
+            errorWidget: (_, __, ___) => _FallbackBackground(log: log),
+          ),
         );
       },
       loading: () => const AppShimmer(),
-      error: (_, __) => _FallbackBackground(customColors: customColors),
+      error: (_, __) => _FallbackBackground(log: log),
     );
   }
 }
 
 class _FallbackBackground extends StatelessWidget {
-  final AppCustomColors customColors;
-  const _FallbackBackground({required this.customColors});
+  final DrinkLogModel log;
+  const _FallbackBackground({required this.log});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: customColors.deepCardBackground,
+      decoration: BoxDecoration(
+        gradient: AppColors.getAlcoholGradient(log.alcoholType),
+      ),
       child: const Center(
         child: Icon(Icons.local_bar, color: Colors.white12, size: 36),
       ),

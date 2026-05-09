@@ -46,15 +46,16 @@ Based on the onboarding flow and feature structure, the target users are individ
 ## 6. Features & Requirements
 
 ### P0 (Core Implemented Features)
-- **Premium Identity Onboarding**
-  - **Description:** Authenticates users and builds their drinking identity through a polished experience.
-  - **User Story:** As a new user, I can sign in with my Google account, confirm my legal drinking age, and build my taste profile so my experience feels personal from the first screen.
+- **Cinematic Identity Onboarding (V2)**
+  - **Description:** A premium, emotionally-driven onboarding experience that communicates the app's mental model before account creation.
+  - **User Story:** As a new user, I want to understand the emotional value of DrunkDiary (nostalgia and memory preservation) before I set up my profile.
   - **Acceptance Criteria:** 
-    - Smooth 5-step perceived flow (Legal Age, Name, Taste, Goal, Final).
-    - Identity confirmation: Users assert they are of legal drinking age via Yes/No interaction.
-    - Blocks ineligible users with a graceful Exit screen.
-    - Requires a unique identity name (username) > 3 characters via Firestore transaction.
-  - **Edge Cases:** Handles taken usernames gracefully by reverting the transaction and showing a snackbar.
+    - **9-Step Refined Flow**: 5 Educational screens + 3 Setup screens (Age, Username, Preferences) + 1 Final CTA.
+    - **Emotional Positioning**: "Memories fade. Your best nights don’t have to."
+    - **Motion System**: Staggered entrance animations and ambient parallax (supports Reduced Motion accessibility).
+    - **First Meaningful Action**: Automatically opens the logging modal upon first home landing to drive immediate conversion.
+    - **Context Memory**: Persists onboarding metadata (version, preferences, privacy) in the `UserModel` for future personalization.
+  - **Analytics**: Tracks `first_log_cta_clicked` and per-step completion/dropoff.
 - **Unified Drink Logging**
   - **Description:** Allows users to log any drink, whether it's a specific bottle from the catalog or a custom concoction (cocktail, mocktail, etc.).
   - **User Story:** As a user, I want to log what I'm drinking even if it's not in the app's database, so my diary remains a complete record of my night.
@@ -159,13 +160,14 @@ Based on the onboarding flow and feature structure, the target users are individ
     - Profile customization backend
 
 - **In-App Feedback System**
-  - **Description:** Allows users to submit screenshots and text feedback directly from their profile.
-  - **User Story:** As a user, I want to easily report bugs or suggest features without leaving the app.
+  - **Description:** Allows users to submit screenshots and text feedback directly from any core screen via a sticky beta disclaimer.
+  - **User Story:** As a user, I want to easily report bugs or suggest features without leaving the app, and have them sent directly to the development team.
   - **Acceptance Criteria:** 
-    - Floating action button or icon in Profile triggers `BetterFeedback` overlay.
-    - Captures a screenshot of the current screen.
-    - Sends feedback via configured email client using `flutter_email_sender`.
-    - Handles "No email client found" gracefully with a SnackBar.
+    - Floating/Sticky "Beta Disclaimer" dropdown at the bottom of core screens.
+    - Captures a **clean screenshot** of the current screen (automatically hiding the disclaimer).
+    - Multi-state `FeedbackBottomSheet`: supports category selection, text input, and photo gallery picking.
+    - **Persistent Submission**: Shows real-time "Sending..." and "Thank You" states within the sheet.
+    - Saves data directly to Firestore (`feedback` collection) and Storage (`feedback/` folder).
 - **Admin Bottle Management**
   - **Description:** In-app tool for admins to add new alcohols to the global database.
   - **User Story:** As an admin, I want to add new bottles directly from my phone so the catalog stays up to date without manual Firestore entry.

@@ -14,32 +14,18 @@ Last Updated: 2026-05-08
 
 ## 2. Core User Flows (Implemented Only)
 
-### Flow: Authentication & Onboarding
-* **Goal:** Authenticate the user into the system, verify their age, and capture initial preferences.
+#### Flow: Cinematic Onboarding (V2)
+* **Goal:** Educate user on app value, collect identity, and trigger first log.
 * **Entry Point:** Initial app launch (handled by `AuthGate`).
-* **Frequency:** Once per account creation / device login.
 * **Happy Path:**
-  1. `SplashScreen` rendered while Firebase Auth initializes.
-  2. `AuthGate` resolves auth state. If no user, renders `LoginScreen`.
-  3. `LoginScreen`: User clicks "Continue with Google".
-  4. System Action: Triggers `signInWithGoogle()`. Redirects back to `AuthGate`.
-  5. `AuthGate` fetches Firestore user document. If missing or `onboardingCompleted` is false, renders `OnboardingScreen`.
-  5. `AuthGate` fetches Firestore user document. If missing or `onboardingCompleted` is false, renders `OnboardingScreen`.
-  6. `OnboardingScreen` (Step 1): Legal Age Check.
-     * Logic: "Are you of legal drinking age?"
-     * Action: User selects "YES" to proceed or "NO" to view block screen.
-  7. `OnboardingScreen` (Step 2): Name.
-     * Logic: "What should the community call you?"
-     * Validation: Username > 3 chars and unique in `usernames` collection.
-  8. `OnboardingScreen` (Step 3): Taste.
-     * Logic: "What's usually in your glass?" (Alcohol preference selection).
-  9. `OnboardingScreen` (Step 4): Experience/Goal.
-     * Logic: "Why did you join DrunkDiary?" (Taste vibe and setting).
-  10. `OnboardingScreen` (Step 5): Finish.
-     * UI: "Your shelf is ready."
-     * System Action: Firestore transaction claims username and saves profile with `legalAge: true`.
-     * System Action: Logs `sign_up` and `onboarding_complete` analytics events.
-  11. Resulting State: `Navigator.pushNamedAndRemoveUntil('/home')`.
+  1. `AuthGate` renders `OnboardingFlowScreen` for new/incomplete users.
+  2. **Education Loop (Steps 1-5)**: Cinematic screens covering Identity, Logging, Shelf, Social, and Privacy.
+  3. **Setup Loop (Steps 6-8)**: Age Check -> Username -> Taste Preferences.
+  4. **Final CTA (Step 9)**: "Log Your First Drink" button.
+  5. **System Action**: Firestore transaction saves user profile with **Context Memory** (onboarding metadata).
+  6. **Resulting State**: Redirects to `HomeScreen`.
+  7. **Post-Onboarding Logic**: `HomeScreen` detects first-time user and automatically opens `UnifiedLoggingScreen` after 800ms.
+* **Accessibility**: Respects system "Reduced Motion" settings to simplify animations.
 * **Error States:**
   * Trigger: Google Sign-in fails. 
     * Message: Shows caught exception message or "Something went wrong. Please try again." in red text on `LoginScreen`.
@@ -94,16 +80,18 @@ Last Updated: 2026-05-08
   * Trigger: Firebase write failure.
     * Message: SnackBar displays "Could not save log" (or "Could not publish review").
 *   **Flow: Submit In-App Feedback**
-  * **Goal:** Report an issue or suggest a feature without leaving the app.
-  * **Entry Point:** `ProfileScreen` (leadingIconButton).
+  * **Goal:** Report an issue or suggest a feature directly to the development team.
+  * **Entry Point:** `BetaTesterDisclaimer` (bottom of core screens).
   * **Happy Path:**
-    1. User taps the feedback icon.
-    2. System Action: Triggers `BetterFeedback.of(context).show(...)` overlay.
-    3. User Action: Captures/Annotates screenshot and types feedback description.
-    4. User Action: Taps submit.
-    5. System Action: Triggers `FeedbackHandler`. Uses `flutter_email_sender` to launch the device's default email client with the screenshot as an attachment.
-    6. Resulting State: Device email composer opens.
-  * Message: SnackBar displays "No email client found. Please configure an email account."
+    1. User expands the disclaimer and taps "SHARE FEEDBACK".
+    2. System Action: Hides the disclaimer UI and captures a **clean screenshot**.
+    3. System Action: Opens `FeedbackBottomSheet` with the screenshot pre-attached.
+    4. User Action: Selects category, types message, and taps "SUBMIT".
+    5. System Action: Shows "Sending..." overlay and uploads data to Firestore/Storage.
+    6. System Action: Shows "Thank You" success message and auto-closes after 2 seconds.
+  * **Error States:**
+    * Trigger: Firebase upload fails.
+      * Message: SnackBar displays "Failed to submit: [Error details]".
 
 ### Flow: Account Deletion
 * **Goal:** Permanently remove user account and data.
@@ -160,10 +148,9 @@ AuthGate
     │   ├── SettingsScreen (via AppBar icon)
     │   │   ├── Logout Action (Clears Nav Stack)
     │   │   └── Delete Account (Confirmation Dialog)
-    │   ├── FriendRequestsScreen (Pending Implementation)
-    │   └── FeedbackOverlay (via Leading Action Icon)
-    └── Dev Routes
-        └── ResponsivePreviewScreen (Breakpoint & Density Audit)
+    │   └── FriendRequestsScreen (Pending Implementation)
+    └── Beta Feedback (Sticky Bottom Bar)
+        └── FeedbackBottomSheet (Direct Firebase Submission)
 ```
 
 ## 4. Screen Inventory (Code-Verified)
@@ -243,13 +230,17 @@ AuthGate
 * **Screen:** `ProfileScreen`
   * **Route:** `/profile`
   * **Access:** Authenticated
-  * **Purpose:** Displays the user's personal identity (Cover, Avatar, Bio) and an "Activity" feed that mirrors the Diary timeline. Reuses `DayActivityCard` and `LogMiniCard` for consistency.
+  * **Purpose:** Displays the user's personal identity and activity feed. Reuses `DayActivityCard` for consistency.
   * **Actions Available:** 
-      - Tapping the Settings icon opens the `SettingsDrawer`.
-      - "Edit" button (UI Placeholder).
-* **Component:** `SettingsDrawer`
-  * **Purpose:** Provides a right-aligned sidebar for account settings and logout functionality.
-  * **Admin Logic:** Includes an entry point for `AdminSettingsScreen` if the authenticated account matches authorized admin emails.
+      - Tapping the Settings icon opens the `SettingsScreen`.
+* **Screen:** `SettingsScreen`
+  * **Route:** `/settings`
+  * **Access:** Authenticated
+  * **Purpose:** Central configuration hub for account privacy, social features, and admin tools.
+  * **Actions Available:** 
+      - Logout (Google Sign-out).
+      - Delete Account.
+      - Access `AdminSettingsScreen` (if admin).
 * **Screen:** `AdminSettingsScreen`
   * **Route:** `/adminSettings`
   * **Access:** Restricted (Authorized Admin Emails Only)

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/app_theme.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/constants/reaction_config.dart';
 import '../../wishlist/widgets/wishlist_action_button.dart';
@@ -335,7 +336,7 @@ class _HeroImage extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: colorScheme.onSurface, // typically white for product background
+        gradient: AppColors.getAlcoholGradient(alcohol.type),
         borderRadius: BorderRadius.circular(32),
       ),
       child: ClipRRect(
@@ -363,7 +364,9 @@ class _HeroImage extends StatelessWidget {
 
   Widget _imagePlaceholder(BuildContext context) {
     return Container(
-      color: Theme.of(context).colorScheme.onSurface,
+      decoration: BoxDecoration(
+        gradient: AppColors.getAlcoholGradient(alcohol.type),
+      ),
       child: Center(
         child: Icon(Icons.local_bar, size: 48, color: Theme.of(context).extension<AppCustomColors>()!.textMuted),
       ),

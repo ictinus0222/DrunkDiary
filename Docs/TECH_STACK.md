@@ -63,15 +63,10 @@ Version: ^1.0.8
 Source File Evidence: `pubspec.yaml`
 Reason: Default iOS styling icons. Reason not explicitly documented in repository.
 
-Library: feedback
-Version: ^3.1.0
+Library: screenshot
+Version: ^3.0.0
 Source File Evidence: `pubspec.yaml`
-Reason: In-app feedback collection (screenshots + annotation).
-
-Library: flutter_email_sender
-Version: ^8.0.0
-Source File Evidence: `pubspec.yaml`
-Reason: Sending emails with attachments (used by Feedback system).
+Reason: High-fidelity in-app screen capture for bug reporting and feedback.
 
 Library: path_provider
 Version: ^2.1.4
@@ -142,7 +137,7 @@ Firebase (Identified via `firebase.json` containing Project ID `drunkdiary-d9241
 
 ## 5. Monitoring
 - **Telemetry:** Firebase Analytics used for tracking user behavior and feature engagement. Automatically tracks screen transitions and custom business events. Supports context-aware identity tracking (`setUserId`).
-- **Crash Reporting:** No explicit crash reporting (e.g., Crashlytics) identified yet.
+- **Crash Reporting:** Firebase Crashlytics is integrated for real-time monitoring of application stability and fatal/non-fatal exception tracking.
 - **Icon Generation:** `flutter_launcher_icons: ^0.14.3` used for cross-platform icon scaling and adaptive background/foreground management.
 
 ## 6. Development Tooling
@@ -189,9 +184,10 @@ dependencies:
   cached_network_image: ^3.3.1
   shimmer: ^3.0.0
   flutter_svg: ^2.0.10
-  firebase_analytics: ^12.2.0
-  feedback: ^3.1.0
-  flutter_email_sender: ^8.0.0
+  firebase_analytics: ^12.3.0
+  firebase_crashlytics: ^5.2.0
+  firebase_remote_config: ^6.4.0
+  screenshot: ^3.0.0
   path_provider: ^2.1.4
   package_info_plus: ^9.0.0
   url_launcher: ^6.3.1

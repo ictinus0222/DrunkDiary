@@ -11,6 +11,7 @@ class AnalyticsEvents {
   static const onboardingCompleted = 'onboarding_completed';
   static const onboardingSkipped = 'onboarding_skipped';
   static const onboardingAbandoned = 'onboarding_abandoned';
+  static const firstLogCtaClicked = 'first_log_cta_clicked';
 
   // Drink Logging Funnel
   static const drinkLogged = 'drink_logged';

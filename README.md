@@ -46,10 +46,9 @@ AuthGate
     │   ├── SettingsScreen (via AppBar icon)
     │   │   ├── Logout Action (Clears Nav Stack)
     │   │   └── Delete Account (Confirmation Dialog)
-    │   ├── FriendRequestsScreen (Pending Implementation)
-    │   └── FeedbackOverlay (via Leading Action Icon)
-    └── Dev Routes
-        └── ResponsivePreviewScreen (Breakpoint & Density Audit)
+    │   └── FriendRequestsScreen (Pending Implementation)
+    └── Beta Feedback (Sticky Bottom Bar)
+        └── FeedbackBottomSheet (Direct Firebase Submission)
 ```
 <!-- SYNC_FLOW_END -->
 
@@ -63,6 +62,7 @@ DrunkDiary uses a **Serverless (BaaS)** architecture based on Firebase:
 - **`drink_logs`**
 - **`wishlists`**
 - **`activity_sessions`**
+- **`feedback`**
 - **`configs`**
 <!-- SYNC_ARCH_END -->
 

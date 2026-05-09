@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/app_theme.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../alcohol/screens/alcohol_detail_screen.dart';
 import '../../../core/navigation/page_transitions.dart';
 import '../models/discover_item_model.dart';
@@ -33,7 +34,6 @@ class DiscoverAlcoholCard extends StatelessWidget {
       },
       child: Container(
         height: 120,
-        margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
           color: customColors.cardBackground,
           borderRadius: BorderRadius.circular(16),
@@ -45,7 +45,7 @@ class DiscoverAlcoholCard extends StatelessWidget {
             Container(
               width: 110,
               decoration: BoxDecoration(
-                color: colorScheme.onSurface, // White usually for images
+                gradient: AppColors.getAlcoholGradient(item.alcohol.type),
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(16),
                   bottomLeft: Radius.circular(16),

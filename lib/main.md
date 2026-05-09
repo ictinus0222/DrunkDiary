@@ -34,7 +34,7 @@ It does NOT handle UI rendering or business logic.
 ```
 - AuthGate decides what the user sees first
   - Logged in -> HoneScreen
-  - Not logged in -> LoginScreen -> OnboardingScreen
+  - Not logged in -> LoginScreen -> OnboardingFlowScreen
 - This centralizes authentication logic and avoids messy checks across screens.
 
 ---

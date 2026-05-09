@@ -7,15 +7,18 @@ import '../../drink_logs/screens/unified_logging_screen.dart';
 import '../../profile/screens/profile_screen.dart';
 import '../../search/screens/search_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../onboarding/presentation/providers/post_onboarding_action_handler.dart';
+
+class HomeScreen extends ConsumerStatefulWidget {
   static const routeName = '/home';
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _currentIndex = 0;
 
   final List<GlobalKey<NavigatorState>> _navigatorKeys = [
@@ -25,6 +28,27 @@ class _HomeScreenState extends State<HomeScreen> {
     GlobalKey<NavigatorState>(),
     GlobalKey<NavigatorState>(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _checkFirstLogGuidance();
+  }
+
+  void _checkFirstLogGuidance() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final guidance = ref.read(postOnboardingHandlerProvider);
+      if (guidance.shouldShowFirstLogGuidance && !guidance.hasTriggered) {
+        // Delay slightly to let the home screen settle
+        Future.delayed(const Duration(milliseconds: 800), () {
+          if (mounted) {
+            _openUnifiedLoggingScreen();
+            ref.read(postOnboardingHandlerProvider.notifier).markAsTriggered();
+          }
+        });
+      }
+    });
+  }
 
   void _openUnifiedLoggingScreen() {
     Navigator.push(

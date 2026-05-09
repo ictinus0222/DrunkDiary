@@ -23,6 +23,7 @@ import '../../../core/widgets/responsive_layout.dart';
 import '../widgets/tester_mode_sheet.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/responsive_tokens.dart';
+import 'package:drunk_diary/core/widgets/beta_tester_disclaimer.dart';
 import '../../../core/theme/app_colors.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -55,6 +56,7 @@ class ProfileScreen extends ConsumerWidget {
           data: (profile) => _buildProfileData(context, ref, profile, isMe),
         ),
       ),
+      bottomNavigationBar: const BetaTesterDisclaimer(currentScreen: 'Profile'),
     );
   }
 
