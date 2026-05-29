@@ -112,7 +112,7 @@ class _CreateReviewBottomSheetState extends State<CreateReviewBottomSheet> {
 
       final review = DrinkLogModel(
         id: reviewDocId,
-        userId: user.uid,
+        creatorId: user.uid,
         alcoholId: widget.alcohol.id,
         username: userDoc['username'] ?? 'Unknown',
         userPhotoUrl: userDoc['photoUrl'],
@@ -123,6 +123,8 @@ class _CreateReviewBottomSheetState extends State<CreateReviewBottomSheet> {
         logKind: LogKind.review,
         createdAt: DateTime.now(),
         isPrivate: isPrivate,
+        acceptedParticipantIds: [user.uid],
+        participantCount: 1,
       );
 
       final ref =

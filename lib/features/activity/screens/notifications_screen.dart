@@ -84,6 +84,12 @@ class _NotificationItem extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     
+    // Filter out expired unread tag requests
+    final isExpired = notification.expiresAt != null && DateTime.now().isAfter(notification.expiresAt!);
+    if (isExpired && !notification.isRead && notification.type == 'tag_request') {
+      return const SizedBox.shrink();
+    }
+
     return InkWell(
       onTap: () {
         // Mark as read
@@ -145,7 +151,9 @@ class _NotificationItem extends ConsumerWidget {
                                   : ' cheered your activity 🥂')
                               : notification.type == 'friend_request'
                                   ? ' sent you a friend request 👋'
-                                  : ' interacted with you',
+                                  : notification.type == 'tag_request'
+                                      ? ' shared ${notification.itemName ?? "a drink"} with you 🥂'
+                                      : ' interacted with you',
                         ),
                       ],
                     ),
@@ -175,6 +183,28 @@ class _NotificationItem extends ConsumerWidget {
                           'Ignore', 
                           Colors.white24, 
                           () => _handleIgnore(ref),
+                        ),
+                      ],
+                    ),
+                  ],
+                  if (notification.type == 'tag_request' && !notification.isRead) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    Row(
+                      children: [
+                        _buildAction(
+                          context, 
+                          ref, 
+                          'Add To My Diary', 
+                          Colors.amber, 
+                          () => _handleTagResponse(ref, true),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        _buildAction(
+                          context, 
+                          ref, 
+                          'Not Now', 
+                          Colors.white24, 
+                          () => _handleTagResponse(ref, false),
                         ),
                       ],
                     ),
@@ -232,6 +262,18 @@ class _NotificationItem extends ConsumerWidget {
   void _handleIgnore(WidgetRef ref) {
     ref.read(friendshipRepositoryProvider).rejectFriendRequest(userId, notification.senderId).then((_) {
       ref.read(notificationRepositoryProvider).markAsRead(userId, notification.id);
+    });
+  }
+
+  void _handleTagResponse(WidgetRef ref, bool accept) {
+    ref.read(drinkLogRepositoryProvider).respondToTagRequest(
+      logId: notification.activityId,
+      userId: userId,
+      accept: accept,
+    ).then((_) {
+      ref.read(notificationRepositoryProvider).markAsRead(userId, notification.id);
+      ref.invalidate(drinkLogsProvider);
+      ref.invalidate(shelfAlcoholsProvider);
     });
   }
 

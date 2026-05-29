@@ -12,7 +12,11 @@ import '../../../core/constants/reaction_config.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../models/drink_model_dto.dart';
 
-class CreateLogBottomSheet extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'tag_friends_selector.dart';
+import '../../profile/models/user_model.dart';
+
+class CreateLogBottomSheet extends ConsumerStatefulWidget {
   final AlcoholModel? alcohol;
   final bool isCustom;
   final String? customName;
@@ -27,10 +31,10 @@ class CreateLogBottomSheet extends StatefulWidget {
   });
 
   @override
-  State<CreateLogBottomSheet> createState() => _CreateLogBottomSheetState();
+  ConsumerState<CreateLogBottomSheet> createState() => _CreateLogBottomSheetState();
 }
 
-class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
+class _CreateLogBottomSheetState extends ConsumerState<CreateLogBottomSheet> {
   DrinkReaction? selectedReaction;
   bool showNoteField = false;
 
@@ -41,6 +45,7 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
 
   File? selectedPhoto;
   final ImagePicker _picker = ImagePicker();
+  List<UserModel> taggedFriends = [];
 
   // =====================
   // SAVE LOG
@@ -59,7 +64,7 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
 
       final log = DrinkLogModel(
         id: '',
-        userId: user.uid,
+        creatorId: user.uid,
         alcoholId: widget.isCustom ? null : widget.alcohol?.id,
         username: userDoc['username'] ?? 'Unknown',
         userPhotoUrl: userDoc['photoUrl'],
@@ -73,11 +78,66 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
         note: noteController.text.isNotEmpty ? noteController.text : null,
         logKind: LogKind.log,
         createdAt: DateTime.now(),
+        acceptedParticipantIds: [user.uid],
+        participantCount: 1,
       );
 
       final logRef = await FirebaseFirestore.instance
           .collection('drink_logs')
           .add(log.toMap());
+
+      // Batch write for participants and notifications
+      final batch = FirebaseFirestore.instance.batch();
+
+      // 1. Creator participant record
+      final creatorParticipantRef = FirebaseFirestore.instance
+          .collection('drink_log_participants')
+          .doc('${logRef.id}_${user.uid}');
+      
+      batch.set(creatorParticipantRef, {
+        'logId': logRef.id,
+        'userId': user.uid,
+        'status': 'accepted',
+        'role': 'creator',
+        'createdAt': FieldValue.serverTimestamp(),
+        'expiresAt': Timestamp.fromDate(DateTime.now().add(const Duration(days: 30))),
+      });
+
+      // 2. Tagged friends participant records & notifications
+      for (final friend in taggedFriends) {
+        final participantRef = FirebaseFirestore.instance
+            .collection('drink_log_participants')
+            .doc('${logRef.id}_${friend.id}');
+
+        batch.set(participantRef, {
+          'logId': logRef.id,
+          'userId': friend.id,
+          'status': 'pending',
+          'role': 'participant',
+          'createdAt': FieldValue.serverTimestamp(),
+          'expiresAt': Timestamp.fromDate(DateTime.now().add(const Duration(days: 30))),
+        });
+
+        final notificationRef = FirebaseFirestore.instance
+            .collection('users')
+            .doc(friend.id)
+            .collection('notifications')
+            .doc('tag_${logRef.id}');
+
+        batch.set(notificationRef, {
+          'type': 'tag_request',
+          'senderId': user.uid,
+          'senderUsername': userDoc['username'] ?? 'Unknown',
+          'senderProfileImage': userDoc['photoUrl'],
+          'activityId': logRef.id,
+          'itemName': log.alcoholName,
+          'createdAt': FieldValue.serverTimestamp(),
+          'isRead': false,
+          'expiresAt': Timestamp.fromDate(DateTime.now().add(const Duration(days: 30))),
+        });
+      }
+
+      await batch.commit();
 
       if (selectedPhoto != null) {
         await _uploadPhoto(logRef, user.uid);
@@ -354,6 +414,16 @@ class _CreateLogBottomSheetState extends State<CreateLogBottomSheet> {
                 ),
               ),
             ],
+
+            const SizedBox(height: 24),
+
+            // Tag Friends Selector
+            TagFriendsSelector(
+              selectedFriends: taggedFriends,
+              onFriendsChanged: (friends) {
+                setState(() => taggedFriends = friends);
+              },
+            ),
 
             const SizedBox(height: 24),
 

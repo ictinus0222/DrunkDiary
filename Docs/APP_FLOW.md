@@ -79,6 +79,41 @@ Last Updated: 2026-05-08
 * **Error States:**
   * Trigger: Firebase write failure.
     * Message: SnackBar displays "Could not save log" (or "Could not publish review").
+
+### Flow: Tag Friends in Drink Log (Shared Logs)
+* **Goal**: Share a bottle logging experience with friends so it appears in their diaries and shelves.
+* **Entry Point**: `UnifiedLoggingScreen` (HomeScreen center "+") or `CreateLogBottomSheet` (Alcohol Detail / Wishlist "+ Log").
+* **Happy Path**:
+  1. User starts logging a drink (catalog bottle or custom name).
+  2. User taps "Tag Friends" section.
+  3. UI displays a list of the user's accepted friends.
+  4. User selects one or more friends and saves the log.
+  5. System Action:
+     - Saves the log document with `creatorId`, `acceptedParticipantIds` (initialized with the creator's ID), and `participantCount` (initialized to 1).
+     - Saves a participant record in `drink_log_participants` for the creator (status: `accepted`, role: `creator`).
+     - Saves `drink_log_participants` entries for all tagged friends (status: `pending`, role: `participant`, `expiresAt` set to 30 days from now).
+     - Dispatches a `tag_request` notification to each tagged friend.
+  6. Resulting State: Returns to previous screen.
+
+### Flow: Accept or Decline Tag Request
+* **Goal**: Process a tag request received from a friend.
+* **Entry Point**: `NotificationsScreen`.
+* **Happy Path (Accept)**:
+  1. User views a `tag_request` notification: "Akhil shared Glenfiddich 12 with you."
+  2. User checks that the request has not expired (current time is before `expiresAt`).
+  3. User taps "Add To My Diary".
+  4. System Action:
+     - Updates `drink_log_participants` status to `'accepted'`.
+     - Appends the user's ID to `acceptedParticipantIds` in the `drink_logs` document and increments `participantCount` by 1.
+     - Marks the notification as read.
+  5. Resulting State: The drink log now automatically shows on the user's timeline and the bottle appears on their shelf.
+* **Happy Path (Decline / Dismiss)**:
+  1. User taps "Not Now" on the tag request notification.
+  2. System Action:
+     - Updates `drink_log_participants` status to `'declined'`.
+     - Marks the notification as read.
+  3. Resulting State: The log does not appear on their timeline or shelf.
+
 *   **Flow: Submit In-App Feedback**
   * **Goal:** Report an issue or suggest a feature directly to the development team.
   * **Entry Point:** `BetaTesterDisclaimer` (bottom of core screens).

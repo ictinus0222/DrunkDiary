@@ -14,6 +14,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/providers/common_providers.dart';
 
+import 'participant_avatars.dart';
+import '../providers/drink_logs_provider.dart';
+
 class LogDetailBottomSheet extends ConsumerStatefulWidget {
   final DrinkLogModel log;
 
@@ -87,10 +90,8 @@ class _LogDetailBottomSheetState extends ConsumerState<LogDetailBottomSheet> {
     setState(() => isDeleting = true);
 
     try {
-      await FirebaseFirestore.instance
-          .collection('drink_logs')
-          .doc(_log.id)
-          .delete();
+      final currentUserId = ref.read(userIdProvider);
+      await ref.read(drinkLogRepositoryProvider).deleteDrinkLog(_log, currentUserId!);
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
@@ -115,7 +116,7 @@ class _LogDetailBottomSheetState extends ConsumerState<LogDetailBottomSheet> {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     
     final currentUserId = ref.watch(userIdProvider);
-    final bool isOwner = currentUserId == _log.userId;
+    final bool isOwner = currentUserId == _log.creatorId;
 
     return Container(
       decoration: BoxDecoration(
@@ -246,6 +247,23 @@ class _LogDetailBottomSheetState extends ConsumerState<LogDetailBottomSheet> {
                               ),
                             ],
                           ),
+
+                        if (_log.participantCount > 1) ...[
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Text(
+                                'Shared With: ',
+                                style: textTheme.bodyMedium?.copyWith(
+                                  color: customColors.textMuted,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              ParticipantAvatars(log: _log, radius: 12),
+                            ],
+                          ),
+                        ],
 
                         const SizedBox(height: 24),
 

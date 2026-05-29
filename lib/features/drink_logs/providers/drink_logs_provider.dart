@@ -23,7 +23,30 @@ final drinkLogsProvider = StreamProvider<List<DrinkLogModel>>((ref) {
   if (userId == null) return Stream.value([]);
   
   final repository = ref.watch(drinkLogRepositoryProvider);
-  return repository.watchLogsForUser(userId);
+  return repository.watchLogsForUser(userId).map((list) {
+    return list..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  });
+});
+
+/// Stream of accepted participant user profiles for a given log ID
+final logParticipantsProvider = StreamProvider.family<List<UserModel>, String>((ref, logId) {
+  return FirebaseFirestore.instance
+      .collection('drink_log_participants')
+      .where('logId', isEqualTo: logId)
+      .where('status', isEqualTo: 'accepted')
+      .snapshots()
+      .asyncMap((snapshot) async {
+        final uids = snapshot.docs.map((doc) => doc.data()['userId'] as String).toList();
+        if (uids.isEmpty) return const <UserModel>[];
+
+        // Fetch user profiles for these uids
+        final userDocs = await FirebaseFirestore.instance
+            .collection('users')
+            .where(FieldPath.documentId, whereIn: uids)
+            .get();
+
+        return userDocs.docs.map((doc) => UserModel.fromFirestore(doc)).toList();
+      });
 });
 
 /// Global stream of all logs ever (Global Feed - Unfiltered)

@@ -16,6 +16,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/drink_logs_provider.dart';
 
+import 'participant_avatars.dart';
+
 class DrinkLogCard extends ConsumerWidget {
   final DrinkLogModel log;
 
@@ -45,7 +47,7 @@ class DrinkLogCard extends ConsumerWidget {
     
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.sm),
-      height: 120, // Fixed height for horizontal cards to improve performance
+      height: 125, // Increased slightly for avatars
       decoration: BoxDecoration(
         color: customColors.cardBackground,
         borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
@@ -64,8 +66,12 @@ class DrinkLogCard extends ConsumerWidget {
                     _titleRow(context),
                     const SizedBox(height: AppSpacing.xs),
                     _metaRow(context),
+                    if (log.participantCount > 1) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      ParticipantAvatars(log: log, radius: 10),
+                    ],
                     if (log.note != null && log.note!.isNotEmpty) ...[
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
                       _caption(context),
                     ],
                     const SizedBox(height: AppSpacing.md),
@@ -102,6 +108,10 @@ class DrinkLogCard extends ConsumerWidget {
                 _titleRow(context),
                 const SizedBox(height: AppSpacing.xs),
                 _metaRow(context),
+                if (log.participantCount > 1) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  ParticipantAvatars(log: log, radius: 10),
+                ],
                 if (log.note != null && log.note!.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   _caption(context),

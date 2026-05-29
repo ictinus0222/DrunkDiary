@@ -74,3 +74,20 @@ final otherProfileDataProvider = FutureProvider.family<ProfileDataModel?, String
     userData: userData,
   );
 });
+
+/// Resolves user models for all friends of the current user
+final userFriendsProvider = FutureProvider<List<UserModel>>((ref) async {
+  final profile = await ref.watch(profileDataProvider.future);
+  final friendIds = profile?.userData.friends ?? [];
+  if (friendIds.isEmpty) return [];
+
+  // Firestore whereIn supports up to 30 items. If more, chunk or retrieve them.
+  final limitedIds = friendIds.take(30).toList();
+
+  final userDocs = await FirebaseFirestore.instance
+      .collection('users')
+      .where(FieldPath.documentId, whereIn: limitedIds)
+      .get();
+
+  return userDocs.docs.map((doc) => UserModel.fromFirestore(doc)).toList();
+});

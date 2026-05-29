@@ -9,7 +9,8 @@ enum Visibility { public, friendsOnly, closeFriends }
 // TODO: fix for when document is deleted, malformed or empty.
 class DrinkLogModel {
   final String id;
-  final String userId;
+  final String creatorId;
+  String get userId => creatorId;
   final String? alcoholId; // Now nullable
   final String username;
   final String? userPhotoUrl;
@@ -36,9 +37,12 @@ class DrinkLogModel {
   final bool isPrivate;
   final Visibility visibility;
 
+  final List<String> acceptedParticipantIds;
+  final int participantCount;
+
   DrinkLogModel({
     required this.id,
-    required this.userId,
+    required this.creatorId,
     this.alcoholId,
     required this.username,
     this.userPhotoUrl,
@@ -57,6 +61,8 @@ class DrinkLogModel {
     this.photoUploadedAt,
     this.isPrivate = false,
     this.visibility = Visibility.public,
+    this.acceptedParticipantIds = const [],
+    this.participantCount = 1,
   });
 
   factory DrinkLogModel.fromFirestore(DocumentSnapshot doc) {
@@ -71,7 +77,7 @@ class DrinkLogModel {
 
     return DrinkLogModel(
       id: doc.id,
-      userId: data['userId'] as String? ?? '',
+      creatorId: data['creatorId'] as String? ?? data['userId'] as String? ?? '',
       alcoholId: data['alcoholId'] as String?,
       username: data['username'] as String? ?? 'Unknown',
       userPhotoUrl: data['userPhotoUrl'] as String?,
@@ -95,6 +101,11 @@ class DrinkLogModel {
       photoUploadedAt: (data['photoUploadedAt'] as Timestamp?)?.toDate(),
       isPrivate: data['isPrivate'] as bool? ?? false,
       visibility: _parseVisibility(data['visibility']),
+      acceptedParticipantIds: (data['acceptedParticipantIds'] as List?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
+      participantCount: data['participantCount'] as int? ?? 1,
     );
   }
 
@@ -108,7 +119,8 @@ class DrinkLogModel {
 
   Map<String, dynamic> toMap() {
     return {
-      'userId': userId,
+      'creatorId': creatorId,
+      'userId': creatorId, // Write both for backward compatibility
       if (alcoholId != null) 'alcoholId': alcoholId,
       'username': username,
       'userPhotoUrl': userPhotoUrl,
@@ -127,11 +139,13 @@ class DrinkLogModel {
       'photoUploadedAt': photoUploadedAt,
       'isPrivate': isPrivate,
       'visibility': visibility.name,
+      'acceptedParticipantIds': acceptedParticipantIds,
+      'participantCount': participantCount,
     };
   }
 
   DrinkLogModel copyWith({
-    String? userId,
+    String? creatorId,
     String? username,
     String? userPhotoUrl,
     double? rating,
@@ -146,10 +160,12 @@ class DrinkLogModel {
     String? alcoholType,
     bool? isPrivate,
     Visibility? visibility,
+    List<String>? acceptedParticipantIds,
+    int? participantCount,
   }) {
     return DrinkLogModel(
       id: id,
-      userId: userId ?? this.userId,
+      creatorId: creatorId ?? this.creatorId,
       alcoholId: alcoholId ?? this.alcoholId,
       username: username ?? this.username,
       userPhotoUrl: userPhotoUrl ?? this.userPhotoUrl,
@@ -168,6 +184,8 @@ class DrinkLogModel {
       photoUploadedAt: photoUploadedAt,
       isPrivate: isPrivate ?? this.isPrivate,
       visibility: visibility ?? this.visibility,
+      acceptedParticipantIds: acceptedParticipantIds ?? this.acceptedParticipantIds,
+      participantCount: participantCount ?? this.participantCount,
     );
   }
 }

@@ -8,6 +8,8 @@ class NotificationModel {
   final String? senderProfileImage;
   final String activityId;
   final DateTime? activityDate; // NEW: The date of the session being cheered
+  final String? itemName; // NEW: The name of the item (bottle or custom drink)
+  final DateTime? expiresAt; // NEW: Expiration date for the request
   final DateTime createdAt;
   final bool isRead;
 
@@ -19,6 +21,8 @@ class NotificationModel {
     this.senderProfileImage,
     required this.activityId,
     this.activityDate,
+    this.itemName,
+    this.expiresAt,
     required this.createdAt,
     this.isRead = false,
   });
@@ -33,6 +37,8 @@ class NotificationModel {
       senderProfileImage: data['senderProfileImage'],
       activityId: data['activityId'] ?? '',
       activityDate: (data['activityDate'] as Timestamp?)?.toDate(),
+      itemName: data['itemName'] as String?,
+      expiresAt: (data['expiresAt'] as Timestamp?)?.toDate(),
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       isRead: data['isRead'] ?? false,
     );
@@ -46,6 +52,8 @@ class NotificationModel {
       'senderProfileImage': senderProfileImage,
       'activityId': activityId,
       'activityDate': activityDate != null ? Timestamp.fromDate(activityDate!) : null,
+      'itemName': itemName,
+      'expiresAt': expiresAt != null ? Timestamp.fromDate(expiresAt!) : null,
       'createdAt': Timestamp.fromDate(createdAt),
       'isRead': isRead,
     };

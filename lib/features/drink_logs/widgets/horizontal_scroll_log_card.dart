@@ -15,6 +15,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/drink_logs_provider.dart';
 
+import 'participant_avatars.dart';
+
 /// Image-first compact card for the [DayActivityCard] horizontal scroll row.
 ///
 /// Layout (170×220):
@@ -66,6 +68,11 @@ class LogMiniCard extends ConsumerWidget {
                       right: AppSpacing.md,
                       bottom: AppSpacing.md,
                       child: _BottomContent(log: log),
+                    ),
+                    Positioned(
+                      left: AppSpacing.sm,
+                      top: AppSpacing.sm,
+                      child: ParticipantAvatars(log: log, radius: 10),
                     ),
                   ],
                 ),

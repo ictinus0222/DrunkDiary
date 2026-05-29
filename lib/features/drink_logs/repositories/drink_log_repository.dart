@@ -36,7 +36,7 @@ class DrinkLogRepository {
   ) async {
     final snapshot = await _firestore
         .collection('drink_logs')
-        .where('userId', isEqualTo: userId)
+        .where('creatorId', isEqualTo: userId)
         .where('logKind', isEqualTo: 'review')
         .orderBy('createdAt', descending: true)
         .get();
@@ -52,12 +52,13 @@ class DrinkLogRepository {
   ) async {
     final snapshot = await _firestore
         .collection('drink_logs')
-        .where('userId', isEqualTo: userId)
+        .where('acceptedParticipantIds', arrayContains: userId)
         .where('logKind', isEqualTo: 'log')
-        .orderBy('createdAt', descending: true)
         .get();
 
-    return snapshot.docs.map(DrinkLogModel.fromFirestore).toList();
+    final list = snapshot.docs.map(DrinkLogModel.fromFirestore).toList();
+    list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return list;
   }
 
   /// Real-time stream of all public interaction logs (Global Feed)
@@ -75,8 +76,7 @@ class DrinkLogRepository {
   Stream<List<DrinkLogModel>> watchLogsForUser(String userId) {
     return _firestore
         .collection('drink_logs')
-        .where('userId', isEqualTo: userId)
-        .orderBy('createdAt', descending: true)
+        .where('acceptedParticipantIds', arrayContains: userId)
         .snapshots()
         .map((snapshot) =>
             snapshot.docs.map(DrinkLogModel.fromFirestore).toList());
@@ -92,7 +92,7 @@ class DrinkLogRepository {
 
     return _firestore
         .collection('drink_logs')
-        .where('userId', whereIn: limitedFriendIds)
+        .where('creatorId', whereIn: limitedFriendIds)
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) =>
@@ -127,5 +127,79 @@ class DrinkLogRepository {
         }
       },
     );
+  }
+
+  // ============================
+  // 🏷️ RESPOND TO TAG REQUEST
+  // ============================
+  Future<void> respondToTagRequest({
+    required String logId,
+    required String userId,
+    required bool accept,
+  }) async {
+    final participantRef = _firestore.collection('drink_log_participants').doc('${logId}_$userId');
+    final logRef = _firestore.collection('drink_logs').doc(logId);
+
+    await _firestore.runTransaction((transaction) async {
+      final participantDoc = await transaction.get(participantRef);
+      if (!participantDoc.exists) throw Exception("Tag request not found");
+
+      final logDoc = await transaction.get(logRef);
+      if (!logDoc.exists) throw Exception("Drink log not found");
+
+      final currentStatus = participantDoc.data()?['status'];
+      if (currentStatus != 'pending') return; // already processed
+
+      final expiresAt = (participantDoc.data()?['expiresAt'] as Timestamp?)?.toDate();
+      if (expiresAt != null && DateTime.now().isAfter(expiresAt)) {
+        transaction.update(participantRef, {'status': 'expired'});
+        return;
+      }
+
+      if (accept) {
+        transaction.update(participantRef, {'status': 'accepted'});
+        transaction.update(logRef, {
+          'acceptedParticipantIds': FieldValue.arrayUnion([userId]),
+          'participantCount': FieldValue.increment(1),
+        });
+      } else {
+        transaction.update(participantRef, {'status': 'declined'});
+      }
+    });
+  }
+
+  // ============================
+  // 🗑️ DELETE / REMOVE LOG
+  // ============================
+  Future<void> deleteDrinkLog(DrinkLogModel log, String userId) async {
+    if (log.creatorId == userId) {
+      // Creator deletes log -> Delete for everyone
+      await _firestore.runTransaction((transaction) async {
+        // 1. Delete drink log
+        transaction.delete(_firestore.collection('drink_logs').doc(log.id));
+
+        // 2. Delete all participant records for this log
+        final participants = await _firestore
+            .collection('drink_log_participants')
+            .where('logId', isEqualTo: log.id)
+            .get();
+        for (var doc in participants.docs) {
+          transaction.delete(doc.reference);
+        }
+      });
+    } else {
+      // Participant removes themselves -> Update participant status & remove from index
+      final participantRef = _firestore
+          .collection('drink_log_participants')
+          .doc('${log.id}_$userId');
+
+      await _firestore.runTransaction((transaction) async {
+        transaction.update(participantRef, {'status': 'declined'});
+        transaction.update(_firestore.collection('drink_logs').doc(log.id), {
+          'acceptedParticipantIds': FieldValue.arrayRemove([userId]),
+          'participantCount': FieldValue.increment(-1),
+        });
+      });
+    }
   }
 }

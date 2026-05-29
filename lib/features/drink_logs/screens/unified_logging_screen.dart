@@ -19,14 +19,18 @@ import '../../../core/theme/app_typography_roles.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../../../core/widgets/responsive_layout.dart';
 
-class UnifiedLoggingScreen extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../widgets/tag_friends_selector.dart';
+import '../../profile/models/user_model.dart';
+
+class UnifiedLoggingScreen extends ConsumerStatefulWidget {
   const UnifiedLoggingScreen({super.key});
 
   @override
-  State<UnifiedLoggingScreen> createState() => _UnifiedLoggingScreenState();
+  ConsumerState<UnifiedLoggingScreen> createState() => _UnifiedLoggingScreenState();
 }
 
-class _UnifiedLoggingScreenState extends State<UnifiedLoggingScreen> {
+class _UnifiedLoggingScreenState extends ConsumerState<UnifiedLoggingScreen> {
   // State
   bool isCustom = true;
   AlcoholModel? selectedBottle;
@@ -35,6 +39,7 @@ class _UnifiedLoggingScreenState extends State<UnifiedLoggingScreen> {
   DrinkReaction? selectedReaction;
   final TextEditingController noteController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
+  List<UserModel> taggedFriends = [];
 
   bool isSaving = false;
   final ImagePicker _picker = ImagePicker();
@@ -116,7 +121,7 @@ class _UnifiedLoggingScreenState extends State<UnifiedLoggingScreen> {
 
       final log = DrinkLogModel(
         id: '',
-        userId: user.uid,
+        creatorId: user.uid,
         username: userDoc['username'] ?? 'Unknown',
         userPhotoUrl: userDoc['photoUrl'],
         alcoholId: isCustom ? null : selectedBottle!.id,
@@ -129,9 +134,64 @@ class _UnifiedLoggingScreenState extends State<UnifiedLoggingScreen> {
         logKind: LogKind.log,
         createdAt: DateTime.now(),
         isPrivate: isPrivate,
+        acceptedParticipantIds: [user.uid],
+        participantCount: 1,
       );
 
       final logRef = await FirebaseFirestore.instance.collection('drink_logs').add(log.toMap());
+
+      // Batch write for participants and notifications
+      final batch = FirebaseFirestore.instance.batch();
+
+      // 1. Creator participant record
+      final creatorParticipantRef = FirebaseFirestore.instance
+          .collection('drink_log_participants')
+          .doc('${logRef.id}_${user.uid}');
+      
+      batch.set(creatorParticipantRef, {
+        'logId': logRef.id,
+        'userId': user.uid,
+        'status': 'accepted',
+        'role': 'creator',
+        'createdAt': FieldValue.serverTimestamp(),
+        'expiresAt': Timestamp.fromDate(DateTime.now().add(const Duration(days: 30))),
+      });
+
+      // 2. Tagged friends participant records & notifications
+      for (final friend in taggedFriends) {
+        final participantRef = FirebaseFirestore.instance
+            .collection('drink_log_participants')
+            .doc('${logRef.id}_${friend.id}');
+
+        batch.set(participantRef, {
+          'logId': logRef.id,
+          'userId': friend.id,
+          'status': 'pending',
+          'role': 'participant',
+          'createdAt': FieldValue.serverTimestamp(),
+          'expiresAt': Timestamp.fromDate(DateTime.now().add(const Duration(days: 30))),
+        });
+
+        final notificationRef = FirebaseFirestore.instance
+            .collection('users')
+            .doc(friend.id)
+            .collection('notifications')
+            .doc('tag_${logRef.id}');
+
+        batch.set(notificationRef, {
+          'type': 'tag_request',
+          'senderId': user.uid,
+          'senderUsername': userDoc['username'] ?? 'Unknown',
+          'senderProfileImage': userDoc['photoUrl'],
+          'activityId': logRef.id,
+          'itemName': log.alcoholName,
+          'createdAt': FieldValue.serverTimestamp(),
+          'isRead': false,
+          'expiresAt': Timestamp.fromDate(DateTime.now().add(const Duration(days: 30))),
+        });
+      }
+
+      await batch.commit();
 
       if (selectedPhoto != null) {
         await _uploadPhoto(logRef, user.uid);
@@ -348,6 +408,16 @@ class _UnifiedLoggingScreenState extends State<UnifiedLoggingScreen> {
                   filled: true,
                   fillColor: customColors.cardBackground,
                 ),
+              ),
+
+              const SizedBox(height: AppSpacing.xxl),
+
+              // Tag Friends Selector
+              TagFriendsSelector(
+                selectedFriends: taggedFriends,
+                onFriendsChanged: (friends) {
+                  setState(() => taggedFriends = friends);
+                },
               ),
 
               const SizedBox(height: AppSpacing.hero),

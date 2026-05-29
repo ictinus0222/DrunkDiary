@@ -35,8 +35,9 @@ Source of Truth: `lib/features/profile/models/user_model.dart` + `lib/features/a
     *   `senderId`: String (Uid of the user who triggered the alert)
     *   `senderUsername`: String (Username for display)
     *   `senderProfileImage`: String? (Profile image URL)
-    *   `type`: String (Value: `'cheers'`)
-    *   `activityId`: String (Deterministic session ID: `{userId}_{yyyy-MM-dd}`)
+    *   `type`: String (Value: `'cheers'`, `'friend_request'`, or `'tag_request'`)
+    *   `activityId`: String (Deterministic session ID: `{userId}_{yyyy-MM-dd}` OR `logId` for tag_request)
+    *   `itemName`: String? (Name of the bottle or custom drink for tag_request)
     *   `createdAt`: Timestamp
     *   `isRead`: Boolean (Default: false)
 
@@ -83,7 +84,7 @@ Source of Truth: `lib/features/alcohol/models/alcohol_model.dart`
 ### Collection: `drink_logs`
 Source of Truth: `lib/features/drink_logs/models/drink_model_dto.dart`
 *   `id`: String (Document ID)
-*   `userId`: String (Default: '')
+*   `creatorId`: String (Default: '', Uid of the log creator. Replaces userId with fallback support)
 *   `alcoholId`: String? (Nullable. Null if `isCustom` is true)
 *   `isCustom`: Boolean (Default: false. True if logged without a catalog bottle.)
 *   `customName`: String? (Name entered by user for custom drinks)
@@ -102,6 +103,20 @@ Source of Truth: `lib/features/drink_logs/models/drink_model_dto.dart`
 *   `photoUploadedAt`: Timestamp? (Nullable, Mapped to DateTime)
 *   `isPrivate`: Boolean (Default: false. Denormalized from user profile for efficient feed filtering.)
 *   `visibility`: String (Enum mapped to string: 'public', 'friendsOnly', 'closeFriends')
+*   `acceptedParticipantIds`: List<String> (Uids of participants who have accepted the tag, always includes creatorId)
+*   `participantCount`: Number (Total number of accepted participants. Starts at 1)
+
+### Collection: `drink_log_participants`
+Source of Truth: `lib/features/drink_logs/models/drink_log_participant_model.dart`
+*   Document ID: String (Deterministic: `{logId}_{userId}`)
+*   `logId`: String (References `drink_logs.id`)
+*   `userId`: String (References `users.id`)
+*   `status`: String (`'pending'`, `'accepted'`, `'declined'`, `'expired'`)
+*   `role`: String (`'creator'`, `'participant'`)
+*   `createdAt`: Timestamp
+*   `expiresAt`: Timestamp
+
+*Note: drink_log_participants.status is the authoritative source of participant membership, while acceptedParticipantIds is a denormalized query index used to power fast feed lookups.*
 
 ### Collection: `wishlists`
 Source of Truth: `lib/features/wishlist/models/wishlist_item_model.dart`
