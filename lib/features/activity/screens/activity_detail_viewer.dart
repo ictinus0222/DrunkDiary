@@ -59,7 +59,6 @@ class _ActivityDetailViewerState extends ConsumerState<ActivityDetailViewer> {
 
   @override
   Widget build(BuildContext context) {
-    final activityAsync = ref.watch(dayActivityProvider(widget.activityId));
     final log = widget.initialLogs[_currentPage];
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
 
@@ -128,7 +127,7 @@ class _ActivityDetailViewerState extends ConsumerState<ActivityDetailViewer> {
               children: [
                 // Social Stats (Avatars + Count + Time)
                 _SocialStatsRow(
-                  activityAsync: activityAsync,
+                  activityId: widget.activityId,
                   time: log.createdAt,
                 ),
                 const SizedBox(height: 20),
@@ -138,7 +137,6 @@ class _ActivityDetailViewerState extends ConsumerState<ActivityDetailViewer> {
                   activityId: widget.activityId,
                   activityOwnerId: widget.userId,
                   activityDate: widget.date,
-                  activityAsync: activityAsync,
                 ),
               ],
             ),
@@ -190,6 +188,7 @@ class _ImageWithBlurredBackground extends StatelessWidget {
           child: CachedNetworkImage(
             imageUrl: imageUrl,
             fit: BoxFit.cover,
+            memCacheWidth: 150,
             color: Colors.black.withOpacity(0.4),
             colorBlendMode: BlendMode.darken,
           ),
@@ -422,14 +421,16 @@ class _ActivityOverlay extends StatelessWidget {
   }
 }
 
-class _SocialStatsRow extends StatelessWidget {
-  final AsyncValue<DayActivityModel?> activityAsync;
+class _SocialStatsRow extends ConsumerWidget {
+  final String activityId;
   final DateTime time;
 
-  const _SocialStatsRow({required this.activityAsync, required this.time});
+  const _SocialStatsRow({required this.activityId, required this.time});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activityAsync = ref.watch(dayActivityProvider(activityId));
+
     return activityAsync.when(
       data: (activity) {
         final count = activity?.cheersCount ?? 0;
@@ -488,7 +489,7 @@ class _StackedAvatars extends StatelessWidget {
                 color: Colors.amber,
                 image: itemsToShow[index].isNotEmpty 
                     ? DecorationImage(
-                        image: CachedNetworkImageProvider(itemsToShow[index]),
+                        image: ResizeImage(CachedNetworkImageProvider(itemsToShow[index]), width: 100, height: 100),
                         fit: BoxFit.cover,
                       )
                     : null,
@@ -508,29 +509,22 @@ class _ActionButtonsRow extends StatelessWidget {
   final String activityId;
   final String activityOwnerId;
   final DateTime activityDate;
-  final AsyncValue<DayActivityModel?> activityAsync;
 
   const _ActionButtonsRow({
     required this.activityId,
     required this.activityOwnerId,
     required this.activityDate,
-    required this.activityAsync,
   });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        activityAsync.when(
-          data: (activity) => CheersButton(
-            activityId: activityId,
-            activityOwnerId: activityOwnerId,
-            activityDate: activityDate,
-            activityData: activity,
-            isImmersive: true,
-          ),
-          loading: () => const SizedBox(height: 40),
-          error: (_, __) => const SizedBox.shrink(),
+        CheersButton(
+          activityId: activityId,
+          activityOwnerId: activityOwnerId,
+          activityDate: activityDate,
+          isImmersive: true,
         ),
         const Spacer(),
         IconButton(

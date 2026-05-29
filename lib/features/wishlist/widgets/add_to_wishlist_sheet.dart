@@ -222,29 +222,29 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
                         child: Container(
                           width: 40,
                           height: 44,
-                            child: alcohol.imageUrl.isNotEmpty
-                                ? CachedNetworkImage(
-                                    imageUrl: alcohol.imageUrl,
-                                    fit: BoxFit.contain,
-                                    placeholder: (context, url) => Container(
-                                      color: colorScheme.onSurface.withOpacity(0.1),
-                                      child: const Center(
-                                        child: SizedBox(
-                                          width: 20,
-                                          height: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: Colors.white24,
-                                          ),
+                          color: colorScheme.onSurface.withValues(alpha: 0.1),
+                          child: alcohol.imageUrl.isNotEmpty
+                              ? CachedNetworkImage(
+                                  imageUrl: alcohol.imageUrl,
+                                  fit: BoxFit.contain,
+                                  placeholder: (context, url) => Container(
+                                    color: colorScheme.onSurface.withValues(alpha: 0.1),
+                                    child: const Center(
+                                      child: SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white24,
                                         ),
                                       ),
                                     ),
-                                    errorWidget: (context, url, error) => Icon(
-                                        Icons.local_bar,
-                                        color: customColors.textMuted),
-                                  )
+                                  ),
+                                  errorWidget: (context, url, error) => Icon(
+                                      Icons.local_bar,
+                                      color: customColors.textMuted),
+                                )
                               : Icon(Icons.local_bar, color: customColors.textMuted),
-                          color: colorScheme.onSurface.withOpacity(0.1), // This line was moved/modified
                         ),
                       ),
                       title: Text(
@@ -339,7 +339,7 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: colorScheme.primary,
-                disabledBackgroundColor: colorScheme.primary.withOpacity(0.5),
+                disabledBackgroundColor: colorScheme.primary.withValues(alpha: 0.5),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),

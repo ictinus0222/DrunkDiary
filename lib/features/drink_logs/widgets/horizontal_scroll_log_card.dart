@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/app_theme.dart';
@@ -6,7 +5,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/constants/reaction_config.dart';
-import '../../alcohol/models/alcohol_model.dart';
 import '../models/drink_model_dto.dart';
 import 'log_detail_bottom_sheet.dart';
 import '../../../core/widgets/app_shimmer.dart';
@@ -117,7 +115,6 @@ class _ImageLayer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final customColors = Theme.of(context).extension<AppCustomColors>()!;
 
     // Prefer the user's captured photo
     if (log.photoUrl != null && log.photoUrl!.isNotEmpty) {
@@ -128,6 +125,7 @@ class _ImageLayer extends ConsumerWidget {
         child: CachedNetworkImage(
           imageUrl: log.photoUrl!,
           fit: BoxFit.cover,
+          memCacheWidth: 600,
           placeholder: (_, __) => const AppShimmer(),
           errorWidget: (_, __, ___) => _FallbackBackground(log: log),
         ),

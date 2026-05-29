@@ -44,7 +44,6 @@ class DayActivityCard extends ConsumerWidget {
     final dateString = "${localDate.year}-${localDate.month.toString().padLeft(2, '0')}-${localDate.day.toString().padLeft(2, '0')}";
     final activityId = "${firstLog.userId}_$dateString";
 
-    final activityAsync = ref.watch(dayActivityProvider(activityId));
     final profileAsync = ref.watch(profileDataProvider);
     final viewer = profileAsync.value?.userData;
     final isFriend = viewer != null && viewer.friends.contains(firstLog.userId);
@@ -94,7 +93,7 @@ class DayActivityCard extends ConsumerWidget {
                               radius: 22,
                               backgroundColor: Colors.amber,
                               backgroundImage: firstLog.userPhotoUrl != null
-                                  ? CachedNetworkImageProvider(firstLog.userPhotoUrl!)
+                                  ? ResizeImage(CachedNetworkImageProvider(firstLog.userPhotoUrl!), width: 200, height: 200)
                                   : null,
                               child: firstLog.userPhotoUrl == null
                                   ? const Icon(Icons.person, size: 24, color: Colors.black)
@@ -144,19 +143,10 @@ class DayActivityCard extends ConsumerWidget {
             children: [
               const SizedBox(width: 56 + 12),
               if (!isEffectivelyPrivate)
-                activityAsync.when(
-                  data: (activity) => CheersButton(
-                    activityId: activityId,
-                    activityOwnerId: firstLog.userId,
-                    activityDate: date,
-                    activityData: activity,
-                  ),
-                  loading: () => CheersButton(
-                    activityId: '',
-                    activityOwnerId: '',
-                    activityDate: DateTime(2000),
-                  ),
-                  error: (_, __) => const SizedBox.shrink(),
+                CheersButton(
+                  activityId: activityId,
+                  activityOwnerId: firstLog.userId,
+                  activityDate: date,
                 ),
               if (isEffectivelyPrivate)
                 Row(

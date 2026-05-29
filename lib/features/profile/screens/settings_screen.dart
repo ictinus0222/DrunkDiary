@@ -18,7 +18,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(profileDataProvider);
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
-    final colorScheme = Theme.of(context).colorScheme;
+
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -203,7 +203,6 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final customColors = Theme.of(context).extension<AppCustomColors>()!;
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md, left: 4),
       child: Text(
@@ -302,7 +301,7 @@ class _SettingSwitchTile extends StatelessWidget {
             : null,
         value: value,
         onChanged: onChanged,
-        activeColor: Colors.amber,
+        activeThumbColor: Colors.amber,
         activeTrackColor: Colors.amber.withValues(alpha: 0.3),
       ),
     );

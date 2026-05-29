@@ -23,13 +23,10 @@ import '../providers/discover_search_provider.dart';
 import '../widgets/search_result_section.dart';
 import '../../../core/theme/responsive_tokens.dart';
 import '../../../core/theme/app_typography_roles.dart';
-import '../../../core/utils/responsive_utils.dart';
 import '../../../core/widgets/responsive_layout.dart';
 import '../../../core/analytics/friction_tracker.dart';
-import '../../../core/analytics/analytics_service.dart';
 import '../../../core/analytics/analytics_event_names.dart';
 import '../../../core/analytics/analytics_parameters.dart';
-import '../../../core/theme/app_colors.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -323,8 +320,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final topPeopleScore = state.peopleResults.isEmpty ? 0 : state.peopleResults.first.score;
     final topBottleScore = state.bottleResults.isEmpty ? 0 : state.bottleResults.first.score;
 
-    final List<Widget> sections = [];
-
     final peopleSection = SliverToBoxAdapter(
       child: SearchResultSection(
         title: 'People',
@@ -339,26 +334,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             );
           },
         )).toList(),
-      ),
-    );
-
-    final bottleSection = SliverPadding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.xl),
-      sliver: SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            if (index == 0) {
-              return SearchResultSection(
-                title: 'Bottles',
-                children: const [], // Section header is handled by wrapper
-              );
-            }
-            // We wrap the list in a single SliverList, but need a header
-            // Actually let's use SearchResultSection for the header and then the list
-            return const SizedBox.shrink();
-          },
-          childCount: 1,
-        ),
       ),
     );
 

@@ -4,12 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:uuid/uuid.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../models/feedback_model.dart';
 import '../repositories/feedback_repository.dart';
-import '../../../core/auth/auth_gate.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class FeedbackBottomSheet extends ConsumerStatefulWidget {
@@ -70,7 +69,7 @@ class _FeedbackBottomSheetState extends ConsumerState<FeedbackBottomSheet> {
       final userId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
       
       final feedback = FeedbackModel(
-        id: const Uuid().v4(),
+        id: FirebaseFirestore.instance.collection('feedback').doc().id,
         userId: userId,
         category: _selectedCategory,
         message: _messageController.text.trim(),
@@ -107,6 +106,12 @@ class _FeedbackBottomSheetState extends ConsumerState<FeedbackBottomSheet> {
         );
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    super.dispose();
   }
 
   @override

@@ -117,6 +117,7 @@ final filteredAllDrinkLogsProvider = Provider<AsyncValue<List<DrinkLogModel>>>((
 
 /// Map of Alcohol IDs to Alcohol Models (simulating local cache)
 final alcoholCacheProvider = FutureProvider.family<AlcoholModel?, String>((ref, id) async {
+  ref.keepAlive();
   final doc = await FirebaseFirestore.instance.collection('alcohols').doc(id).get();
   if (!doc.exists) return null;
   return AlcoholModel.fromFirestore(doc);
@@ -202,3 +203,193 @@ final userDrinkLogsProvider = StreamProvider.family<List<DrinkLogModel>, String>
     }).toList();
   });
 });
+
+// ============================
+// 📖 PAGINATED FEED NOTIFIERS & PROVIDERS
+// ============================
+
+class PaginatedFeedState {
+  final List<DrinkLogModel> logs;
+  final bool isLoadingMore;
+  final bool hasMore;
+  final DocumentSnapshot? lastDoc;
+
+  PaginatedFeedState({
+    required this.logs,
+    this.isLoadingMore = false,
+    this.hasMore = true,
+    this.lastDoc,
+  });
+
+  PaginatedFeedState copyWith({
+    List<DrinkLogModel>? logs,
+    bool? isLoadingMore,
+    bool? hasMore,
+    DocumentSnapshot? lastDoc,
+  }) {
+    return PaginatedFeedState(
+      logs: logs ?? this.logs,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      hasMore: hasMore ?? this.hasMore,
+      lastDoc: lastDoc ?? this.lastDoc,
+    );
+  }
+}
+
+class PaginatedAllLogsNotifier extends Notifier<AsyncValue<PaginatedFeedState>> {
+  @override
+  AsyncValue<PaginatedFeedState> build() {
+    Future.microtask(() => fetchInitial());
+    return const AsyncValue.loading();
+  }
+
+  Future<void> fetchInitial() async {
+    try {
+      state = const AsyncValue.loading();
+      final repository = ref.read(drinkLogRepositoryProvider);
+      final profileAsync = ref.read(profileDataProvider);
+      final viewer = profileAsync.value?.userData;
+
+      final snapshot = await repository.fetchAllLogsPage(limit: 20);
+      
+      final logs = _processSnapshot(snapshot, viewer);
+      final lastDoc = snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
+      
+      state = AsyncValue.data(PaginatedFeedState(
+        logs: logs,
+        hasMore: snapshot.docs.length >= 20,
+        lastDoc: lastDoc,
+      ));
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  Future<void> fetchNextPage() async {
+    final current = state.value;
+    if (current == null || current.isLoadingMore || !current.hasMore) return;
+
+    state = AsyncValue.data(current.copyWith(isLoadingMore: true));
+    try {
+      final repository = ref.read(drinkLogRepositoryProvider);
+      final profileAsync = ref.read(profileDataProvider);
+      final viewer = profileAsync.value?.userData;
+
+      final snapshot = await repository.fetchAllLogsPage(
+        limit: 20,
+        startAfter: current.lastDoc,
+      );
+
+      final nextLogs = _processSnapshot(snapshot, viewer);
+      final lastDoc = snapshot.docs.isNotEmpty ? snapshot.docs.last : current.lastDoc;
+
+      state = AsyncValue.data(PaginatedFeedState(
+        logs: [...current.logs, ...nextLogs],
+        hasMore: snapshot.docs.length >= 20,
+        lastDoc: lastDoc,
+        isLoadingMore: false,
+      ));
+    } catch (e, st) {
+      state = AsyncValue.data(current.copyWith(isLoadingMore: false));
+    }
+  }
+
+  List<DrinkLogModel> _processSnapshot(QuerySnapshot snapshot, UserModel? viewer) {
+    final rawLogs = snapshot.docs.map(DrinkLogModel.fromFirestore).toList();
+    if (viewer == null) {
+      return rawLogs.where((log) => !log.isPrivate).toList();
+    }
+    return rawLogs.where((log) {
+      if (log.userId == viewer.id) return true;
+      if (viewer.blockedUsers.contains(log.userId)) return false;
+      return log.visibility == Visibility.public;
+    }).toList();
+  }
+}
+
+class PaginatedFriendsFeedNotifier extends Notifier<AsyncValue<PaginatedFeedState>> {
+  @override
+  AsyncValue<PaginatedFeedState> build() {
+    Future.microtask(() => fetchInitial());
+    return const AsyncValue.loading();
+  }
+
+  Future<void> fetchInitial() async {
+    try {
+      state = const AsyncValue.loading();
+      final repository = ref.read(drinkLogRepositoryProvider);
+      final profileAsync = ref.read(profileDataProvider);
+      final viewer = profileAsync.value?.userData;
+      final friendIds = viewer?.friends ?? [];
+
+      final targetIds = viewer != null ? [if (viewer.id != null) viewer.id, ...friendIds] : friendIds;
+      final snapshot = await repository.fetchFriendsFeedPage(
+        friendIds: targetIds,
+        limit: 20,
+      );
+
+      final logs = _processSnapshot(snapshot, viewer);
+      final lastDoc = snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
+
+      state = AsyncValue.data(PaginatedFeedState(
+        logs: logs,
+        hasMore: snapshot.docs.length >= 20,
+        lastDoc: lastDoc,
+      ));
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  Future<void> fetchNextPage() async {
+    final current = state.value;
+    if (current == null || current.isLoadingMore || !current.hasMore) return;
+
+    state = AsyncValue.data(current.copyWith(isLoadingMore: true));
+    try {
+      final repository = ref.read(drinkLogRepositoryProvider);
+      final profileAsync = ref.read(profileDataProvider);
+      final viewer = profileAsync.value?.userData;
+      final friendIds = viewer?.friends ?? [];
+
+      final targetIds = viewer != null ? [if (viewer.id != null) viewer.id, ...friendIds] : friendIds;
+      final snapshot = await repository.fetchFriendsFeedPage(
+        friendIds: targetIds,
+        limit: 20,
+        startAfter: current.lastDoc,
+      );
+
+      final nextLogs = _processSnapshot(snapshot, viewer);
+      final lastDoc = snapshot.docs.isNotEmpty ? snapshot.docs.last : current.lastDoc;
+
+      state = AsyncValue.data(PaginatedFeedState(
+        logs: [...current.logs, ...nextLogs],
+        hasMore: snapshot.docs.length >= 20,
+        lastDoc: lastDoc,
+        isLoadingMore: false,
+      ));
+    } catch (e, st) {
+      state = AsyncValue.data(current.copyWith(isLoadingMore: false));
+    }
+  }
+
+  List<DrinkLogModel> _processSnapshot(QuerySnapshot snapshot, UserModel? viewer) {
+    final rawLogs = snapshot.docs.map(DrinkLogModel.fromFirestore).toList();
+    if (viewer == null) {
+      return [];
+    }
+    return rawLogs.where((log) {
+      if (log.userId == viewer.id) return true;
+      if (viewer.blockedUsers.contains(log.userId)) return false;
+      return log.visibility != Visibility.closeFriends || viewer.friends.contains(log.userId);
+    }).toList();
+  }
+}
+
+final paginatedAllLogsProvider = NotifierProvider<PaginatedAllLogsNotifier, AsyncValue<PaginatedFeedState>>(
+  PaginatedAllLogsNotifier.new,
+);
+
+final paginatedFriendsFeedProvider = NotifierProvider<PaginatedFriendsFeedNotifier, AsyncValue<PaginatedFeedState>>(
+  PaginatedFriendsFeedNotifier.new,
+);

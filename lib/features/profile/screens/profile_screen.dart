@@ -1,15 +1,11 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/app_theme.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/widgets/app_shimmer.dart';
 import '../../drink_logs/models/drink_model_dto.dart';
 import '../../drink_logs/providers/drink_logs_provider.dart';
 import '../../drink_logs/widgets/day_section.dart';
@@ -78,13 +74,6 @@ class ProfileScreen extends ConsumerWidget {
     return _buildFullProfile(context, ref, profile, isMe);
   }
 
-  void _selfHealUser(dynamic user) {
-    FirebaseFirestore.instance.collection('users').doc(user.id).update({
-      'usernameLowercase': user.username.toLowerCase(),
-      'displayNameLowercase': user.displayName.toLowerCase(),
-    }).catchError((e) => print('Self-heal failed: $e'));
-  }
-
   Widget _buildLockedProfileView(BuildContext ctx, WidgetRef ref, UserModel userData, UserModel currentUser) {
     return CustomScrollView(
       slivers: [
@@ -112,7 +101,7 @@ class ProfileScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(AppSpacing.xl),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.05),
+                        color: Colors.white.withValues(alpha: 0.05),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -206,9 +195,9 @@ class ProfileScreen extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.1)),
+        border: Border.all(color: color.withValues(alpha: 0.1)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -291,9 +280,9 @@ class ProfileScreen extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
       height: 100,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
+        color: Colors.white.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Center(
         child: Text(
@@ -451,6 +440,7 @@ class _ProfileHeader extends ConsumerWidget {
                     ? CachedNetworkImage(
                         imageUrl: profile.coverUrl!,
                         fit: BoxFit.cover,
+                        memCacheWidth: 800,
                         fadeInDuration: Duration.zero,
                         placeholder: (_, __) => Container(color: Colors.white10),
                         errorWidget: (_, __, ___) => const Icon(Icons.image, color: Colors.white12, size: 48),
@@ -508,7 +498,7 @@ class _ProfileHeader extends ConsumerWidget {
                     radius: 40,
                     backgroundColor: Colors.amber,
                     backgroundImage: profile.photoUrl != null
-                        ? CachedNetworkImageProvider(profile.photoUrl!)
+                        ? ResizeImage(CachedNetworkImageProvider(profile.photoUrl!), width: 200, height: 200)
                         : null,
                     child: profile.photoUrl == null
                         ? const Icon(Icons.person, size: 40, color: Colors.black)
@@ -543,7 +533,7 @@ class _ProfileHeader extends ConsumerWidget {
                     if (profile.instagram != null && profile.instagram!.isNotEmpty) ...[
                       CircleAvatar(
                         radius: 18,
-                        backgroundColor: Colors.white.withOpacity(0.1),
+                        backgroundColor: Colors.white.withValues(alpha: 0.1),
                         child: IconButton(
                           padding: EdgeInsets.zero,
                           icon: const Icon(Icons.alternate_email, color: Colors.amber, size: 18),
@@ -618,7 +608,7 @@ class _ProfileHeader extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: Colors.amber.withOpacity(0.1),
+                    color: Colors.amber.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -756,7 +746,7 @@ class _ProfileHeader extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(

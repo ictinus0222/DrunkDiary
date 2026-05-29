@@ -42,19 +42,92 @@ class DiaryScreen extends ConsumerStatefulWidget {
 class _DiaryScreenState extends ConsumerState<DiaryScreen> {
   String _selectedFilter = 'All';
   DiaryLayout _currentLayout = DiaryLayout.timeline;
+  ScrollController? _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController()..addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController?.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController == null || !_scrollController!.hasClients) return;
+    
+    final maxScroll = _scrollController!.position.maxScrollExtent;
+    final currentScroll = _scrollController!.position.pixels;
+    if (currentScroll >= maxScroll * 0.8) {
+      _loadMore();
+    }
+  }
+
+  void _loadMore() {
+    if (_selectedFilter == 'All') {
+      ref.read(paginatedAllLogsProvider.notifier).fetchNextPage();
+    } else if (_selectedFilter == 'Friends') {
+      ref.read(paginatedFriendsFeedProvider.notifier).fetchNextPage();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final logsAsync = _selectedFilter == 'All' 
-        ? ref.watch(filteredAllDrinkLogsProvider) 
-        : _selectedFilter == 'Friends'
-            ? ref.watch(friendsFeedProvider)
-            : ref.watch(drinkLogsProvider);
+    final allFeedsAsync = ref.watch(paginatedAllLogsProvider);
+    final friendsFeedAsync = ref.watch(paginatedFriendsFeedProvider);
+    final myLogsAsync = ref.watch(drinkLogsProvider);
 
-    return SafeArea(
-      child: logsAsync.when(
-        loading: () => Scaffold(
+    List<DrinkLogModel> logs = [];
+    bool isLoading = false;
+    bool isLoadingMore = false;
+    Object? error;
+
+    if (_selectedFilter == 'All') {
+      allFeedsAsync.when(
+        data: (state) {
+          logs = state.logs;
+          isLoadingMore = state.isLoadingMore;
+        },
+        loading: () => isLoading = true,
+        error: (err, _) {
+          error = err;
+        },
+      );
+    } else if (_selectedFilter == 'Friends') {
+      friendsFeedAsync.when(
+        data: (state) {
+          logs = state.logs;
+          isLoadingMore = state.isLoadingMore;
+        },
+        loading: () => isLoading = true,
+        error: (err, _) {
+          error = err;
+        },
+      );
+    } else {
+      myLogsAsync.when(
+        data: (allLogs) {
+          logs = allLogs.where((log) {
+            if (_selectedFilter == 'Logs') return log.logKind == LogKind.log;
+            if (_selectedFilter == 'Reviews') return log.logKind == LogKind.review;
+            return true;
+          }).toList();
+        },
+        loading: () => isLoading = true,
+        error: (err, _) {
+          error = err;
+        },
+      );
+    }
+
+    if (isLoading && logs.isEmpty) {
+      return SafeArea(
+        child: Scaffold(
           body: CustomScrollView(
+            controller: _scrollController,  // safe: null means no external controller
             physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
             slivers: [
               SliverAppBar(
@@ -96,69 +169,74 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
             ],
           ),
         ),
-        error: (err, stack) => Scaffold(
-          body: Center(child: Text('Error: $err')),
-        ),
-        data: (allLogs) {
-          final logs = allLogs.where((log) {
-            if (_selectedFilter == 'All') return true;
-            if (_selectedFilter == 'Logs') return log.logKind == LogKind.log;
-            if (_selectedFilter == 'Reviews') {
-              return log.logKind == LogKind.review;
-            }
-            return true;
-          }).toList();
+      );
+    }
 
-          return Scaffold(
-            body: ResponsiveScaffoldBody(
-              maxWidth: AppWidths.feed,
-              padding: EdgeInsets.zero,
-              child: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                slivers: [
-                  SliverAppBar(
-                    floating: true,
-                    snap: true,
-                    centerTitle: true,
-                    leading: const _ProfileAvatarLeading(),
-                    leadingWidth: 64,
-                    title: SvgPicture.asset(
-                      'assets/icons/drunk_diary_logo.svg',
-                      height: APP_BAR_VISUAL_HEIGHT,
-                      placeholderBuilder: (_) => const SizedBox.shrink(),
-                    ),
-                    actions: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: _NotificationBadgeButton(),
-                      ),
-                    ],
+    if (error != null && logs.isEmpty) {
+      return SafeArea(
+        child: Scaffold(
+          body: Center(child: Text('Error: $error')),
+        ),
+      );
+    }
+
+    return SafeArea(
+      child: Scaffold(
+        body: ResponsiveScaffoldBody(
+          maxWidth: AppWidths.feed,
+          padding: EdgeInsets.zero,
+          child: CustomScrollView(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+            slivers: [
+              SliverAppBar(
+                floating: true,
+                snap: true,
+                centerTitle: true,
+                leading: const _ProfileAvatarLeading(),
+                leadingWidth: 64,
+                title: SvgPicture.asset(
+                  'assets/icons/drunk_diary_logo.svg',
+                  height: APP_BAR_VISUAL_HEIGHT,
+                  placeholderBuilder: (_) => const SizedBox.shrink(),
+                ),
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: _NotificationBadgeButton(),
                   ),
-                  const SliverToBoxAdapter(child: _WelcomeSection()),
-                  const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
-                  SliverToBoxAdapter(
-                    child: _FiltersRow(
-                      selectedFilter: _selectedFilter,
-                      onFilterChanged: (filter) {
-                        setState(() {
-                          _selectedFilter = filter;
-                        });
-                      },
-                    ),
-                  ),
-                  const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
-                  _DiarySliverList(
-                    logs: logs,
-                    layout: _currentLayout,
-                    selectedFilter: _selectedFilter,
-                  ),
-                  const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.hero)),
                 ],
               ),
-            ),
-            bottomNavigationBar: const BetaTesterDisclaimer(currentScreen: 'Diary'),
-          );
-        },
+              const SliverToBoxAdapter(child: _WelcomeSection()),
+              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
+              SliverToBoxAdapter(
+                child: _FiltersRow(
+                  selectedFilter: _selectedFilter,
+                  onFilterChanged: (filter) {
+                    setState(() {
+                      _selectedFilter = filter;
+                    });
+                  },
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
+              _DiarySliverList(
+                logs: logs,
+                layout: _currentLayout,
+                selectedFilter: _selectedFilter,
+              ),
+              if (isLoadingMore)
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Center(child: CircularProgressIndicator(color: Colors.amber)),
+                  ),
+                ),
+              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.hero)),
+            ],
+          ),
+        ),
+        bottomNavigationBar: const BetaTesterDisclaimer(currentScreen: 'Diary'),
       ),
     );
   }

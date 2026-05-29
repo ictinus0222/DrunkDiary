@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../app/app_theme.dart';
-import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../profile/models/user_model.dart';
 import '../../profile/providers/profile_providers.dart';
@@ -86,7 +85,7 @@ class ParticipantAvatars extends ConsumerWidget {
                           radius: 20,
                           backgroundColor: customColors.borderDark,
                           backgroundImage: participant.photoUrl != null
-                              ? CachedNetworkImageProvider(participant.photoUrl!)
+                              ? ResizeImage(CachedNetworkImageProvider(participant.photoUrl!), width: 200, height: 200)
                               : null,
                           child: participant.photoUrl == null
                               ? const Icon(Icons.person, color: Colors.white24, size: 20)
@@ -238,7 +237,7 @@ class ParticipantAvatars extends ConsumerWidget {
                       child: CircleAvatar(
                         radius: radius,
                         backgroundImage: participant.photoUrl != null
-                            ? CachedNetworkImageProvider(participant.photoUrl!)
+                            ? ResizeImage(CachedNetworkImageProvider(participant.photoUrl!), width: 200, height: 200)
                             : null,
                         child: participant.photoUrl == null
                             ? Icon(Icons.person, size: radius * 1.2, color: Colors.white70)
@@ -264,7 +263,7 @@ class ParticipantAvatars extends ConsumerWidget {
       child: CircleAvatar(
         radius: radius,
         backgroundImage: log.userPhotoUrl != null
-            ? CachedNetworkImageProvider(log.userPhotoUrl!)
+            ? ResizeImage(CachedNetworkImageProvider(log.userPhotoUrl!), width: 200, height: 200)
             : null,
         child: log.userPhotoUrl == null
             ? Icon(Icons.person, size: radius * 1.2, color: Colors.white70)

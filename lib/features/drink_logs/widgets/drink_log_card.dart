@@ -150,7 +150,7 @@ class DrinkLogCard extends ConsumerWidget {
               child: CachedNetworkImage(
                 imageUrl: log.photoUrl!,
                 fit: BoxFit.cover,
-                memCacheWidth: 1000, // Increased for high quality
+                memCacheWidth: 600, // Optimize from 1000 to 600
                 maxWidthDiskCache: 1000,
                 placeholder: (context, url) => const AppShimmer(),
                 errorWidget: (context, url, error) => const Icon(Icons.error),
@@ -168,7 +168,7 @@ class DrinkLogCard extends ConsumerWidget {
                       child: CachedNetworkImage(
                         imageUrl: alcohol.imageUrl,
                         fit: BoxFit.cover,
-                        memCacheWidth: 1000, // Increased from 200 for high quality
+                        memCacheWidth: 600, // Optimize from 1000 to 600
                         maxWidthDiskCache: 1000,
                         placeholder: (context, url) => const AppShimmer(),
                         errorWidget: (context, url, error) => const Center(

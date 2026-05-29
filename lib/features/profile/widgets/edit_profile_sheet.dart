@@ -283,7 +283,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                                   gradient: LinearGradient(
                                     begin: Alignment.topCenter,
                                     end: Alignment.bottomCenter,
-                                    colors: [Colors.black.withOpacity(0.6), Colors.transparent, Colors.black.withOpacity(0.6)],
+                                    colors: [Colors.black.withValues(alpha: 0.6), Colors.transparent, Colors.black.withValues(alpha: 0.6)],
                                   ),
                                 ),
                               ),
@@ -393,9 +393,9 @@ class _HeaderButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
         decoration: BoxDecoration(
-          color: isPrimary ? Colors.amber.withOpacity(0.15) : Colors.white.withOpacity(0.05),
+          color: isPrimary ? Colors.amber.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
-          border: Border.all(color: isPrimary ? Colors.amber.withOpacity(0.3) : Colors.white10),
+          border: Border.all(color: isPrimary ? Colors.amber.withValues(alpha: 0.3) : Colors.white10),
         ),
         child: isLoading
             ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
@@ -486,6 +486,6 @@ class _Divider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Divider(color: Colors.white.withOpacity(0.05), height: 1);
+    return Divider(color: Colors.white.withValues(alpha: 0.05), height: 1);
   }
 }

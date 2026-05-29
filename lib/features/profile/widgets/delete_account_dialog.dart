@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../auth/services/google_auth_service.dart';
 import '../repositories/account_deletion_repository.dart';
 
 class DeleteAccountDialog extends ConsumerStatefulWidget {

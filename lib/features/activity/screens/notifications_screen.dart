@@ -123,7 +123,7 @@ class _NotificationItem extends ConsumerWidget {
               radius: 24,
               backgroundColor: customColors.borderDark,
               backgroundImage: notification.senderProfileImage != null
-                  ? CachedNetworkImageProvider(notification.senderProfileImage!)
+                  ? ResizeImage(CachedNetworkImageProvider(notification.senderProfileImage!), width: 200, height: 200)
                   : null,
               child: notification.senderProfileImage == null
                   ? const Icon(Icons.person, color: Colors.white24)

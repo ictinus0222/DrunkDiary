@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/app_theme.dart';
 import '../../alcohol/models/alcohol_model.dart';
-import '../repositories/wishlist_repository.dart';
-import '../models/wishlist_item_model.dart';
+import '../../../core/providers/common_providers.dart';
+import '../providers/wishlist_providers.dart';
 
-class WishlistActionButton extends StatelessWidget {
+class WishlistActionButton extends ConsumerWidget {
   final AlcoholModel alcohol;
 
   const WishlistActionButton({
@@ -15,20 +15,17 @@ class WishlistActionButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userId = ref.watch(userIdProvider);
     if (userId == null) return const SizedBox.shrink();
 
-    final repo = WishlistRepository();
+    final wishlistAsync = ref.watch(wishlistStreamProvider);
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return StreamBuilder<List<WishlistItemModel>>(
-      stream: repo.streamWishlist(userId),
-      builder: (context, snapshot) {
-        final wishlist = snapshot.data ?? [];
-        final isInWishlist =
-            wishlist.any((item) => item.alcoholId == alcohol.id);
+    return wishlistAsync.when(
+      data: (wishlist) {
+        final isInWishlist = wishlist.any((item) => item.alcoholId == alcohol.id);
 
         return IconButton(
           icon: Icon(
@@ -36,10 +33,10 @@ class WishlistActionButton extends StatelessWidget {
             color: isInWishlist ? colorScheme.primary : colorScheme.onSurface,
           ),
           onPressed: () async {
+            final repo = ref.read(wishlistRepositoryProvider);
             try {
               if (isInWishlist) {
-                final item =
-                    wishlist.firstWhere((item) => item.alcoholId == alcohol.id);
+                final item = wishlist.firstWhere((item) => item.alcoholId == alcohol.id);
                 await repo.removeFromWishlist(item.id);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -79,6 +76,14 @@ class WishlistActionButton extends StatelessWidget {
           },
         );
       },
+      loading: () => IconButton(
+        icon: Icon(Icons.bookmark_border, color: colorScheme.onSurface.withValues(alpha: 0.3)),
+        onPressed: null,
+      ),
+      error: (_, __) => IconButton(
+        icon: Icon(Icons.bookmark_border, color: colorScheme.onSurface.withValues(alpha: 0.3)),
+        onPressed: null,
+      ),
     );
   }
 }

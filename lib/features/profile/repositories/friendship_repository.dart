@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/friend_request_model.dart';
+import 'package:flutter/foundation.dart';
 
 class FriendshipRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -77,7 +77,7 @@ class FriendshipRepository {
         'isRead': false,
       });
     }).catchError((e) {
-      print('FriendshipRepository.sendFriendRequest error: $e');
+      debugPrint('FriendshipRepository.sendFriendRequest error: $e');
       throw e;
     });
   }
@@ -182,7 +182,7 @@ class FriendshipRepository {
       transaction.set(req1, {'status': 'rejected'}, SetOptions(merge: true));
       transaction.set(req2, {'status': 'rejected'}, SetOptions(merge: true));
     }).catchError((e) {
-      print('FriendshipRepository.blockUser error: $e');
+      debugPrint('FriendshipRepository.blockUser error: $e');
       throw e;
     });
   }

@@ -7,6 +7,7 @@ All architecture must be reflected in the following source-of-truth files locate
 - `APP_FLOW.md`
 - `TECH_STACK.md`
 - `FRONTEND_GUIDELINES.md`
+- `DESIGN_SYSTEM.md`
 - `BACKEND_STRUCTURE.md`
 
 No code may contradict documentation. Documentation must update with structural changes.
@@ -35,7 +36,7 @@ If implementation changes affect the Database schema, API contracts, Navigation,
 * If unsure whether something exists in docs: Ask. Do not assume.
 
 ### 4. No Silent Changes
-Whenever adding a new package, environment variable, API endpoint, DB column, or UI component variant, you MUST require updating `TECH_STACK.md`, `BACKEND_STRUCTURE.md`, or `FRONTEND_GUIDELINES.md` first.
+Whenever adding a new package, environment variable, API endpoint, DB column, or UI component variant, you MUST require updating `TECH_STACK.md`, `BACKEND_STRUCTURE.md`, `FRONTEND_GUIDELINES.md`, or `DESIGN_SYSTEM.md` first.
 
 This repository follows:
 → Documentation-first discipline

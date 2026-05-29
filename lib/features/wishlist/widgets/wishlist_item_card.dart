@@ -100,7 +100,7 @@ class WishlistItemCard extends StatelessWidget {
                         onPressed: () => _confirmDelete(context),
                         icon: Icon(
                           Icons.delete_outline,
-                          color: customColors.textMuted.withOpacity(0.3),
+                          color: customColors.textMuted.withValues(alpha: 0.3),
                           size: 18,
                         ),
                         visualDensity: VisualDensity.compact,
@@ -134,7 +134,7 @@ class WishlistItemCard extends StatelessWidget {
         border: Border.all(color: customColors.borderDark, width: 0.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -145,25 +145,26 @@ class WishlistItemCard extends StatelessWidget {
           ? CachedNetworkImage(
               imageUrl: item.alcoholImageUrl,
               fit: BoxFit.contain, // Maintain aspect ratio, no stretched image
+              memCacheWidth: 200,
               placeholder: (_, __) => Center(
                 child: SizedBox(
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
-                    color: colorScheme.primary.withOpacity(0.3),
+                    color: colorScheme.primary.withValues(alpha: 0.3),
                     strokeWidth: 1.5,
                   ),
                 ),
               ),
               errorWidget: (_, __, ___) => Icon(
                 Icons.local_bar_outlined,
-                color: customColors.textMuted.withOpacity(0.5),
+                color: customColors.textMuted.withValues(alpha: 0.5),
                 size: 32,
               ),
             )
           : Icon(
               Icons.local_bar_outlined,
-              color: customColors.textMuted.withOpacity(0.5),
+              color: customColors.textMuted.withValues(alpha: 0.5),
               size: 32,
             ),
     );
@@ -175,7 +176,7 @@ class WishlistItemCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: customColors.borderDark.withOpacity(0.3),
+        color: customColors.borderDark.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
@@ -201,14 +202,14 @@ class WishlistItemCard extends StatelessWidget {
         Icon(
           isRecommendation ? Icons.verified_user_outlined : Icons.sticky_note_2_outlined,
           size: 10,
-          color: customColors.textMuted.withOpacity(0.5),
+          color: customColors.textMuted.withValues(alpha: 0.5),
         ),
         const SizedBox(width: 4),
         Expanded(
           child: Text(
             item.note!,
             style: textTheme.bodySmall?.copyWith(
-              color: customColors.textMuted.withOpacity(0.6),
+              color: customColors.textMuted.withValues(alpha: 0.6),
               fontSize: 10,
             ),
             maxLines: 1,
@@ -233,7 +234,7 @@ class WishlistItemCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16), // Radius 16
           boxShadow: [
             BoxShadow(
-              color: colorScheme.primary.withOpacity(0.2),
+              color: colorScheme.primary.withValues(alpha: 0.2),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),

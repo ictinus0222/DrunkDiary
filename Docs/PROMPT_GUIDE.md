@@ -8,7 +8,7 @@ This guide defines the optimal prompting format for the **Drunk Diary** codebase
 
 1.  **Architecture**: Feature-First Clean Architecture (`lib/features/[feature_name]`).
 2.  **State Management**: `flutter_riverpod` (v3+). Use providers for logic; views for UI.
-3.  **UI/UX**: High-contrast dark theme (#0F0F0F), Amber accents (#FFC107), and `CategoriesElegant` branding.
+3.  **UI/UX / Design System**: Consult `Docs/DESIGN_SYSTEM.md` for spacing, typography, colors, and components before writing any frontend code.
 4.  **Governance**: **Doc-Driven Implementation**. Documentation must be updated *before* code logic changes significantly.
 
 ---
@@ -43,7 +43,8 @@ This guide defines the optimal prompting format for the **Drunk Diary** codebase
 
 **Consistency Constraints:**
 * Hero animations must use unique tags (e.g., `feature_alcohol_[id]`).
-* Follow `FRONTEND_GUIDELINES.md` for spacing and colors.
+* Strictly consult and adhere to `DESIGN_SYSTEM.md` and `FRONTEND_GUIDELINES.md` for layout, spacing, typography, colors, and components.
+* Avoid hardcoded colors, sizes, or typography weights; always use tokens from the design system.
 * Avoid hardcoded strings; use localized constants if applicable.
 
 **Docs Check:**

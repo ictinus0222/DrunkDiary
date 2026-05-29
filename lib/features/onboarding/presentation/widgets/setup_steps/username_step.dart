@@ -42,7 +42,6 @@ class _UsernameStepState extends ConsumerState<UsernameStep> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(onboardingProvider);
     
     return Column(
       children: [

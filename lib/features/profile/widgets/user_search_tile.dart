@@ -120,7 +120,7 @@ class UserSearchTile extends ConsumerWidget {
       },
       loading: () => const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
       error: (err, stack) {
-        print('Error in UserSearchTile buildAction: $err');
+        debugPrint('Error in UserSearchTile buildAction: $err');
         return const SizedBox.shrink();
       },
     );
@@ -130,7 +130,7 @@ class UserSearchTile extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -209,6 +209,7 @@ class UserSearchTile extends ConsumerWidget {
             ? CachedNetworkImage(
                 imageUrl: user.photoUrl!,
                 fit: BoxFit.cover,
+                memCacheWidth: 150,
                 placeholder: (context, url) => Container(color: Colors.white12),
                 errorWidget: (context, url, error) => const Icon(Icons.person, color: Colors.white24),
               )
@@ -217,18 +218,4 @@ class UserSearchTile extends ConsumerWidget {
     );
   }
 
-  Widget _buildAddFriendButton() {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        shape: BoxShape.circle,
-      ),
-      child: const Icon(
-        Icons.person_add_rounded,
-        size: 18,
-        color: Colors.white70,
-      ),
-    );
-  }
 }

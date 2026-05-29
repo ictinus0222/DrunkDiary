@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../alcohol/models/alcohol_model.dart';
-import 'package:drunk_diary/core/analytics/analytics_service.dart';
 import '../models/wishlist_item_model.dart';
 import '../../../core/analytics/analytics_service.dart';
 

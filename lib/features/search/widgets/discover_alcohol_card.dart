@@ -102,10 +102,10 @@ class DiscoverAlcoholCard extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: colorScheme.primary.withOpacity(0.2),
+                            color: colorScheme.primary.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                                color: colorScheme.primary.withOpacity(0.5)),
+                                color: colorScheme.primary.withValues(alpha: 0.5)),
                           ),
                           child: Text(
                             item.alcohol.type,

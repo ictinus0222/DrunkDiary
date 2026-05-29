@@ -1,6 +1,9 @@
 # Frontend Design System & Guidelines
 
-Last Updated: 2026-05-06
+> [!IMPORTANT]
+> This document should be used in tandem with the primary **[Design System Document](file:///c:/Users/akhil/StudioProjects/drunk_diary/Docs/DESIGN_SYSTEM.md)**, which acts as the ultimate authority and source of truth for colors, typography, layout rules, spacing, and component definitions. Always consult it before modifying or adding frontend code.
+
+Last Updated: 2026-05-29
 
 ## 1. Design Principles (Inferred From UI)
 *   **High Contrast Dark UI:** The primary implementation centers entirely around a dark theme with a stark black background and high-visibility amber accents.

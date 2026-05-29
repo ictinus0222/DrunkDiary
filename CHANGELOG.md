@@ -2,7 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0+12] - 2026-05-29
+
+### Added
+- **Shared Logs (Tagging)**: Users can now tag friends directly in their drink logs, creating shared memories visible to both parties.
+- **Paginated Diary Feed**: The main diary now loads in pages with infinite scroll — smoother performance at any diary size, and a loading indicator while fetching more.
+- **Wishlist Stream Caching**: Wishlist state is now managed via a cached Riverpod provider, reducing redundant Firestore reads and improving responsiveness.
+
+### Fixed & Optimized
+- **Performance — Image Memory**: Applied `memCacheWidth` and `ResizeImage` across feed cards, avatars, and the activity detail viewer to significantly reduce RAM usage on high-density screens.
+- **Performance — Stream Lifecycle**: Moved Firestore stream creation out of `build()` methods and into properly lifecycle-managed providers, reducing listener churn and network traffic.
+- **Performance — Firestore Caching**: Alcohol catalog entries are now kept alive in memory via `ref.keepAlive()`, eliminating repeated reads when navigating to bottle detail pages.
+- **Stability — DiaryScreen Crash**: Fixed a `LateInitializationError` that could crash the Diary screen during rapid navigation or hot-reload by converting the scroll controller to a nullable, safely-disposed field.
+- **Memory Leak — FeedbackSheet**: Fixed a missing `_messageController.dispose()` call in the feedback bottom sheet.
+- **Riverpod v3 Compatibility**: Migrated `PaginatedAllLogsNotifier` and `PaginatedFriendsFeedNotifier` from deprecated `StateNotifier` to the `Notifier` API.
+- **Deprecations**: Replaced all `withOpacity()` calls with `withValues(alpha:)` across the codebase. Replaced `activeColor` with `activeThumbColor` in Switch widgets.
+- **Code Cleanup**: Removed unused imports and local variables across 8 files, flagged by static analysis.
+
 ## [1.1.2+11] - 2026-05-09
+
 
 ### Added
 - **Premium Account Deletion**: Implemented a "Right to be Forgotten" compliant deletion system.

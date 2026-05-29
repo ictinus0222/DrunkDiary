@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/app_theme.dart';
 import '../../alcohol/models/alcohol_model.dart';
@@ -8,7 +8,6 @@ import '../../alcohol/screens/alcohol_detail_screen.dart';
 import '../../../core/navigation/page_transitions.dart';
 import '../../../core/navigation/tab_change_notification.dart';
 import '../models/wishlist_item_model.dart';
-import '../repositories/wishlist_repository.dart';
 import '../widgets/add_to_wishlist_sheet.dart';
 import '../widgets/wishlist_item_card.dart';
 import '../../../core/widgets/app_empty_state.dart';
@@ -18,18 +17,19 @@ import '../../../core/theme/app_spacing.dart';
 import '../../alcohol/repositories/alcohol_repository.dart';
 import '../widgets/wishlist_discovery_carousel.dart';
 import '../../drink_logs/widgets/create_log_bottom_sheet.dart';
+import '../providers/wishlist_providers.dart';
+import '../../../core/providers/common_providers.dart';
 
-class WishlistScreen extends StatefulWidget {
+class WishlistScreen extends ConsumerStatefulWidget {
   static const routeName = '/wishlist';
 
   const WishlistScreen({super.key});
 
   @override
-  State<WishlistScreen> createState() => _WishlistScreenState();
+  ConsumerState<WishlistScreen> createState() => _WishlistScreenState();
 }
 
-class _WishlistScreenState extends State<WishlistScreen> {
-  final _wishlistRepo = WishlistRepository();
+class _WishlistScreenState extends ConsumerState<WishlistScreen> {
   late final String _userId;
 
   // Set of alcoholIds that the user has already logged or reviewed
@@ -39,13 +39,13 @@ class _WishlistScreenState extends State<WishlistScreen> {
   // Discovery
   final _alcoholRepo = AlcoholRepository();
   List<AlcoholModel> _discoveryItems = [];
-  bool _isDiscoveryLoading = false;
+  final bool _isDiscoveryLoading = false;
   List<AlcoholModel> _allAlcohols = [];
 
   @override
   void initState() {
     super.initState();
-    _userId = FirebaseAuth.instance.currentUser!.uid;
+    _userId = ref.read(userIdProvider)!;
     _loadTriedIds();
     _loadAllAlcohols();
   }
@@ -121,7 +121,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
   Future<void> _removeItem(String wishlistItemId) async {
     try {
-      await _wishlistRepo.removeFromWishlist(wishlistItemId);
+      await ref.read(wishlistRepositoryProvider).removeFromWishlist(wishlistItemId);
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -198,7 +198,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
   void _onAddFromDiscovery(AlcoholModel alcohol) async {
     try {
-      await _wishlistRepo.addToWishlist(
+      await ref.read(wishlistRepositoryProvider).addToWishlist(
         userId: _userId,
         alcohol: alcohol,
       );
@@ -236,13 +236,12 @@ class _WishlistScreenState extends State<WishlistScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     final customColors = Theme.of(context).extension<AppCustomColors>()!;
     final textTheme = Theme.of(context).textTheme;
+    final wishlistAsync = ref.watch(wishlistStreamProvider);
 
     return Scaffold(
-      body: StreamBuilder<List<WishlistItemModel>>(
-        stream: _wishlistRepo.streamWishlist(_userId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting ||
-              !_triedLoaded) {
+      body: wishlistAsync.when(
+        data: (items) {
+          if (!_triedLoaded) {
             return CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(
                   parent: BouncingScrollPhysics()),
@@ -254,37 +253,11 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   title: Text('WISHLIST', style: AppTextStyles.appBarTitle),
                 ),
                 SliverToBoxAdapter(
-                  child: _WishlistLoadingSkeleton(),
+                  child: const _WishlistLoadingSkeleton(),
                 ),
               ],
             );
           }
-
-          if (snapshot.hasError) {
-            return CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(
-                  parent: BouncingScrollPhysics()),
-              slivers: [
-                SliverAppBar(
-                  floating: true,
-                  snap: true,
-                  centerTitle: true,
-                  title: Text('WISHLIST', style: AppTextStyles.appBarTitle),
-                ),
-                SliverFillRemaining(
-                  child: Center(
-                    child: Text(
-                      'Something went wrong.',
-                      style: textTheme.bodyMedium
-                          ?.copyWith(color: customColors.textMuted),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          }
-
-          final items = snapshot.data ?? [];
 
           // Trigger discovery update if we have data now
           if (_discoveryItems.isEmpty && _allAlcohols.isNotEmpty) {
@@ -377,7 +350,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                               margin:
                                   const EdgeInsets.only(bottom: AppSpacing.lg),
                               decoration: BoxDecoration(
-                                color: customColors.error.withOpacity(0.8),
+                                color: customColors.error.withValues(alpha: 0.8),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: const Icon(Icons.delete_outline,
@@ -413,7 +386,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         child: Text(
                           'Keep building your wishlist.',
                           style: textTheme.bodySmall?.copyWith(
-                            color: customColors.textMuted.withOpacity(0.5),
+                            color: customColors.textMuted.withValues(alpha: 0.5),
                             fontStyle: FontStyle.italic,
                           ),
                         ),
@@ -427,12 +400,47 @@ class _WishlistScreenState extends State<WishlistScreen> {
             ),
           );
         },
+        loading: () => CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics()),
+          slivers: [
+            SliverAppBar(
+              floating: true,
+              snap: true,
+              centerTitle: true,
+              title: Text('WISHLIST', style: AppTextStyles.appBarTitle),
+            ),
+            SliverToBoxAdapter(
+              child: const _WishlistLoadingSkeleton(),
+            ),
+          ],
+        ),
+        error: (err, stack) => CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics()),
+          slivers: [
+            SliverAppBar(
+              floating: true,
+              snap: true,
+              centerTitle: true,
+              title: Text('WISHLIST', style: AppTextStyles.appBarTitle),
+            ),
+            SliverFillRemaining(
+              child: Center(
+                child: Text(
+                  'Something went wrong.',
+                  style: textTheme.bodyMedium
+                      ?.copyWith(color: customColors.textMuted),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-// Remove _Header widget as it's no longer used
 /* ----------------------------- SKELETONS ----------------------------- */
 
 class _WishlistLoadingSkeleton extends StatelessWidget {

@@ -109,20 +109,21 @@ class _DiscoveryCard extends StatelessWidget {
                   Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.03),
+                      color: Colors.white.withValues(alpha: 0.03),
                       borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                     ),
                     padding: const EdgeInsets.all(AppSpacing.md),
                     child: CachedNetworkImage(
                       imageUrl: alcohol.imageUrl,
                       fit: BoxFit.contain,
+                      memCacheWidth: 200,
                       placeholder: (_, __) => Center(
                         child: SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: colorScheme.primary.withOpacity(0.5),
+                            color: colorScheme.primary.withValues(alpha: 0.5),
                           ),
                         ),
                       ),
@@ -146,7 +147,7 @@ class _DiscoveryCard extends StatelessWidget {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: colorScheme.primary.withOpacity(0.3),
+                              color: colorScheme.primary.withValues(alpha: 0.3),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
@@ -199,7 +200,7 @@ class _DiscoveryCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: customColors.borderDark.withOpacity(0.5),
+                        color: customColors.borderDark.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(

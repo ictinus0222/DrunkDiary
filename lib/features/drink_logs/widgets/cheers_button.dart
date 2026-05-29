@@ -68,8 +68,9 @@ class _CheersButtonState extends ConsumerState<CheersButton>
     _controller.forward(from: 0.0);
 
     // Get current state
-    final isCheered = _isCheeredLocal ?? widget.activityData?.cheeredBy.contains(userId) ?? false;
-    final currentCount = _cheersCountLocal ?? widget.activityData?.cheersCount ?? 0;
+    final activityData = ref.read(dayActivityProvider(widget.activityId)).value ?? widget.activityData;
+    final isCheered = _isCheeredLocal ?? activityData?.cheeredBy.contains(userId) ?? false;
+    final currentCount = _cheersCountLocal ?? activityData?.cheersCount ?? 0;
 
     // Optimistic update
     setState(() {
@@ -103,7 +104,8 @@ class _CheersButtonState extends ConsumerState<CheersButton>
   @override
   Widget build(BuildContext context) {
     final userId = ref.watch(userIdProvider);
-    final activityData = widget.activityData;
+    final activityAsync = ref.watch(dayActivityProvider(widget.activityId));
+    final activityData = activityAsync.value ?? widget.activityData;
     
     // Sync local state if data from stream changed
     final isCheered = _isCheeredLocal ?? activityData?.cheeredBy.contains(userId) ?? false;

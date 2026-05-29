@@ -100,6 +100,48 @@ class DrinkLogRepository {
   }
 
   // ============================
+  // 📖 PAGINATED FETCH METHODS
+  // ============================
+  Future<QuerySnapshot> fetchAllLogsPage({
+    required int limit,
+    DocumentSnapshot? startAfter,
+  }) async {
+    var query = _firestore
+        .collection('drink_logs')
+        .where('isPrivate', isEqualTo: false)
+        .orderBy('createdAt', descending: true)
+        .limit(limit);
+
+    if (startAfter != null) {
+      query = query.startAfterDocument(startAfter);
+    }
+    return query.get();
+  }
+
+  Future<QuerySnapshot> fetchFriendsFeedPage({
+    required List<String> friendIds,
+    required int limit,
+    DocumentSnapshot? startAfter,
+  }) async {
+    if (friendIds.isEmpty) {
+      // Return an empty/mock snapshot using a dummy query that yields no results
+      return _firestore.collection('drink_logs').limit(0).get();
+    }
+    final limitedFriendIds = friendIds.take(10).toList();
+
+    var query = _firestore
+        .collection('drink_logs')
+        .where('creatorId', whereIn: limitedFriendIds)
+        .orderBy('createdAt', descending: true)
+        .limit(limit);
+
+    if (startAfter != null) {
+      query = query.startAfterDocument(startAfter);
+    }
+    return query.get();
+  }
+
+  // ============================
   // ➕ CREATE SINGLE LOG / REVIEW
   // ============================
   Future<void> createDrinkLog(

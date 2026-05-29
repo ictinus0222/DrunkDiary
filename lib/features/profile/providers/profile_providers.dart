@@ -1,4 +1,3 @@
-import 'package:drunk_diary/features/drink_logs/providers/drink_logs_provider.dart';
 import 'package:drunk_diary/features/profile/models/profile_data_model.dart';
 import 'package:drunk_diary/features/profile/models/user_model.dart';
 import 'package:drunk_diary/features/profile/repositories/profile_repository.dart';
@@ -34,14 +33,9 @@ final profileDataProvider = FutureProvider<ProfileDataModel?>((ref) async {
   final userId = ref.watch(userIdProvider);
   if (userId == null) return null;
 
-  // Watch the logs to trigger re-computation of stats
-  final logsAsync = ref.watch(drinkLogsProvider);
-  final logs = logsAsync.value ?? [];
-
   // Fetch basic user data once (or could also be a stream if needed)
   final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
   final userData = UserModel.fromFirestore(userDoc);
-  print('Loaded profile for ${userData.id}. Friends: ${userData.friends.length}');
 
   return ProfileDataModel(
     userData: userData,
@@ -60,15 +54,6 @@ final otherProfileDataProvider = FutureProvider.family<ProfileDataModel?, String
   final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
   if (!userDoc.exists) return null;
   final userData = UserModel.fromFirestore(userDoc);
-  print('Loaded other profile for ${userData.id}. Friends: ${userData.friends.length}');
-
-  final repository = ref.watch(drinkLogRepositoryProvider);
-  // For other users, we only care about their reviews or public logs if we were using Option B,
-  // but for now we fetch all their logs to compute stats, 
-  // and filtering happens at the UI/Feed level.
-  final logs = await repository.fetchLogsForUser(userId);
-  final reviews = await repository.fetchReviewsForUser(userId);
-  final allLogs = [...logs, ...reviews]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
   return ProfileDataModel(
     userData: userData,

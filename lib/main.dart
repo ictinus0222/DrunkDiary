@@ -8,7 +8,6 @@ import 'package:drunk_diary/features/home/screens/home_screen.dart';
 import 'package:drunk_diary/features/auth/screens/login_screen.dart';
 import 'package:drunk_diary/features/onboarding/presentation/screens/onboarding_flow_screen.dart';
 import 'package:drunk_diary/app/app_theme.dart';
-import 'package:drunk_diary/core/theme/app_text_styles.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'core/auth/auth_gate.dart';
 import 'core/firebase/firebase_options.dart';
@@ -19,15 +18,13 @@ import 'features/admin/screens/admin_bottle_manager_screen.dart';
 import 'features/activity/screens/notifications_screen.dart';
 import 'features/profile/screens/settings_screen.dart';
 import 'splash/splash_screen.dart';
-
+ 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'core/analytics/analytics_service.dart';
 import 'core/analytics/session_tracker.dart';
 import 'core/analytics/screen_tracking_observer.dart';
-import 'core/analytics/analytics_environment.dart';
 import 'package:flutter/foundation.dart';
 
 void main() async {
