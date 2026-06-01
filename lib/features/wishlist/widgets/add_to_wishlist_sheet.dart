@@ -150,7 +150,7 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
             'Search for a drink you\'ve heard of and want to try.',
             style: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
           ),
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.lg),
 
           // Search field
           TextField(
@@ -317,7 +317,7 @@ class _AddToWishlistSheetState extends State<AddToWishlistSheet> {
             ),
           ],
 
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.lg),
 
           // Save button
           SizedBox(

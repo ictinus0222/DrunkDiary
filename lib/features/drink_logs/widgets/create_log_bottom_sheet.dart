@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../app/app_theme.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/constants/reaction_config.dart';
 import '../../alcohol/models/alcohol_model.dart';
@@ -295,7 +296,7 @@ class _CreateLogBottomSheetState extends ConsumerState<CreateLogBottomSheet> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
 
             // 👍 / 👎
             Text(
@@ -358,7 +359,7 @@ class _CreateLogBottomSheetState extends ConsumerState<CreateLogBottomSheet> {
               }).toList(),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
 
             // NOTE
             InkWell(
@@ -388,7 +389,7 @@ class _CreateLogBottomSheetState extends ConsumerState<CreateLogBottomSheet> {
             ),
 
             if (showNoteField) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.lg),
               TextField(
                 controller: noteController,
                 maxLines: 3,
@@ -415,7 +416,7 @@ class _CreateLogBottomSheetState extends ConsumerState<CreateLogBottomSheet> {
               ),
             ],
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
 
             // Tag Friends Selector
             TagFriendsSelector(
@@ -425,7 +426,7 @@ class _CreateLogBottomSheetState extends ConsumerState<CreateLogBottomSheet> {
               },
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
 
             // PHOTO
             Text(
@@ -469,7 +470,7 @@ class _CreateLogBottomSheetState extends ConsumerState<CreateLogBottomSheet> {
               ),
             ),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: AppSpacing.lg),
 
             SizedBox(
               width: double.infinity,

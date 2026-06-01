@@ -58,6 +58,8 @@ dependencies:
   shared_preferences: ^2.3.2
   device_info_plus: ^11.1.1
   screenshot: ^3.0.0
+  camera: ^0.11.1
+  permission_handler: ^11.4.0
 
 
 dev_dependencies:

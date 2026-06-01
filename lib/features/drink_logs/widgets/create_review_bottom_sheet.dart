@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../app/app_theme.dart';
-import '../../../core/analytics/analytics_service.dart';
+import '../../../core/theme/app_spacing.dart';
 import 'package:drunk_diary/core/analytics/analytics_service.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../models/drink_model_dto.dart';
@@ -238,7 +238,7 @@ class _CreateReviewBottomSheetState extends State<CreateReviewBottomSheet> {
               style: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
 
             // ⭐ RATING
             Text(
@@ -276,7 +276,7 @@ class _CreateReviewBottomSheetState extends State<CreateReviewBottomSheet> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
 
             // 📝 REVIEW NOTE
             Text(
@@ -311,7 +311,7 @@ class _CreateReviewBottomSheetState extends State<CreateReviewBottomSheet> {
               ),
             ),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: AppSpacing.lg),
 
             // 🚀 PUBLISH
             SizedBox(

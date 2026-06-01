@@ -207,7 +207,7 @@ class _AdminBottleManagerScreenState extends ConsumerState<AdminBottleManagerScr
                       : null,
                 ),
               ),
-              const SizedBox(height: AppSpacing.xxl),
+              const SizedBox(height: AppSpacing.lg),
 
               _buildTextField('Bottle Name', nameController, 'Enter name', customColors),
               _buildTextField('Brand', brandController, 'Enter brand', customColors),
@@ -228,7 +228,7 @@ class _AdminBottleManagerScreenState extends ConsumerState<AdminBottleManagerScr
               _buildTextField('Description', descriptionController, 'Enter description', customColors, maxLines: 4),
               _buildTextField('Tags', tagsController, 'smoke, peat, oak (comma separated)', customColors, isRequired: false),
 
-              const SizedBox(height: AppSpacing.hero),
+              const SizedBox(height: AppSpacing.lg),
 
               SizedBox(
                 width: double.infinity,

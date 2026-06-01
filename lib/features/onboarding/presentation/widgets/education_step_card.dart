@@ -70,7 +70,7 @@ class _EducationStepCardState extends State<EducationStepCard> with SingleTicker
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    Widget content = Padding(
       padding: const EdgeInsets.all(AppSpacing.xl),
       child: Column(
         children: [
@@ -131,5 +131,7 @@ class _EducationStepCardState extends State<EducationStepCard> with SingleTicker
         ],
       ),
     );
+
+    return content;
   }
 }
