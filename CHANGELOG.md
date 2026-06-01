@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0+13] - 2026-06-01
+
+### Added
+- **Onboarding Overhaul**:
+  - Global scroll-coupled parallax and cross-fading background stack.
+  - Alternate "Not Drinking" Flow: Transitions the Polaroid to a specialized context card, letting users choose their favorite alcohol and write a star-rated review without photo uploads.
+  - Dynamic Progress Checklist: Adaptively skips photo uploads and updates labels/indicators for photo-less entries.
+  - Shelf Visualization: Displays database brand images or gold/amber fallback icons, with review rating bubbles showing star scores (`⭐ 4.5`).
+
+### Fixed & Optimized
+- **Performance**: Integrated `RepaintBoundary` around high-animation layouts to ensure a smooth 60fps experience on Impeller/Vulkan.
+- **Onboarding Keyboard Dismissal**: Unfocuses keyboard on all onboarding page transitions.
+- **Camera Stream Stabilization**: Fixed stream configuration errors on physical Android devices.
+- **Camera Lifecycle Fix**: Resolved camera lifecycle pause/resume crash.
+
 ## [1.2.0+12] - 2026-05-29
 
 ### Added
