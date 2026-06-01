@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../app/app_theme.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -13,10 +12,8 @@ import '../../../core/constants/reaction_config.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../../alcohol/screens/bottle_selection_screen.dart';
 import '../models/drink_model_dto.dart';
-import '../widgets/create_log_bottom_sheet.dart';
 import '../../../core/theme/responsive_tokens.dart';
 import '../../../core/theme/app_typography_roles.dart';
-import '../../../core/utils/responsive_utils.dart';
 import '../../../core/widgets/responsive_layout.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -273,7 +270,7 @@ class _UnifiedLoggingScreenState extends ConsumerState<UnifiedLoggingScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.xxl),
+              const SizedBox(height: AppSpacing.lg),
 
               if (isCustom) ...[
                 Text('Drink Name', style: AppTypography.sectionLabel(context)),
@@ -318,7 +315,7 @@ class _UnifiedLoggingScreenState extends ConsumerState<UnifiedLoggingScreen> {
                 ),
               ],
 
-              const SizedBox(height: AppSpacing.xxl),
+              const SizedBox(height: AppSpacing.lg),
 
               // Image Picker
               Text('Photo', style: AppTypography.sectionLabel(context)),
@@ -351,7 +348,7 @@ class _UnifiedLoggingScreenState extends ConsumerState<UnifiedLoggingScreen> {
                 ),
               ),
 
-              const SizedBox(height: AppSpacing.xxl),
+              const SizedBox(height: AppSpacing.lg),
 
               // Reaction
               Text('How was it?', style: AppTypography.sectionLabel(context)),
@@ -394,7 +391,7 @@ class _UnifiedLoggingScreenState extends ConsumerState<UnifiedLoggingScreen> {
                 }).toList(),
               ),
 
-              const SizedBox(height: AppSpacing.xxl),
+              const SizedBox(height: AppSpacing.lg),
 
               // Notes
               Text('Notes', style: AppTypography.sectionLabel(context)),
@@ -410,7 +407,7 @@ class _UnifiedLoggingScreenState extends ConsumerState<UnifiedLoggingScreen> {
                 ),
               ),
 
-              const SizedBox(height: AppSpacing.xxl),
+              const SizedBox(height: AppSpacing.lg),
 
               // Tag Friends Selector
               TagFriendsSelector(
@@ -420,7 +417,7 @@ class _UnifiedLoggingScreenState extends ConsumerState<UnifiedLoggingScreen> {
                 },
               ),
 
-              const SizedBox(height: AppSpacing.hero),
+              const SizedBox(height: AppSpacing.lg),
 
               // Save Button
               SizedBox(

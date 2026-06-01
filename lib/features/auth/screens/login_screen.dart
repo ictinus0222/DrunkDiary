@@ -89,19 +89,28 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Background Depth
+          // Background image
           Positioned.fill(
-            child: Container(
+            child: Image.asset(
+              'assets/images/onboarding_bg.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+
+          // Dark scrim overlay so text stays readable
+          Positioned.fill(
+            child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black,
-                    Colors.black,
-                    Colors.black.withValues(alpha: 0.8),
-                    const Color(0xFF0F0F0F),
+                    Colors.black.withValues(alpha: 0.55),
+                    Colors.black.withValues(alpha: 0.35),
+                    Colors.black.withValues(alpha: 0.65),
+                    Colors.black.withValues(alpha: 0.92),
                   ],
+                  stops: const [0.0, 0.3, 0.65, 1.0],
                 ),
               ),
             ),
@@ -216,13 +225,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         ),
 
         const SizedBox(height: 16),
-        
-        Text(
-          'Private by default. We never post anything.',
-          style: AppTextStyles.caption.copyWith(color: customColors.textMuted),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 4),
         Text(
           'By continuing, you agree to Terms & Privacy Policy',
           style: AppTextStyles.caption.copyWith(

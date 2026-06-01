@@ -186,7 +186,7 @@ class _FeedbackBottomSheetState extends ConsumerState<FeedbackBottomSheet> {
                     }).toList(),
                   ),
                   
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.lg),
                   TextField(
                     controller: _messageController,
                     maxLines: 2,
@@ -197,7 +197,7 @@ class _FeedbackBottomSheetState extends ConsumerState<FeedbackBottomSheet> {
                       contentPadding: EdgeInsets.all(12),
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.lg),
                   
                   Row(
                     children: [

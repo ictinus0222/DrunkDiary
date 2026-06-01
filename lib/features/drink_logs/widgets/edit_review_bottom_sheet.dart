@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/app_theme.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../alcohol/models/alcohol_model.dart';
 import '../models/drink_model_dto.dart';
 
@@ -120,7 +121,7 @@ class _EditReviewBottomSheetState extends State<EditReviewBottomSheet> {
               style: textTheme.bodyMedium?.copyWith(color: customColors.textMuted),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
 
             // ⭐ RATING
             Text(
@@ -157,7 +158,7 @@ class _EditReviewBottomSheetState extends State<EditReviewBottomSheet> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
 
             // 📝 REVIEW NOTE
             Text(
@@ -192,7 +193,7 @@ class _EditReviewBottomSheetState extends State<EditReviewBottomSheet> {
               ),
             ),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: AppSpacing.lg),
 
             // 🚀 UPDATE
             SizedBox(

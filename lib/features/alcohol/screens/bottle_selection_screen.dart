@@ -81,10 +81,44 @@ class _BottleSelectionScreenState extends State<BottleSelectionScreen> {
                 ? const _LoadingList()
                 : ListView.separated(
                     padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                    itemCount: _filteredAlcohols.length,
+                    itemCount: _filteredAlcohols.length + (_searchQuery.isNotEmpty ? 1 : 0),
                     separatorBuilder: (_, __) => Divider(color: customColors.borderDark),
                     itemBuilder: (context, index) {
-                      final alcohol = _filteredAlcohols[index];
+                      if (_searchQuery.isNotEmpty && index == 0) {
+                        return ListTile(
+                          onTap: () {
+                            Navigator.pop(
+                              context,
+                              AlcoholModel(
+                                id: '',
+                                name: _searchQuery,
+                                brand: 'Custom',
+                                type: 'Custom',
+                                abv: 0.0,
+                                origin: '',
+                                description: '',
+                                imageUrl: '',
+                              ),
+                            );
+                          },
+                          leading: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: customColors.cardBackground,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(Icons.edit_note_rounded, color: Colors.amber),
+                          ),
+                          title: Text(
+                            "Use custom: \"$_searchQuery\"",
+                            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold, color: Colors.amber),
+                          ),
+                          trailing: const Icon(Icons.chevron_right_rounded, color: Colors.amber, size: 20),
+                        );
+                      }
+
+                      final alcohol = _filteredAlcohols[_searchQuery.isNotEmpty ? index - 1 : index];
                       return ListTile(
                         onTap: () => Navigator.pop(context, alcohol),
                         leading: Container(

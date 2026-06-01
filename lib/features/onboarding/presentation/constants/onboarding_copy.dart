@@ -17,7 +17,7 @@ class OnboardingCopy {
   static const String screen3Subtext = 'Every drink you log becomes part of your evolving taste profile.';
 
   // Screen 4: Social
-  static const String screen4Headline = 'Drink Together';
+  static const String screen4Headline = 'Share drinks together';
   static const String screen4Subtext = 'Follow friends, react to logs, and discover new bottles together.';
 
   // Screen 5: Privacy
