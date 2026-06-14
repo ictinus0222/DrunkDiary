@@ -2,7 +2,7 @@
 
 ## 1. Product Overview
 Project Title: DrunkDiary
-Version: 1.1.2+11
+Version: 1.3.0+13
 Last Updated: 2026-05-09
 Owner: Not explicitly identified in the repository metadata.
 

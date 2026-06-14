@@ -44,7 +44,7 @@ Defined in `lib/app/app_theme.dart` as `ThemeExtension<AppCustomColors>`. Access
 ### Typography
 *   **Font Families:**
     - `CategoriesElegant`: Primary branding font (AppBar titles).
-    - `DMSans`: Primary UI font for both Heading and Body (via `google_fonts` and `AppTextStyles`).
+    - `DMSans`: Primary UI font for both Heading and Body (via local font assets and AppTextStyles).
     - `GiveYouGlory`: Decorative font for greetings.
 *   **Font Weights:** Regular (`w400`), `FontWeight.w500`, `FontWeight.w600`, `FontWeight.w700` (bold).
 

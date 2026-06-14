@@ -83,6 +83,32 @@ Version: ^6.3.1
 Source File Evidence: `pubspec.yaml`
 Reason: Opening browser URLs for privacy policies and external links.
 
+Library: shared_preferences
+Version: ^2.3.2
+Source File Evidence: `pubspec.yaml`
+Reason: Persistent local storage for user preferences and onboarding funnel state tracking.
+
+Library: device_info_plus
+Version: ^11.1.1
+Source File Evidence: `pubspec.yaml`
+Reason: Reading local hardware and platform-specific device metadata for detailed bug/feedback ticketing.
+
+Library: camera
+Version: ^0.11.1
+Source File Evidence: `pubspec.yaml`
+Reason: Direct device camera access for in-app photo capture within onboarding/logging workflows.
+
+Library: permission_handler
+Version: ^11.4.0
+Source File Evidence: `pubspec.yaml`
+Reason: Handling cross-platform OS-level permissions for Camera and Photo Library access.
+
+Library: flutter_email_sender
+Version: ^8.0.0
+Source File Evidence: `pubspec.yaml`
+Reason: Declared in configuration for future ticket submission capabilities.
+
+
 ### Responsive Architecture Implementation
 - **Layout Governance**: `ResponsiveScaffoldBody` and `SliverResponsiveConstrainedBox` (Custom components).
 - **Design Tokens**: `lib/core/theme/responsive_tokens.dart` (Semantic widths: 600px, 800px, 1200px).
@@ -191,6 +217,11 @@ dependencies:
   path_provider: ^2.1.4
   package_info_plus: ^9.0.0
   url_launcher: ^6.3.1
+  flutter_email_sender: ^8.0.0
+  shared_preferences: ^2.3.2
+  device_info_plus: ^11.1.1
+  camera: ^0.11.1
+  permission_handler: ^11.4.0
 
 dev_dependencies:
   flutter_test:

@@ -10,7 +10,7 @@ Last Updated: 2026-05-08
 * **Missing Elements (Not Implemented):**
   * No deep linking logic identified in codebase.
   * No push notification entry flows identified.
-  * Admin-only access points restricted to specific authenticated emails via UI-level checks.
+  * Admin-only access points restricted to specific authenticated emails via UI-level checks (Note: AdminSettingsScreen and AdminBottleManagerScreen are registered as routes in main.dart but are currently un-linked in the UI navigation).
 
 ## 2. Core User Flows (Implemented Only)
 
@@ -275,11 +275,11 @@ AuthGate
   * **Actions Available:** 
       - Logout (Google Sign-out).
       - Delete Account.
-      - Access `AdminSettingsScreen` (if admin).
+      - Access `AdminSettingsScreen` (Registered route, currently un-linked in the UI).
 * **Screen:** `AdminSettingsScreen`
   * **Route:** `/adminSettings`
   * **Access:** Restricted (Authorized Admin Emails Only)
-  * **Purpose:** Real-time toggle control for feature flags (e.g., "Personal Meaning Section"). Uses Riverpod to update global state persisted in Firestore.
+  * **Purpose:** Real-time toggle control for feature flags (e.g., "Personal Meaning Section"). Uses Riverpod to update global state persisted in Firestore. (Registered route, currently un-linked in the UI).
 
 ## 5. Decision Points (Derived from Conditionals)
 
