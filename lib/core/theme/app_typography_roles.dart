@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../utils/responsive_utils.dart';
 
 /// 🔡 Semantic typographic roles for DrunkDiary.
@@ -13,7 +12,8 @@ class AppTypography {
     double? letterSpacing,
     Color? color,
   }) {
-    return GoogleFonts.dmSans(
+    return TextStyle(
+      fontFamily: 'DMSans',
       fontSize: mobileSize, // Base is mobile
       fontWeight: weight,
       height: height,

@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,7 +8,6 @@ import '../../../app/app_theme.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../alcohol/models/alcohol_model.dart';
-import '../../alcohol/repositories/alcohol_repository.dart';
 import '../../../core/widgets/custom_app_bar.dart';
 import '../repositories/admin_repository.dart';
 import '../../alcohol/providers/alcohol_providers.dart';

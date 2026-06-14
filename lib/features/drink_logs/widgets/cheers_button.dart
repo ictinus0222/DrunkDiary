@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../core/providers/common_providers.dart';
-import '../../../core/theme/app_spacing.dart';
 import '../../activity/providers/activity_providers.dart';
 import '../../profile/providers/profile_providers.dart';
 import '../../activity/models/day_activity_model.dart';
@@ -120,10 +118,10 @@ class _CheersButtonState extends ConsumerState<CheersButton>
             : const EdgeInsets.symmetric(vertical: 4),
         decoration: widget.isImmersive 
             ? BoxDecoration(
-                color: isCheered ? Colors.amber.withOpacity(0.2) : Colors.white10,
+                color: isCheered ? Colors.amber.withValues(alpha: 0.2) : Colors.white10,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isCheered ? Colors.amber.withOpacity(0.5) : Colors.white24,
+                  color: isCheered ? Colors.amber.withValues(alpha: 0.5) : Colors.white24,
                 ),
               )
             : null,
@@ -143,7 +141,8 @@ class _CheersButtonState extends ConsumerState<CheersButton>
             const SizedBox(width: 8),
             Text(
               '$cheersCount ${cheersCount == 1 ? 'Cheers' : 'Cheers'}',
-              style: GoogleFonts.dmSans(
+              style: TextStyle(
+                fontFamily: 'DMSans',
                 color: isCheered ? Colors.amber : (widget.isImmersive ? Colors.white : Colors.white.withValues(alpha: 0.5)),
                 fontWeight: isCheered ? FontWeight.bold : FontWeight.w500,
                 fontSize: 13,

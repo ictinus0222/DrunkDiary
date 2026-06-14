@@ -5,15 +5,11 @@ import '../../../core/theme/app_spacing.dart';
 import '../models/drink_model_dto.dart';
 import 'horizontal_scroll_log_card.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/drink_logs_provider.dart';
-import '../../activity/providers/activity_providers.dart';
 import 'cheers_button.dart';
 import '../../profile/screens/profile_screen.dart';
 import '../../activity/screens/activity_detail_viewer.dart';
 import '../../../core/navigation/tab_change_notification.dart';
-import '../../../core/providers/common_providers.dart';
 import '../../profile/providers/profile_providers.dart';
 
 /// Groups one day's logs into a timeline-style activity cluster.
@@ -102,7 +98,8 @@ class DayActivityCard extends ConsumerWidget {
                             const SizedBox(width: AppSpacing.sm),
                             Text(
                               "@${firstLog.username}",
-                              style: GoogleFonts.dmSans(
+                              style: const TextStyle(
+                                fontFamily: 'DMSans',
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
@@ -238,14 +235,6 @@ class DayActivityCard extends ConsumerWidget {
       ),
     );
   }
-
-  String _getMonthAbbr(int month) {
-    const months = [
-      'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
-      'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
-    ];
-    return months[month - 1];
-  }
 }
 
 class _DateColumn extends StatelessWidget {
@@ -269,7 +258,8 @@ class _DateColumn extends StatelessWidget {
         children: [
           Text(
             localDate.day.toString().padLeft(2, '0'),
-            style: GoogleFonts.dmSans(
+            style: const TextStyle(
+              fontFamily: 'DMSans',
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -278,7 +268,8 @@ class _DateColumn extends StatelessWidget {
           ),
           Text(
             _getMonthAbbr(localDate.month),
-            style: GoogleFonts.dmSans(
+            style: const TextStyle(
+              fontFamily: 'DMSans',
               fontSize: 12,
               fontWeight: FontWeight.w500,
               color: Colors.white60,

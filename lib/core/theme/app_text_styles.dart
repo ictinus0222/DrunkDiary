@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppTextStyles {
   // 🔹 Font Families
-  static const String headingFontFamily = 'DM Sans';
-  static const String bodyFontFamily = 'DM Sans';
+  static const String headingFontFamily = 'DMSans';
+  static const String bodyFontFamily = 'DMSans';
 
   // 🔹 Base
   static const double base = 14;
@@ -23,39 +22,45 @@ class AppTextStyles {
   // 🔹 Styles
 
   // Caption / metadata
-  static TextStyle caption = GoogleFonts.dmSans(
+  static const TextStyle caption = TextStyle(
+    fontFamily: 'DMSans',
     fontSize: captionSize,
     fontWeight: FontWeight.w400,
     color: Colors.grey,
   );
 
   // Body text (default)
-  static TextStyle body = GoogleFonts.dmSans(
+  static const TextStyle body = TextStyle(
+    fontFamily: 'DMSans',
     fontSize: bodySize,
     fontWeight: FontWeight.w500,
   );
 
   // Card titles (Alcohol names)
-  static TextStyle title = GoogleFonts.dmSans(
+  static const TextStyle title = TextStyle(
+    fontFamily: 'DMSans',
     fontSize: titleSize,
     fontWeight: FontWeight.w600,
     height: 1.2, // prevents vertical overflow
   );
 
   // Subtitle / Smaller headers
-  static TextStyle subtitle = GoogleFonts.dmSans(
+  static const TextStyle subtitle = TextStyle(
+    fontFamily: 'DMSans',
     fontSize: subtitleSize,
     fontWeight: FontWeight.w600,
   );
 
   // Section headings (e.g., "Taste Identity", "Recent Activity")
-  static TextStyle section = GoogleFonts.dmSans(
+  static const TextStyle section = TextStyle(
+    fontFamily: 'DMSans',
     fontSize: sectionSize,
     fontWeight: FontWeight.w700,
   );
 
   // AppBar (Already defined separately, keeping it consistent)
-  static TextStyle appBarTitle = GoogleFonts.dmSans(
+  static const TextStyle appBarTitle = TextStyle(
+    fontFamily: 'DMSans',
     fontSize: 22, // NOT 24 (matching user specification)
     letterSpacing: 2.0,
     height: 1.0, // critical for vertical alignment

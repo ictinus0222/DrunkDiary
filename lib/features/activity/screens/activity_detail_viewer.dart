@@ -2,7 +2,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../app/app_theme.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -11,10 +10,8 @@ import '../../../core/constants/reaction_config.dart';
 import '../../drink_logs/models/drink_model_dto.dart';
 import '../../drink_logs/providers/drink_logs_provider.dart';
 import '../providers/activity_providers.dart';
-import '../models/day_activity_model.dart';
 import '../../profile/screens/profile_screen.dart';
 import '../../drink_logs/widgets/cheers_button.dart';
-import '../../../core/providers/common_providers.dart';
 
 class ActivityDetailViewer extends ConsumerStatefulWidget {
   final String activityId;
@@ -189,7 +186,7 @@ class _ImageWithBlurredBackground extends StatelessWidget {
             imageUrl: imageUrl,
             fit: BoxFit.cover,
             memCacheWidth: 150,
-            color: Colors.black.withOpacity(0.4),
+            color: Colors.black.withValues(alpha: 0.4),
             colorBlendMode: BlendMode.darken,
           ),
         ),
@@ -297,7 +294,7 @@ class _TopBar extends StatelessWidget {
                   children: [
                     Text(
                       username,
-                      style: GoogleFonts.dmSans(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                      style: const TextStyle(fontFamily: 'DMSans', color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
                     ),
                     Text(formattedDate, style: AppTextStyles.caption.copyWith(color: Colors.white70)),
                   ],
@@ -335,12 +332,13 @@ class _ActivityOverlay extends StatelessWidget {
         if (log.note != null && log.note!.isNotEmpty)
           Text(
             log.note!,
-            style: GoogleFonts.dmSans(
+            style: const TextStyle(
+              fontFamily: 'DMSans',
               color: Colors.white,
               fontSize: 24,
               fontWeight: FontWeight.bold,
               height: 1.2,
-              shadows: [const Shadow(color: Colors.black54, blurRadius: 8, offset: Offset(0, 2))],
+              shadows: [Shadow(color: Colors.black54, blurRadius: 8, offset: Offset(0, 2))],
             ),
           ),
         const SizedBox(height: 8),
@@ -536,26 +534,4 @@ class _ActionButtonsRow extends StatelessWidget {
   }
 }
 
-class _RoundedActionButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _RoundedActionButton({required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.08),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white12),
-        ),
-        child: Icon(icon, color: Colors.white, size: 20),
-      ),
-    );
-  }
-}
 

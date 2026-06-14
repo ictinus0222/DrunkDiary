@@ -14,8 +14,6 @@ import '../../../core/widgets/app_shimmer.dart';
 import '../providers/notifications_provider.dart';
 import '../models/notification_model.dart';
 import '../screens/activity_detail_viewer.dart';
-import '../../drink_logs/models/drink_model_dto.dart';
-import '../../drink_logs/repositories/drink_log_repository.dart';
 import '../../drink_logs/providers/drink_logs_provider.dart';
 import '../../../core/providers/common_providers.dart';
 
@@ -114,7 +112,7 @@ class _NotificationItem extends ConsumerWidget {
         ),
         color: notification.isRead 
             ? Colors.transparent 
-            : Colors.amber.withOpacity(0.05),
+            : Colors.amber.withValues(alpha: 0.05),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -237,9 +235,9 @@ class _NotificationItem extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withOpacity(0.2)),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
         ),
         child: Text(
           label,

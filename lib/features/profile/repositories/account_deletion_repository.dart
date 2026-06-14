@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 
 final accountDeletionRepositoryProvider = Provider((ref) => AccountDeletionRepository());
 
@@ -129,7 +130,7 @@ class AccountDeletionRepository {
           await item.delete();
         }
       } catch (e) {
-        print('Error deleting storage files in $folder: $e');
+        debugPrint('Error deleting storage files in $folder: $e');
       }
     }
 
@@ -148,7 +149,7 @@ class AccountDeletionRepository {
         } catch (_) {}
       }
     } catch (e) {
-      print('Error cleaning up feedback screenshots: $e');
+      debugPrint('Error cleaning up feedback screenshots: $e');
     }
   }
 

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 enum FriendState {
   none,
@@ -114,8 +115,8 @@ class UserModel {
       friendsSince: _parseFriendsSince(userData['friendsSince']),
     );
     } catch (e, stack) {
-      print('Error parsing UserModel for $id: $e');
-      print(stack);
+      debugPrint('Error parsing UserModel for $id: $e');
+      debugPrint(stack.toString());
       // Return a minimal valid model to prevent crashes
       return UserModel(
         id: id,

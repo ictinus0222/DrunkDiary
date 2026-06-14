@@ -329,7 +329,7 @@ class _CreateLogBottomSheetState extends ConsumerState<CreateLogBottomSheet> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         backgroundColor: isSelected
-                            ? color.withOpacity(0.12)
+                            ? color.withValues(alpha: 0.12)
                             : Colors.transparent,
                       ),
                       onPressed: () => setState(() => selectedReaction = reaction),
@@ -483,7 +483,7 @@ class _CreateLogBottomSheetState extends ConsumerState<CreateLogBottomSheet> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  disabledBackgroundColor: colorScheme.primary.withOpacity(0.5),
+                  disabledBackgroundColor: colorScheme.primary.withValues(alpha: 0.5),
                 ),
                 child: isSaving
                     ? SizedBox(

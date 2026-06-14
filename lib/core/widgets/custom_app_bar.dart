@@ -35,7 +35,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             (isDiaryScreen
                 ? SvgPicture.asset(
                     'assets/icons/drunk_diary_logo.svg',
-                    height: APP_BAR_VISUAL_HEIGHT,
+                    height: appBarVisualHeight,
                     placeholderBuilder: (_) => const SizedBox.shrink(),
                   )
                 : (title != null

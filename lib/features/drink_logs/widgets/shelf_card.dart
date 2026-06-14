@@ -48,7 +48,7 @@ class ShelfCard extends StatelessWidget {
           Container(
             decoration: BoxDecoration(boxShadow: [
               BoxShadow(
-                color: colorScheme.shadow.withOpacity(0.6),
+                color: colorScheme.shadow.withValues(alpha: 0.6),
                 blurRadius: 15,
                 offset: const Offset(0, 10),
               )

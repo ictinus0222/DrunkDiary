@@ -332,7 +332,6 @@ class _HeroImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -600,7 +599,7 @@ class _PersonalMeaningSectionState extends State<_PersonalMeaningSection> {
       }, SetOptions(merge: true));
       setState(() => _isEditing = false);
     } catch (e) {
-      if (!context.mounted) return;
+      if (!mounted) return;
       final colorScheme = Theme.of(context).colorScheme;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

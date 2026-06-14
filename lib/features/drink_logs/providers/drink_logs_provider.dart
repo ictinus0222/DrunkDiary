@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drunk_diary/core/providers/common_providers.dart';
-import 'package:drunk_diary/core/utils/visibility_resolver.dart';
 import 'package:drunk_diary/features/alcohol/models/alcohol_model.dart';
 import 'package:drunk_diary/features/drink_logs/models/drink_model_dto.dart';
 import 'package:drunk_diary/features/drink_logs/repositories/drink_log_repository.dart';
@@ -66,7 +65,7 @@ final friendsFeedProvider = StreamProvider<List<DrinkLogModel>>((ref) {
   final friends = userData?.friends ?? [];
 
   // Include self in the "Friends" feed so you see your own activity too
-  final List<String> targetIds = [if (userId != null) userId, ...friends];
+  final List<String> targetIds = [userId, ...friends];
 
   if (targetIds.isEmpty) return Stream.value([]);
 
@@ -179,7 +178,6 @@ final shelfAlcoholsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) a
 
 /// Stream of logs for a specific user, filtered by privacy if viewed by others.
 final userDrinkLogsProvider = StreamProvider.family<List<DrinkLogModel>, String>((ref, userId) {
-  final currentUserId = ref.watch(userIdProvider);
   final repository = ref.watch(drinkLogRepositoryProvider);
   
   final logsStream = repository.watchLogsForUser(userId);
@@ -289,7 +287,7 @@ class PaginatedAllLogsNotifier extends Notifier<AsyncValue<PaginatedFeedState>> 
         lastDoc: lastDoc,
         isLoadingMore: false,
       ));
-    } catch (e, st) {
+    } catch (e) {
       state = AsyncValue.data(current.copyWith(isLoadingMore: false));
     }
   }
@@ -322,7 +320,7 @@ class PaginatedFriendsFeedNotifier extends Notifier<AsyncValue<PaginatedFeedStat
       final viewer = profileAsync.value?.userData;
       final friendIds = viewer?.friends ?? [];
 
-      final targetIds = viewer != null ? [if (viewer.id != null) viewer.id, ...friendIds] : friendIds;
+      final targetIds = viewer != null ? [viewer.id, ...friendIds] : friendIds;
       final snapshot = await repository.fetchFriendsFeedPage(
         friendIds: targetIds,
         limit: 20,
@@ -352,7 +350,7 @@ class PaginatedFriendsFeedNotifier extends Notifier<AsyncValue<PaginatedFeedStat
       final viewer = profileAsync.value?.userData;
       final friendIds = viewer?.friends ?? [];
 
-      final targetIds = viewer != null ? [if (viewer.id != null) viewer.id, ...friendIds] : friendIds;
+      final targetIds = viewer != null ? [viewer.id, ...friendIds] : friendIds;
       final snapshot = await repository.fetchFriendsFeedPage(
         friendIds: targetIds,
         limit: 20,
@@ -368,7 +366,7 @@ class PaginatedFriendsFeedNotifier extends Notifier<AsyncValue<PaginatedFeedStat
         lastDoc: lastDoc,
         isLoadingMore: false,
       ));
-    } catch (e, st) {
+    } catch (e) {
       state = AsyncValue.data(current.copyWith(isLoadingMore: false));
     }
   }

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 
 /// 📱 System-standard breakpoints for DrunkDiary.
 class AppBreakpoints {

@@ -45,7 +45,7 @@ class _ResponsivePreviewScreenState extends State<ResponsivePreviewScreen> {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 width: _isSimulating ? _simulatedWidth : double.infinity,
-                color: Colors.white.withOpacity(0.02),
+                color: Colors.white.withValues(alpha: 0.02),
                 child: _buildPreviewContent(),
               ),
             ),
@@ -140,9 +140,9 @@ class _ResponsivePreviewScreenState extends State<ResponsivePreviewScreen> {
                     height: 60,
                     margin: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: Colors.amber.withOpacity(0.1),
+                      color: Colors.amber.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.amber.withOpacity(0.3)),
+                      border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
                     ),
                     child: const Center(child: Icon(Icons.wine_bar)),
                   ),

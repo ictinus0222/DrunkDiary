@@ -1,14 +1,11 @@
 import 'package:drunk_diary/core/widgets/beta_tester_disclaimer.dart';
 import 'dart:math';
 import 'package:drunk_diary/app/app_routes.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drunk_diary/features/drink_logs/models/drink_model_dto.dart';
 import 'package:flutter/material.dart';
 
-import '../../drink_logs/widgets/drink_log_card.dart';
 import '../../drink_logs/widgets/day_section.dart';
 import '../../drink_logs/widgets/log_detail_bottom_sheet.dart';
-import '../../alcohol/models/alcohol_model.dart';
 import '../../../core/widgets/app_empty_state.dart';
 import 'package:drunk_diary/core/navigation/tab_change_notification.dart';
 import '../../../app/app_theme.dart';
@@ -23,10 +20,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/constants/app_constants.dart';
 import '../providers/notifications_provider.dart';
 import '../../profile/providers/profile_providers.dart';
-import '../../profile/models/user_model.dart';
 import '../../../core/theme/responsive_tokens.dart';
-import '../../../core/theme/app_typography_roles.dart';
-import '../../../core/utils/responsive_utils.dart';
 import '../../../core/widgets/responsive_layout.dart';
 
 enum DiaryLayout { timeline, gallery }
@@ -41,7 +35,7 @@ class DiaryScreen extends ConsumerStatefulWidget {
 
 class _DiaryScreenState extends ConsumerState<DiaryScreen> {
   String _selectedFilter = 'All';
-  DiaryLayout _currentLayout = DiaryLayout.timeline;
+  final DiaryLayout _currentLayout = DiaryLayout.timeline;
   ScrollController? _scrollController;
 
   @override
@@ -138,7 +132,7 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
                 leadingWidth: 64,
                 title: SvgPicture.asset(
                   'assets/icons/drunk_diary_logo.svg',
-                  height: APP_BAR_VISUAL_HEIGHT,
+                  height: appBarVisualHeight,
                   placeholderBuilder: (_) => const SizedBox.shrink(),
                 ),
                 actions: [
@@ -197,7 +191,7 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
                 leadingWidth: 64,
                 title: SvgPicture.asset(
                   'assets/icons/drunk_diary_logo.svg',
-                  height: APP_BAR_VISUAL_HEIGHT,
+                  height: appBarVisualHeight,
                   placeholderBuilder: (_) => const SizedBox.shrink(),
                 ),
                 actions: [

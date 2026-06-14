@@ -165,7 +165,7 @@ class ParticipantAvatars extends ConsumerWidget {
 
     return ElevatedButton.icon(
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.amber.withOpacity(0.1),
+        backgroundColor: Colors.amber.withValues(alpha: 0.1),
         foregroundColor: Colors.amber,
         side: const BorderSide(color: Colors.amber, width: 1),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

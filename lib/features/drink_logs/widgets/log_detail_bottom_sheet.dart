@@ -11,7 +11,6 @@ import '../../drink_logs/widgets/edit_review_bottom_sheet.dart';
 import '../../../core/widgets/app_shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../core/providers/common_providers.dart';
 
 import 'participant_avatars.dart';
@@ -136,7 +135,7 @@ class _LogDetailBottomSheetState extends ConsumerState<LogDetailBottomSheet> {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    colorScheme.primary.withOpacity(0.18),
+                    colorScheme.primary.withValues(alpha: 0.18),
                     Colors.transparent,
                   ],
                   radius: 0.6,
@@ -161,11 +160,11 @@ class _LogDetailBottomSheetState extends ConsumerState<LogDetailBottomSheet> {
                         child: Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.4),
+                            color: Colors.black.withValues(alpha: 0.4),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(Icons.close,
-                              size: 18, color: colorScheme.onSurface.withOpacity(0.7)),
+                              size: 18, color: colorScheme.onSurface.withValues(alpha: 0.7)),
                         ),
                       ),
                     ],
@@ -377,7 +376,8 @@ class _LogDetailBottomSheetState extends ConsumerState<LogDetailBottomSheet> {
                                 },
                                 icon: const Icon(Icons.edit, size: 20),
                                 label: Text('Edit Review',
-                                    style: GoogleFonts.dmSans(
+                                    style: TextStyle(
+                                        fontFamily: 'DMSans',
                                         color: colorScheme.onPrimary,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 16)),
@@ -395,7 +395,7 @@ class _LogDetailBottomSheetState extends ConsumerState<LogDetailBottomSheet> {
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12)),
-                              backgroundColor: colorScheme.error.withOpacity(0.05),
+                              backgroundColor: colorScheme.error.withValues(alpha: 0.05),
                             ),
                             onPressed: isDeleting ? null : _deleteLog,
                             child: isDeleting
@@ -405,7 +405,8 @@ class _LogDetailBottomSheetState extends ConsumerState<LogDetailBottomSheet> {
                                     child: CircularProgressIndicator(
                                         color: colorScheme.error, strokeWidth: 2))
                                 : Text('Delete Entry',
-                                    style: GoogleFonts.dmSans(
+                                    style: TextStyle(
+                                        fontFamily: 'DMSans',
                                         color: colorScheme.error,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 16)),

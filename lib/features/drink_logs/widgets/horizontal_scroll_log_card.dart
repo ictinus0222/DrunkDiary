@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../app/app_theme.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -9,7 +8,6 @@ import '../models/drink_model_dto.dart';
 import 'log_detail_bottom_sheet.dart';
 import '../../../core/widgets/app_shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/drink_logs_provider.dart';
 
@@ -85,7 +83,7 @@ class LogMiniCard extends ConsumerWidget {
               ),
               child: Text(
                 _formattedTime(log.createdAt),
-                style: GoogleFonts.dmSans(
+                style: AppTextStyles.caption.copyWith(
                   color: Colors.white54,
                   fontSize: 11,
                 ),
@@ -130,6 +128,10 @@ class _ImageLayer extends ConsumerWidget {
           errorWidget: (_, __, ___) => _FallbackBackground(log: log),
         ),
       );
+    }
+
+    if (log.alcoholId == null) {
+      return _FallbackBackground(log: log);
     }
 
     return ref.watch(alcoholCacheProvider(log.alcoholId!)).when(

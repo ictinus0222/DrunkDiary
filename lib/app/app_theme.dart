@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_text_styles.dart';
 import '../core/theme/app_spacing.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppCustomColors extends ThemeExtension<AppCustomColors> {
   final Color cardBackground;
@@ -78,8 +77,8 @@ class AppThemes {
 
   static final darkTheme = ThemeData(
     useMaterial3: true,
-    fontFamily: GoogleFonts.dmSans().fontFamily,
-    textTheme: TextTheme(
+    fontFamily: 'DMSans',
+    textTheme: const TextTheme(
       bodyLarge: AppTextStyles.body,
       bodyMedium: AppTextStyles.body,
       bodySmall: AppTextStyles.caption,
@@ -97,15 +96,15 @@ class AppThemes {
     splashFactory: NoSplash.splashFactory,
     highlightColor: Colors.transparent,
     splashColor: Colors.transparent,
-    bottomNavigationBarTheme: BottomNavigationBarThemeData(
-      backgroundColor: const Color(0xFF0F0F0F),
-      selectedItemColor: const Color(0xFFFFC107),
-      unselectedItemColor: const Color(0xFF666666),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: Color(0xFF0F0F0F),
+      selectedItemColor: Color(0xFFFFC107),
+      unselectedItemColor: Color(0xFF666666),
       elevation: 0,
       type: BottomNavigationBarType.fixed,
       enableFeedback: false,
-      selectedLabelStyle: GoogleFonts.dmSans(fontSize: 12, fontWeight: FontWeight.bold),
-      unselectedLabelStyle: GoogleFonts.dmSans(fontSize: 12, fontWeight: FontWeight.w500),
+      selectedLabelStyle: TextStyle(fontFamily: 'DMSans', fontSize: 12, fontWeight: FontWeight.bold),
+      unselectedLabelStyle: TextStyle(fontFamily: 'DMSans', fontSize: 12, fontWeight: FontWeight.w500),
     ),
     appBarTheme: AppBarTheme(
       backgroundColor: const Color(0xFF0F0F0F),
@@ -156,7 +155,7 @@ class AppThemes {
         backgroundColor: const Color(0xFFFFC107),
         foregroundColor: Colors.black,
         elevation: 0,
-        textStyle: GoogleFonts.dmSans(fontWeight: FontWeight.bold, fontSize: 14),
+        textStyle: const TextStyle(fontFamily: 'DMSans', fontWeight: FontWeight.bold, fontSize: 14),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
@@ -166,7 +165,7 @@ class AppThemes {
           borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
         ),
         side: const BorderSide(color: Color(0xFF333333)),
-        textStyle: GoogleFonts.dmSans(fontWeight: FontWeight.bold, fontSize: 14),
+        textStyle: const TextStyle(fontFamily: 'DMSans', fontWeight: FontWeight.bold, fontSize: 14),
       ),
     ),
     iconTheme: const IconThemeData(
@@ -190,8 +189,8 @@ class AppThemes {
 
   static final lightTheme = ThemeData(
     useMaterial3: true,
-    fontFamily: GoogleFonts.dmSans().fontFamily,
-    textTheme: TextTheme(
+    fontFamily: 'DMSans',
+    textTheme: const TextTheme(
       bodyLarge: AppTextStyles.body,
       bodyMedium: AppTextStyles.body,
       bodySmall: AppTextStyles.caption,
@@ -216,8 +215,8 @@ class AppThemes {
       elevation: 0,
       type: BottomNavigationBarType.fixed,
       enableFeedback: false,
-      selectedLabelStyle: GoogleFonts.dmSans(fontSize: 12, fontWeight: FontWeight.bold),
-      unselectedLabelStyle: GoogleFonts.dmSans(fontSize: 12, fontWeight: FontWeight.w500),
+      selectedLabelStyle: const TextStyle(fontFamily: 'DMSans', fontSize: 12, fontWeight: FontWeight.bold),
+      unselectedLabelStyle: const TextStyle(fontFamily: 'DMSans', fontSize: 12, fontWeight: FontWeight.w500),
     ),
     appBarTheme: AppBarTheme(
         backgroundColor: const Color(0xFFFFFFFF),
@@ -267,7 +266,7 @@ class AppThemes {
         backgroundColor: Colors.amber.shade700,
         foregroundColor: Colors.white,
         elevation: 0,
-        textStyle: GoogleFonts.dmSans(fontWeight: FontWeight.bold, fontSize: 14),
+        textStyle: const TextStyle(fontFamily: 'DMSans', fontWeight: FontWeight.bold, fontSize: 14),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
@@ -277,7 +276,7 @@ class AppThemes {
           borderRadius: BorderRadius.circular(AppSpacing.radiusDefault),
         ),
         side: BorderSide(color: Colors.grey.shade300),
-        textStyle: GoogleFonts.dmSans(fontWeight: FontWeight.bold, fontSize: 14),
+        textStyle: const TextStyle(fontFamily: 'DMSans', fontWeight: FontWeight.bold, fontSize: 14),
       ),
     ),
     extensions: <ThemeExtension<dynamic>>[

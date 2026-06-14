@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../models/user_model.dart';
 
 class UserSearchService {
@@ -6,7 +7,7 @@ class UserSearchService {
 
   Future<List<UserSearchResult>> searchUsers(String query) async {
     final lowercaseQuery = query.toLowerCase().trim();
-    print('Searching users for: $lowercaseQuery');
+    debugPrint('Searching users for: $lowercaseQuery');
     
     // Debug test case
     if (lowercaseQuery == 'debug') {
@@ -55,7 +56,7 @@ class UserSearchService {
           .limit(10)
           .get();
 
-      print('Query results: usernameLowercase=${usernameQuery.docs.length}, displayNameLowercase=${displayNameQuery.docs.length}, legacy=${legacyUsernameQuery.docs.length}');
+      debugPrint('Query results: usernameLowercase=${usernameQuery.docs.length}, displayNameLowercase=${displayNameQuery.docs.length}, legacy=${legacyUsernameQuery.docs.length}');
 
       final Map<String, UserSearchResult> results = {};
 
@@ -83,7 +84,7 @@ class UserSearchService {
 
       return sortedResults.take(20).toList();
     } catch (e) {
-      print('Error searching users: $e');
+      debugPrint('Error searching users: $e');
       return [];
     }
   }

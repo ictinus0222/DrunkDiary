@@ -50,9 +50,13 @@ final bottleSearchProvider = FutureProvider.autoDispose<List<AlcoholSearchResult
 
   return results.map((a) {
     int score = 0;
-    if (a.name.toLowerCase() == lowercaseQuery) score = 100;
-    else if (a.name.toLowerCase().startsWith(lowercaseQuery)) score = 70;
-    else score = 30;
+    if (a.name.toLowerCase() == lowercaseQuery) {
+      score = 100;
+    } else if (a.name.toLowerCase().startsWith(lowercaseQuery)) {
+      score = 70;
+    } else {
+      score = 30;
+    }
     return AlcoholSearchResult(alcohol: a, score: score);
   }).toList();
 });

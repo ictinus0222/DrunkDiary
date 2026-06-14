@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../utils/responsive_utils.dart';
-import '../theme/responsive_tokens.dart';
 
 /// 🏛️ The layout governance layer for DrunkDiary.
 /// Ensures all screens follow the same constraint and centering rules.

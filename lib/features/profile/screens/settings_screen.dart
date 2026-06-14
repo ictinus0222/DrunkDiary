@@ -221,13 +221,11 @@ class _SectionHeader extends StatelessWidget {
 class _SettingTile extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String? subtitle;
   final VoidCallback onTap;
 
   const _SettingTile({
     required this.icon,
     required this.title,
-    this.subtitle,
     required this.onTap,
   });
 
@@ -251,9 +249,6 @@ class _SettingTile extends StatelessWidget {
           child: Icon(icon, color: Colors.white, size: 20),
         ),
         title: Text(title, style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
-        subtitle: subtitle != null 
-            ? Text(subtitle!, style: AppTextStyles.caption.copyWith(color: customColors.textMuted)) 
-            : null,
         trailing: Icon(Icons.chevron_right, color: Colors.amber.withValues(alpha: 0.3), size: 20),
         onTap: onTap,
       ),

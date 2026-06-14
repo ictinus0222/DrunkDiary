@@ -363,7 +363,7 @@ class _UnifiedLoggingScreenState extends ConsumerState<UnifiedLoggingScreen> {
                         margin: const EdgeInsets.symmetric(horizontal: 4),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
-                          color: isSelected ? ReactionConfig.getColor(reaction).withOpacity(0.2) : Colors.transparent,
+                          color: isSelected ? ReactionConfig.getColor(reaction).withValues(alpha: 0.2) : Colors.transparent,
                           border: Border.all(
                             color: isSelected ? ReactionConfig.getColor(reaction) : customColors.borderDark,
                           ),

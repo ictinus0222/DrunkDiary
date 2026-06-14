@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/app_theme.dart';
@@ -6,7 +5,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/constants/reaction_config.dart';
-import '../../alcohol/models/alcohol_model.dart';
 import '../models/drink_model_dto.dart';
 import 'log_detail_bottom_sheet.dart';
 import '../../../core/widgets/app_shimmer.dart';
@@ -294,7 +292,7 @@ class DrinkLogCard extends ConsumerWidget {
     return Text(
       '"${log.note!}"',
       style: AppTextStyles.body.copyWith(
-        color: Colors.white.withOpacity(0.9),
+        color: Colors.white.withValues(alpha: 0.9),
         fontStyle: FontStyle.italic,
         height: 1.4,
       ),

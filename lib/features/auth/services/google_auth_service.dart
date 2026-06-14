@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../../core/analytics/analytics_service.dart';
 
@@ -10,16 +11,10 @@ final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 Future<void> signInWithGoogle() async {
   try {
     // 1. Trigger Google sign-in (Authenticate)
-    final GoogleSignInAccount? googleUser = await _googleSignIn.authenticate();
-
-    if (googleUser == null) {
-      // User cancelled the sign-in
-      print("Google Sign-In: User cancelled");
-      return;
-    }
+    final googleUser = await _googleSignIn.authenticate();
 
     // 2. Get auth details (Identity/idToken)
-    final googleAuth = await googleUser.authentication;
+    final googleAuth = googleUser.authentication;
     final String? idToken = googleAuth.idToken;
 
     if (idToken == null) {
@@ -32,19 +27,15 @@ Future<void> signInWithGoogle() async {
       'email',
       'openid',
     ]);
-    final String? accessToken = authorization.accessToken;
-
-    if (accessToken == null) {
-      throw Exception("Missing Google Access Token");
-    }
+    final accessToken = authorization.accessToken;
 
     // 4. Create Firebase credential
-    final OAuthCredential credential = GoogleAuthProvider.credential(
+    final credential = GoogleAuthProvider.credential(
       accessToken: accessToken,
       idToken: idToken,
     );
     // 4. Sign in to Firebase
-    final UserCredential userCredential =
+    final userCredential =
     await FirebaseAuth.instance.signInWithCredential(credential);
 
     final user = userCredential.user;
@@ -74,7 +65,7 @@ Future<void> signInWithGoogle() async {
       });
     }
   } catch (e) {
-    print("Google Sign-In Error: $e");
+    debugPrint("Google Sign-In Error: $e");
     rethrow;
   }
 }
@@ -82,9 +73,9 @@ Future<void> signOutGoogle() async {
   try {
     await FirebaseAuth.instance.signOut();
     await _googleSignIn.signOut();
-    print("Google Sign-Out: Successful");
+    debugPrint("Google Sign-Out: Successful");
   } catch (e) {
-    print("Google Sign-Out Error: $e");
+    debugPrint("Google Sign-Out Error: $e");
     rethrow;
   }
 }

@@ -143,7 +143,7 @@ class _EditReviewBottomSheetState extends State<EditReviewBottomSheet> {
                 activeTrackColor: colorScheme.primary,
                 inactiveTrackColor: customColors.borderDark,
                 thumbColor: colorScheme.primary,
-                overlayColor: colorScheme.primary.withOpacity(0.2),
+                overlayColor: colorScheme.primary.withValues(alpha: 0.2),
               ),
               child: Slider(
                 value: rating,
@@ -207,7 +207,7 @@ class _EditReviewBottomSheetState extends State<EditReviewBottomSheet> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  disabledBackgroundColor: colorScheme.primary.withOpacity(0.5),
+                  disabledBackgroundColor: colorScheme.primary.withValues(alpha: 0.5),
                 ),
                 child: isSaving
                     ? SizedBox(

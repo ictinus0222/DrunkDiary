@@ -234,17 +234,17 @@ class _ShelfScreenState extends ConsumerState<ShelfScreen> {
                             borderRadius: BorderRadius.circular(4),
                             boxShadow: [
                               BoxShadow(
-                                color: colorScheme.onSurface.withOpacity(0.1),
+                                color: colorScheme.onSurface.withValues(alpha: 0.1),
                                 blurRadius: 1,
                                 offset: const Offset(0, -1),
                               ),
                               BoxShadow(
-                                color: glow.withOpacity(0.8),
+                                color: glow.withValues(alpha: 0.8),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
                               BoxShadow(
-                                color: glow.withOpacity(0.4),
+                                color: glow.withValues(alpha: 0.4),
                                 blurRadius: 25,
                                 offset: const Offset(0, 8),
                               )
@@ -292,7 +292,7 @@ class _ShelfScreenState extends ConsumerState<ShelfScreen> {
                 style: TextStyle(
                     color: isSelected
                         ? colorScheme.onPrimary
-                        : colorScheme.onSurface.withOpacity(0.7),
+                        : colorScheme.onSurface.withValues(alpha: 0.7),
                     fontWeight:
                         isSelected ? FontWeight.bold : FontWeight.w500))));
   }
